@@ -6,7 +6,7 @@ from src.interface import mostrar_titulo_etapa
 
 
 # -------------------------------------------------------------------
-# Configuração dos arquivos de referência
+# Configuração dos arquivos de referência e apoio
 # -------------------------------------------------------------------
 
 # Este arquivo está dentro da pasta "pages".
@@ -23,15 +23,21 @@ CAMINHO_APOSTILA = (
     / "Sistemas Automáticos.pdf"
 )
 
+CAMINHO_GUIA_RAPIDO = (
+    PASTA_RAIZ
+    / "Guia Rápido.pdf"
+)
+
 
 @st.cache_data(show_spinner=False)
 def carregar_pdf(caminho: str) -> bytes:
     """
     Carrega um arquivo PDF e mantém seu conteúdo em cache.
 
-    O uso de cache evita que o Streamlit leia novamente o arquivo
+    O uso do cache evita que o Streamlit leia novamente o arquivo
     do disco a cada interação realizada na página.
     """
+
     return Path(caminho).read_bytes()
 
 
@@ -41,9 +47,13 @@ def mostrar_download_pdf(
     caminho: Path,
     nome_download: str,
     chave: str,
+    texto_botao: str = "Baixar PDF",
 ) -> None:
     """
-    Exibe a descrição de um material e o botão para download.
+    Exibe a descrição de um material e seu botão para download.
+
+    Caso o arquivo não exista, apresenta uma mensagem informando
+    o caminho esperado dentro do projeto.
     """
 
     st.markdown(f"#### {titulo}")
@@ -57,15 +67,17 @@ def mostrar_download_pdf(
         return
 
     try:
-        dados_pdf = carregar_pdf(str(caminho))
+        dados_pdf = carregar_pdf(
+            str(caminho)
+        )
 
         st.download_button(
-            label="Baixar PDF",
+            label=texto_botao,
             data=dados_pdf,
             file_name=nome_download,
             mime="application/pdf",
             key=chave,
-            use_container_width=True,
+            width="stretch",
         )
 
     except OSError as erro:
@@ -133,14 +145,19 @@ st.markdown(
     `a0` indica que o cilindro A está recuado e `a1` indica que ele está
     avançado.
 
+    Em atuadores com mais de duas posições, podem existir sensores
+    intermediários, como `b0`, `b1`, `b2` e `b3`. Nesses casos, a sequência
+    também informa até qual sensor o atuador deve se deslocar.
+
     A sequência de operação é percorrida passo a passo. Em cada etapa,
     observa-se o estado dos sensores e identifica-se qual sinal deve provocar
     o próximo movimento.
 
     Quando dois momentos diferentes da sequência apresentam o mesmo conjunto
-    de sinais físicos, os sensores não são suficientes para distinguir em qual
-    parte do ciclo o sistema se encontra. Nesse caso, o método acrescenta
-    memórias, normalmente representadas por `X`, `Y`, `Z` e assim por diante.
+    de sinais físicos, os sensores podem não ser suficientes para distinguir
+    em qual parte do ciclo o sistema se encontra. Nesse caso, o método
+    acrescenta memórias, normalmente representadas por `X`, `Y`, `Z` e assim
+    por diante.
 
     Essas memórias dividem o ciclo em regiões lógicas diferentes e permitem
     separar comandos que, sem essa diferenciação, poderiam receber a mesma
@@ -170,8 +187,10 @@ st.markdown(
 
     Quando existe possibilidade de acionamento indevido, são acrescentados
     sinais qualificadores. Esses sinais podem ser posições de outros
-    atuadores ou estados das memórias. A qualificação garante que a equação
-    seja verdadeira apenas na região correta do mapa.
+    atuadores, estados das memórias ou condições externas de um loop.
+
+    A qualificação garante que a equação seja verdadeira apenas na região
+    correta do mapa.
     """
 )
 
@@ -205,6 +224,35 @@ st.markdown(
 
 mostrar_titulo_etapa(
     5,
+    "Recursos adicionais da plataforma",
+    (
+        "A ferramenta também interpreta movimentos simultâneos, atuadores "
+        "multiposição e trechos repetitivos condicionais."
+    ),
+)
+
+st.markdown(
+    """
+    Além das sequências tradicionais, a plataforma permite representar:
+
+    - **movimentos simultâneos**, usando parênteses, como
+      `(B+, C+)`;
+    - **atuadores multiposição**, indicando o sensor de destino, como
+      `B+ até b2`;
+    - **loops condicionais**, usando colchetes e uma condição, como
+      `[C+, D+, C-, D-] enquanto e=0`;
+    - **mais de um loop independente**, utilizando sinais externos
+      diferentes, como `e` e `f`.
+
+    Nos loops, a condição negada, como `e'`, normalmente representa a
+    repetição. A condição direta, como `e`, representa a saída do trecho
+    repetitivo e a continuação da sequência.
+    """
+)
+
+
+mostrar_titulo_etapa(
+    6,
     "Resultado fornecido pelo método",
     (
         "Ao final, são obtidas as equações booleanas que comandam "
@@ -217,7 +265,12 @@ st.markdown(
     O resultado é um conjunto de equações para os avanços e retornos dos
     atuadores, além das equações de acionamento e desacionamento das memórias.
 
-    Essas equações podem ser utilizadas na montagem de circuitos pneumáticos,
+    Quando uma mesma saída física aparece várias vezes na sequência, a
+    plataforma mostra cada **ocorrência lógica** separadamente, como
+    `B+(1)`, `B+(2)` e `B+(3)`. Em seguida, apresenta a
+    **saída física agregada**, formada pela soma lógica dessas ocorrências.
+
+    As equações podem ser utilizadas na montagem de circuitos pneumáticos,
     eletropneumáticos ou hidráulicos. Também podem servir como base para uma
     implementação em relés, lógica elétrica, controladores programáveis ou
     sistemas de simulação.
@@ -225,16 +278,17 @@ st.markdown(
     A ferramenta desenvolvida neste projeto automatiza essa análise:
     interpreta a sequência informada, identifica os estados dos atuadores,
     determina a quantidade necessária de memórias, localiza qualificações e
-    pontos perigosos e apresenta as equações finais de comando.
+    pontos perigosos, constrói o mapa e apresenta as equações finais de
+    comando.
     """
 )
 
 
 st.info(
     """
-    O mapa de Karnaugh estendido não é apenas uma simplificação algébrica.
-    Ele também representa a evolução sequencial do sistema e utiliza memórias
-    para diferenciar estados físicos que se repetem durante o ciclo.
+    O mapa de Karnaugh Estendido não é apenas uma simplificação algébrica.
+    Ele também representa a evolução sequencial do sistema e utiliza
+    memórias para diferenciar estados físicos que se repetem durante o ciclo.
     """
 )
 
@@ -245,18 +299,37 @@ st.info(
 
 st.divider()
 
-st.header("Materiais de referência")
+st.header("Materiais de referência e apoio")
 
 st.write(
     """
-    Os documentos abaixo apresentam a fundamentação do método e exemplos
-    de aplicação em sistemas sequenciais fluídicos.
+    Os materiais abaixo apresentam a fundamentação do método, exemplos de
+    aplicação em sistemas sequenciais fluídicos e orientações para utilizar
+    a plataforma.
     """
 )
 
-coluna_1, coluna_2 = st.columns(2)
+coluna_1, coluna_2, coluna_3 = st.columns(3)
+
 
 with coluna_1:
+    with st.container(border=True):
+        mostrar_download_pdf(
+            titulo="Guia rápido da plataforma",
+            descricao=(
+                "Manual resumido com instruções para escrever sequências, "
+                "representar movimentos simultâneos, utilizar sensores "
+                "intermediários, configurar loops e interpretar os símbolos "
+                "das equações finais."
+            ),
+            caminho=CAMINHO_GUIA_RAPIDO,
+            nome_download="Guia Rápido.pdf",
+            chave="download_guia_rapido",
+            texto_botao="Baixar guia rápido",
+        )
+
+
+with coluna_2:
     with st.container(border=True):
         mostrar_download_pdf(
             titulo="Artigo sobre o método",
@@ -273,13 +346,14 @@ with coluna_1:
             chave="download_artigo_metodo",
         )
 
-with coluna_2:
+
+with coluna_3:
     with st.container(border=True):
         mostrar_download_pdf(
             titulo="Sistemas Automáticos",
             descricao=(
                 "Material didático com a explicação do mapa de Karnaugh "
-                "estendido e exemplos de identificação das condições "
+                "Estendido e exemplos de identificação das condições "
                 "mínimas, qualificadores e pontos perigosos."
             ),
             caminho=CAMINHO_APOSTILA,
