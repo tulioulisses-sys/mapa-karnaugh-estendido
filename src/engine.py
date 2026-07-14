@@ -1,29 +1,4 @@
 # engine.py
-"""Solucionador do Método do Mapa de Karnaugh Estendido.
-
-Esta versão segue a construção apresentada na apostila e no artigo
-"Método de projeto ótimo para circuitos sequenciais fluídicos":
-
-1. monta os conjuntos máximos de sinais (estados de todos os sensores);
-2. procura a menor quantidade de memórias capaz de diferenciar os passos;
-3. prefere a colocação tradicional das memórias do método;
-4. insere X+, X-, Y+, Y- etc. na sequência;
-5. usa o sinal produzido pelo passo anterior como condição básica;
-6. faz a qualificação progressiva entre comando e contracomando;
-7. acrescenta qualificadores para eliminar pontos perigosos;
-8. apresenta também as equações completas das memórias X, Y, ...
-
-Exemplos aceitos:
-
-    A+, B+, B-, A-
-    A+, B+ até b1, C+, B+ até b2, C-, B+ até b3, A-, B- até b0
-    A+, B+, [C+, D+, C-, D-] enquanto e=0, A-, B-
-    A+, B+, (C-, D+), (D-, A-)
-
-Dependência:
-
-    pip install sympy
-"""
 
 from __future__ import annotations
 
@@ -47,20 +22,13 @@ _LIMITE_ALTERNATIVAS = 1200
 _LIMITE_MEMORIAS = 8
 
 
-# ---------------------------------------------------------------------------
 # Estruturas de dados
-# ---------------------------------------------------------------------------
+
 
 
 @dataclass(frozen=True)
 class ContextoFisico:
-    """Descrição das variáveis físicas usadas pelo motor lógico.
 
-    Atuadores com exatamente duas posições continuam representados por uma
-    única variável binária, preservando as equações tradicionais a0/a1.
-    Atuadores com três ou mais posições são representados pelos próprios
-    sensores em codificação one-hot, por exemplo b0, b1, b2 e b3.
-    """
 
     atuadores: tuple[str, ...]
     configuracoes: dict[str, AtuadorConfig]
@@ -326,9 +294,9 @@ class Resultado:
         return "\n".join(linhas)
 
 
-# ---------------------------------------------------------------------------
+
 # Leitura e simulação da sequência
-# ---------------------------------------------------------------------------
+
 
 
 _RE_ACAO = re.compile(r"^([A-Za-z][A-Za-z0-9_]*)\s*([+-])$")
@@ -619,14 +587,6 @@ def _condicoes_por_etapa(
     dict[int, tuple[tuple[str, int], ...]],
     dict[int, tuple[tuple[str, int], ...]],
 ]:
-    """Retorna condições de habilitação e restrições de alcançabilidade.
-
-    A condição externa entra explicitamente somente nas duas saídas do nó de
-    decisão: início do loop (repetir) e primeira etapa após o loop (sair).
-    Durante as etapas internas, o valor de repetição é usado apenas para
-    descrever os estados alcançáveis, sem ser acrescentado às equações de D+,
-    C-, D- etc. Isso reproduz o ciclo interno apresentado no método.
-    """
 
     habilitacao: dict[int, dict[str, int]] = {}
     restricoes: dict[int, dict[str, int]] = {}
@@ -776,11 +736,7 @@ def _construir_etapas_contexto(
         for acao in acoes:
             depois = _aplicar_acao(depois, acao)
 
-        # Estados fisicamente alcançáveis durante a etapa. Para atuadores
-        # multiposição, também entram as posições atravessadas entre origem e
-        # destino. Em movimentos simultâneos são consideradas todas as ordens
-        # possíveis de avanço/conclusão, exceto o estado inicial e o estado em
-        # que todas as ações já terminaram.
+
         progressos_por_acao: list[list[tuple[int, ...]]] = []
         for acao in acoes:
             progressos = [antes]
@@ -834,9 +790,7 @@ def _construir_etapas_contexto(
         )
         estado = depois
 
-    # A saída de um loop deve confirmar a conclusão da última etapa física do
-    # ciclo mesmo quando um evento de memória é inserido entre o retorno dos
-    # atuadores e a decisão de saída.
+
     for loop in projeto.loops:
         indice_saida = loop.fim + 1
         if indice_saida >= len(etapas):
@@ -930,13 +884,7 @@ def _rotulos_comandos(
     comandos_por_passo: list[tuple[ComandoLogico, ...]],
     ciclo: bool,
 ) -> dict[str, list[str]]:
-    """Rótulos 1/0/X por comando lógico.
 
-    Quando um atuador multiposição recebe vários comandos no mesmo sentido,
-    os intervalos entre dois avanços (ou dois retornos) são tratados como
-    regiões de parada. Após o último comando daquele sentido, o sinal volta a
-    ser don't-care até surgir o contracomando, preservando a retenção usual.
-    """
 
     comandos = _comandos_unicos(comandos_por_passo)
     resultado: dict[str, list[str]] = {}
@@ -1060,9 +1008,8 @@ def _maior_clique_aproximada(
     return melhor
 
 
-# ---------------------------------------------------------------------------
+
 # Busca da colocação das memórias conforme o método
-# ---------------------------------------------------------------------------
 
 
 def _inteiro_para_codigo(valor: int, quantidade: int) -> tuple[int, ...]:
@@ -1115,12 +1062,7 @@ def _buscar_caminhos_memorias(
     *,
     limite: int,
 ) -> tuple[CaminhoCandidato, ...]:
-    """Obtém as melhores colocações de SET/RESET para uma quantidade de memórias.
 
-    A busca percorre códigos binários adjacentes, permitindo no máximo uma
-    mudança de memória entre dois passos físicos. No fechamento, podem ocorrer
-    vários RESETs sucessivos, como previsto no artigo.
-    """
     n = len(etapas)
     m = quantidade_memorias
 
@@ -1356,17 +1298,7 @@ def _chave_metodo_candidato(
     candidato: CaminhoCandidato,
     arestas: set[tuple[int, int]],
 ) -> tuple:
-    """Ordena colocações de memória conforme a construção do método.
 
-    Entre caminhos com a mesma quantidade de memórias, a apostila mantém
-    uma região de memória enquanto ela continua válida e evita ativar várias
-    memórias simultaneamente nos conjuntos máximos que precisam ser
-    diferenciados. Essa regra reproduz, entre outros, os exemplos:
-
-      A+, B+, B-, A-
-      A+, A-, B+, B-, C+, C-
-      A+, B+, B-, C+, B+, B-, C-, A-
-    """
     nos = _nos_de_conflito(arestas)
     codigos = tuple(candidato.codigos[indice] for indice in nos)
 
@@ -1421,10 +1353,8 @@ def _atribuir_candidato(
 
     return caminhos
 
-
-# ---------------------------------------------------------------------------
 # Sequência expandida: atuadores + comandos das memórias
-# ---------------------------------------------------------------------------
+
 
 
 def _literal(simbolo: Symbol, valor: int):
@@ -1483,10 +1413,7 @@ def _construir_eventos(
             fechamento_loop=etapa.fechamento_loop,
         )
 
-        # Cada saída multiposição recebe seu próprio contato de parada. Isso
-        # permite que, numa etapa simultânea, uma ação termine sem desligar as
-        # demais. O contato pode ser removido mais adiante quando um sensor de
-        # origem intermediário já fornece a autointerrupção necessária.
+
         for acao in etapa.acoes:
             if (
                 acao.comando is not None
@@ -1567,9 +1494,8 @@ def _construir_eventos(
     return eventos
 
 
-# ---------------------------------------------------------------------------
+
 # Qualificação progressiva como na apostila
-# ---------------------------------------------------------------------------
 
 
 def _comandos_eventos(eventos: list[Evento]) -> dict[str, ComandoLogico]:
@@ -1594,12 +1520,7 @@ def _pontos_alcancaveis(
     eventos: list[Evento],
     entradas_externas: tuple[str, ...] = (),
 ) -> list[Ponto]:
-    """Gera os conjuntos máximos alcançáveis.
 
-    Entradas externas não associadas a uma decisão são avaliadas nas duas
-    possibilidades. Quando um evento pertence a uma ramificação, somente o
-    valor que habilita essa rota é usado naquele evento.
-    """
 
     if not entradas_externas:
         ordem_detectada: list[str] = []
@@ -1697,12 +1618,7 @@ def _qualificar_progressivamente(
     arestas_conflito: set[tuple[int, int]],
     contexto: ContextoFisico,
 ) -> dict[str, object]:
-    """Executa a qualificação progressiva com termos por saída lógica.
 
-    Uma etapa simultânea continua sendo um único passo do método, mas cada
-    comando recebe seu próprio contato de parada. Assim, B pode alcançar b1 e
-    desligar B+ enquanto C+ permanece ativo até C concluir o mesmo passo.
-    """
 
     alvo = {
         evento.indice: _valores_alvo_evento(
@@ -1908,10 +1824,7 @@ def _qualificar_progressivamente(
                 for comando in evento.comandos:
                     if rotulos[comando.chave][ponto.evento] != "0":
                         continue
-                    # O mapa do método não usa a passagem transitória do
-                    # próprio atuador sob o contracomando para requalificar o
-                    # comando oposto. Outros atuadores continuam sendo
-                    # verificados nesses pontos (ex.: C+ ao cruzar b1).
+
                     if transitorio_do_contracomando(ponto, comando):
                         continue
                     if _avaliar(
@@ -2217,9 +2130,9 @@ def _qualificar_progressivamente(
     }
 
 
-# ---------------------------------------------------------------------------
+
 # Validação
-# ---------------------------------------------------------------------------
+
 
 
 def _agrupar_expressoes_fisicas(
@@ -2379,9 +2292,9 @@ def _validar(
     )
 
 
-# ---------------------------------------------------------------------------
+
 # Formatação das equações na mesma ordem da construção
-# ---------------------------------------------------------------------------
+
 
 
 def _formatar_literal(
@@ -2475,12 +2388,7 @@ def _simplificar_soma_textual(
     contexto: ContextoFisico,
     memorias: tuple[str, ...],
 ) -> str:
-    """Aplica absorção e a identidade p.q + p.q' = p.
-
-    A simplificação é deliberadamente conservadora para preservar a ordem e
-    a forma didática do método. Ela resolve, por exemplo,
-    x.b1' + b1.x = x, sem reescrever globalmente todas as equações.
-    """
+   
 
     complementos: dict[str, str] = {"S": "S0", "S0": "S"}
     for memoria in memorias:
@@ -2622,9 +2530,8 @@ def _equacoes_completas_memorias(
     return completas
 
 
-# ---------------------------------------------------------------------------
-# Função principal
-# ---------------------------------------------------------------------------
+# main
+
 
 
 def _candidato_compativel_com_loops(
@@ -2632,13 +2539,6 @@ def _candidato_compativel_com_loops(
     loops: tuple[Any, ...],
     quantidade_etapas: int,
 ) -> bool:
-    """Garante um único código de memória no nó de decisão do loop.
-
-    O estado antes da primeira etapa do loop e o estado após sua última etapa
-    são fisicamente iguais. Portanto, a rota de repetição e a rota de saída
-    precisam compartilhar o mesmo código de memória; a entrada externa é que
-    escolhe qual comando será habilitado.
-    """
 
     for loop in loops:
         codigo_inicio = candidato.codigos[loop.inicio]
@@ -2895,19 +2795,10 @@ def resolver(
     )
 
 
-# ---------------------------------------------------------------------------
 # Regressões dos exemplos documentados
-# ---------------------------------------------------------------------------
 
 
 def validar_exemplos_referencia() -> tuple[str, ...]:
-    """Executa regressões dos exemplos explícitos da apostila.
-
-    A função não é chamada durante a importação do módulo. Ela pode ser
-    executada manualmente após futuras alterações no algoritmo para garantir
-    que colocação das memórias, qualificação, pontos perigosos e equações não
-    se afastaram dos resultados documentados.
-    """
 
     casos = (
         (
@@ -3112,9 +3003,8 @@ def validar_exemplos_referencia() -> tuple[str, ...]:
     return tuple(mensagens)
 
 
-# ---------------------------------------------------------------------------
+
 # Utilidades de exibição
-# ---------------------------------------------------------------------------
 
 
 def _estado_texto(

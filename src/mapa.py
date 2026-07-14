@@ -1,29 +1,6 @@
 from __future__ import annotations
 
-"""Gerador organizado do Mapa de Karnaugh Estendido em SVG.
 
-A função pública permanece compatível com a interface do projeto::
-
-    mapa = gerar_mapa_svg(resultado, incluir_titulo=True)
-    mapa.svg
-    mapa.largura
-    mapa.altura
-
-Esta versão combina a organização visual da implementação original com os
-recursos acrescentados ao motor atual:
-
-* atuadores tradicionais e multiposição;
-* movimentos simultâneos;
-* memórias internas;
-* um ou mais loops condicionais;
-* eixos em código Gray refletido de base mista;
-* roteamento ortogonal com trilhos exclusivos;
-* posicionamento de rótulos com detecção de colisões;
-* retornos de loop em corredores externos dedicados, com conectores internos leves;
-* mapa completo limitado por quantidade configurável de células.
-
-O módulo utiliza apenas a biblioteca-padrão do Python.
-"""
 
 from dataclasses import dataclass
 from heapq import heappop, heappush
@@ -32,10 +9,6 @@ from itertools import combinations, count
 from math import ceil, prod, sqrt
 from typing import Any, Iterable, Iterator, Literal, Mapping, Sequence
 
-
-# ---------------------------------------------------------------------------
-# Aparência
-# ---------------------------------------------------------------------------
 
 FUNDO = "#FFFFFF"
 GRADE = "#4D5659"

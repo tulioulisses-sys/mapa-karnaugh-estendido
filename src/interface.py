@@ -44,12 +44,7 @@ def carregar_css() -> None:
 
 @st.cache_data(show_spinner=False)
 def carregar_imagem_base64(caminho: str) -> str:
-    """
-    Lê uma imagem e retorna seu conteúdo codificado em Base64.
 
-    A codificação permite inserir a imagem diretamente dentro
-    do HTML do rodapé.
-    """
 
     dados = Path(caminho).read_bytes()
 
@@ -57,12 +52,7 @@ def carregar_imagem_base64(caminho: str) -> str:
 
 
 def obter_html_logo_ufpe() -> str:
-    """
-    Retorna o bloco HTML da logo da UFPE.
 
-    Caso a imagem não seja encontrada, utiliza o texto UFPE
-    como alternativa para evitar que o rodapé fique quebrado.
-    """
 
     if not CAMINHO_LOGO_UFPE.exists():
         return """
