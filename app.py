@@ -13,6 +13,21 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+st.markdown(
+    """
+    <style>
+    [data-testid="stToolbar"] a[href*="github.com"],
+    [data-testid="stToolbar"] a[aria-label*="GitHub"],
+    [data-testid="stToolbar"] a[title*="GitHub"],
+    [data-testid="stToolbar"] button[aria-label*="GitHub"],
+    [data-testid="stToolbar"] button[title*="GitHub"] {
+        display: none !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 carregar_css()
 
 paginas = [

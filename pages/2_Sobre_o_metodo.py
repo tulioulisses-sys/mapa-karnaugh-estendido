@@ -4,13 +4,22 @@ import streamlit as st
 
 from src.interface import mostrar_titulo_etapa
 
+import streamlit as st
 
-# -------------------------------------------------------------------
-# Configuração dos arquivos de referência e apoio
-# -------------------------------------------------------------------
+# Outros imports...
 
-# Este arquivo está dentro da pasta "pages".
-# Portanto, parents[1] corresponde à pasta raiz do projeto.
+st.markdown(
+    """
+    <style>
+    [data-testid="stToolbar"] a[href*="github.com"],
+    header a[href*="github.com"] {
+        display: none !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 PASTA_RAIZ = Path(__file__).resolve().parents[1]
 
 CAMINHO_ARTIGO = (

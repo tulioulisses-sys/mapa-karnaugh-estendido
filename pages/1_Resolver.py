@@ -12,9 +12,21 @@ from src.mapa import gerar_mapa_svg
 from src.solver import analisar_entrada, resolver_site
 
 
-# ---------------------------------------------------------------------------
-# Exemplos e estado da página
-# ---------------------------------------------------------------------------
+import streamlit as st
+
+# Outros imports...
+
+st.markdown(
+    """
+    <style>
+    [data-testid="stToolbar"] a[href*="github.com"],
+    header a[href*="github.com"] {
+        display: none !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 EXEMPLOS = {
     "simples": "A+, B+, B-, A-",
@@ -549,9 +561,8 @@ def mostrar_resumo(resultado: Mapping[str, Any]) -> None:
 
 
 
-# ---------------------------------------------------------------------------
 # Página
-# ---------------------------------------------------------------------------
+
 
 
 mostrar_cabecalho()
