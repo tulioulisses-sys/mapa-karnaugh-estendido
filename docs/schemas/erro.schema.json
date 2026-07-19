@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://karnaugh-estendido.app/schemas/v1/erro.json",
+  "title": "Erro da API",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["erro"],
+  "properties": {
+    "erro": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["codigo", "mensagem", "detalhes"],
+      "properties": {
+        "codigo": {"type": "string"},
+        "mensagem": {"type": "string"},
+        "campo": {"type": ["string", "null"]},
+        "detalhes": {"type": "object"}
+      }
+    }
+  }
+}
+
