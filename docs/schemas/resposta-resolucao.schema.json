@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://karnaugh-estendido.app/schemas/v1/resposta-resolucao.json",
+  "title": "Resposta de resolução",
+  "type": "object",
+  "required": [
+    "atuadores",
+    "sensores_por_atuador",
+    "estado_inicial",
+    "sensores_iniciais",
+    "etapas",
+    "memorias",
+    "quantidade_memorias",
+    "equacoes",
+    "equacoes_comandos",
+    "equacoes_fisicas",
+    "equacoes_memorias",
+    "resolucao",
+    "eventos_mapa",
+    "validacoes",
+    "observacoes",
+    "versao_motor"
+  ],
+  "properties": {
+    "atuadores": {"type": "array", "items": {"type": "string"}},
+    "variaveis_fisicas": {"type": "array", "items": {"type": "string"}},
+    "sensores_por_atuador": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {"type": "string"}
+      }
+    },
+    "estado_inicial": {"type": "object"},
+    "sensores_iniciais": {"type": "object"},
+    "etapas": {"type": "array", "items": {"type": "object"}},
+    "memorias": {"type": "array", "items": {"type": "string"}},
+    "quantidade_memorias": {"type": "integer", "minimum": 0},
+    "equacoes": {"type": "object"},
+    "equacoes_comandos": {"type": "object"},
+    "equacoes_fisicas": {"type": "object"},
+    "equacoes_memorias": {"type": "object"},
+    "resolucao": {"type": "array", "items": {"type": "object"}},
+    "eventos_mapa": {"type": "array", "items": {"type": "object"}},
+    "validacoes": {"type": "array", "items": {"type": "string"}},
+    "observacoes": {"type": "array", "items": {"type": "string"}},
+    "versao_motor": {"type": "string"},
+    "mapa_svg": {"type": ["string", "null"]}
+  },
+  "additionalProperties": true
+}
+

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://karnaugh-estendido.app/schemas/v1/solicitacao-resolucao.json",
+  "title": "Solicitação de resolução",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sequencia"],
+  "properties": {
+    "sequencia": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20000
+    },
+    "estados_iniciais": {
+      "type": ["object", "null"],
+      "additionalProperties": {
+        "type": ["integer", "boolean", "string"]
+      },
+      "default": null
+    },
+    "ciclo_continuo": {
+      "type": "boolean",
+      "default": false
+    },
+    "incluir_mapa": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}
+
