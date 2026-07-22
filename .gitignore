@@ -5,3 +5,6 @@ __pycache__/
 .streamlit/secrets.toml
 
 *.bak
+.env
+.env.*
+!.env.example

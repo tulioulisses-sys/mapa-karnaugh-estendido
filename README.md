@@ -43,12 +43,23 @@ python -m pytest
 
 ```bash
 python -m pip install -r requirements-api.txt
-python -m uvicorn api.main:app --reload
+cp .env.example .env
+python -m uvicorn api.main:app --reload --env-file .env
 ```
 
 A documentação interativa ficará disponível em
 `http://127.0.0.1:8000/docs`. Para permitir um frontend em outro domínio,
 configure `CORS_ORIGINS` com uma lista separada por vírgulas.
+
+Preencha o arquivo `.env` local com a URL, a chave publicável e uma chave
+secreta do projeto Supabase. O arquivo real é ignorado pelo Git. A chave
+`SUPABASE_SECRET_KEY` é exclusiva do servidor e nunca deve ser copiada para o
+Flutter, para o navegador, para commits ou para mensagens.
+
+`POST /api/v1/analises` permanece público porque faz apenas validação de
+entrada e não consome cota. `POST /api/v1/resolucoes` exige um token Bearer do
+Supabase, uma `chave_idempotencia` e, para usuários comuns, o `turma_id`. A API
+reserva a cota, executa o motor e confirma ou estorna a reserva.
 
 ## Entrada básica
 

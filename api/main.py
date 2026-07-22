@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import os
-from typing import Any
+from typing import Annotated, Any
+from uuid import UUID
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -12,6 +13,11 @@ from src.engine import VERSAO
 from src.mapa import gerar_mapa_svg
 from src.solver import analisar_entrada, resolver_site
 
+from .acesso.dependencias import (
+    obter_provedor_acesso,
+    obter_usuario_atual,
+)
+from .acesso.supabase import ProvedorAcesso, UsuarioAutenticado
 from .erros import ErroAPI, erro_do_motor
 from .modelos import (
     LIMITE_SEQUENCIA,
@@ -22,7 +28,7 @@ from .modelos import (
 )
 
 
-API_VERSION = "1.0.0"
+API_VERSION = "1.1.0"
 
 
 def _origens_permitidas() -> list[str]:
@@ -103,10 +109,10 @@ async def tratar_erro_validacao(
             mensagem="O corpo da requisição não contém um JSON válido.",
         )
     elif any(
-        item.get("type") == "string_too_long"
-        or (
-            item.get("loc", ())[-1:] == ("sequencia",)
-            and item.get("ctx", {}).get("max_length") == LIMITE_SEQUENCIA
+        item.get("loc", ())[-1:] == ("sequencia",)
+        and (
+            item.get("type") == "string_too_long"
+            or item.get("ctx", {}).get("max_length") == LIMITE_SEQUENCIA
         )
         for item in erros
     ):
@@ -177,12 +183,52 @@ def analisar(solicitacao: SolicitacaoAnalise) -> dict[str, Any]:
     response_model=dict[str, Any],
     responses={
         400: {"model": RespostaErro},
+        401: {"model": RespostaErro},
+        403: {"model": RespostaErro},
+        409: {"model": RespostaErro},
         413: {"model": RespostaErro},
         422: {"model": RespostaErro},
+        500: {"model": RespostaErro},
+        503: {"model": RespostaErro},
     },
     tags=["karnaugh"],
 )
-def resolver(solicitacao: SolicitacaoResolucao) -> dict[str, Any]:
+def resolver(
+    solicitacao: SolicitacaoResolucao,
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> dict[str, Any]:
+    # Erros básicos de entrada são identificados antes de qualquer reserva.
+    try:
+        analisar_entrada(solicitacao.sequencia)
+    except (ValueError, TypeError) as erro:
+        raise erro_do_motor(erro) from erro
+
+    reserva = provedor.reservar(
+        usuario_id=usuario.id,
+        chave_idempotencia=solicitacao.chave_idempotencia,
+        turma_id=solicitacao.turma_id,
+    )
+    reserva_id = _id_reserva(reserva)
+    estado_reserva = str(reserva.get("estado", ""))
+
+    if estado_reserva in {"estornada", "expirada"}:
+        raise ErroAPI(
+            status_code=409,
+            codigo="CHAVE_IDEMPOTENCIA_ENCERRADA",
+            mensagem=(
+                "Essa identificação já foi encerrada. "
+                "Inicie uma nova solicitação."
+            ),
+            campo="chave_idempotencia",
+        )
+
     try:
         resultado = resolver_site(
             sequencia=solicitacao.sequencia,
@@ -197,13 +243,65 @@ def resolver(solicitacao: SolicitacaoResolucao) -> dict[str, Any]:
             resultado["mapa_altura"] = mapa.altura
         else:
             resultado["mapa_svg"] = None
-
-        return resultado
     except (ValueError, RuntimeError, TypeError) as erro:
+        _estornar_apos_falha(
+            provedor,
+            reserva_id,
+            "erro_entrada_ou_resolucao",
+        )
         raise erro_do_motor(
             erro,
             estados_iniciais_informados=(
                 solicitacao.estados_iniciais is not None
             ),
         ) from erro
+    except Exception as erro:
+        _estornar_apos_falha(provedor, reserva_id, "falha_interna_motor")
+        raise ErroAPI(
+            status_code=500,
+            codigo="FALHA_INTERNA_RESOLUCAO",
+            mensagem="Não foi possível concluir a análise.",
+        ) from erro
 
+    consumo = provedor.consumir(reserva_id)
+    resultado["controle_acesso"] = {
+        "reserva_id": str(reserva_id),
+        "estado": consumo.get("estado", "consumida"),
+        "acesso": reserva.get("acesso"),
+        "analises_restantes": consumo.get(
+            "analises_restantes",
+            reserva.get("analises_restantes"),
+        ),
+        "requisicao_repetida": bool(
+            reserva.get("idempotente") or consumo.get("idempotente")
+        ),
+    }
+    return resultado
+
+
+def _id_reserva(reserva: dict[str, Any]) -> UUID:
+    try:
+        return UUID(str(reserva["reserva_id"]))
+    except (KeyError, TypeError, ValueError) as erro:
+        raise ErroAPI(
+            status_code=503,
+            codigo="RESPOSTA_CONTROLE_ACESSO_INVALIDA",
+            mensagem="O controle de acesso retornou uma resposta inválida.",
+        ) from erro
+
+
+def _estornar_apos_falha(
+    provedor: ProvedorAcesso,
+    reserva_id: UUID,
+    motivo: str,
+) -> None:
+    try:
+        provedor.estornar(reserva_id, motivo)
+    except ErroAPI as erro:
+        raise ErroAPI(
+            status_code=503,
+            codigo="ESTORNO_PENDENTE",
+            mensagem=(
+                "A análise falhou e a reserva será liberada automaticamente."
+            ),
+        ) from erro

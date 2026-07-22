@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -27,6 +28,8 @@ class SolicitacaoAnalise(ModeloEntrada):
 
 
 class SolicitacaoResolucao(SolicitacaoAnalise):
+    chave_idempotencia: str = Field(min_length=1, max_length=200)
+    turma_id: UUID | None = None
     estados_iniciais: dict[str, int | bool | str] | None = None
     ciclo_continuo: bool = False
     incluir_mapa: bool = True
@@ -47,4 +50,3 @@ class RespostaSaude(BaseModel):
     status: str
     api_version: str
     motor_version: str
-
