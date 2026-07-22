@@ -33,8 +33,8 @@ corresponde mais ao resultado atual do motor Python.
 
 ## Ordem planejada da migração
 
-1. modelos do domínio;
-2. parser de sequências;
+1. modelos do domínio — concluído;
+2. parser de sequências — concluído;
 3. construção das etapas e estados;
 4. cálculo e alocação das memórias;
 5. qualificação e simplificação das equações;
