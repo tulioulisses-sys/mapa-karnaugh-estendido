@@ -1,17 +1,29 @@
-# mapa_karnaugh_app
+# Aplicativo Flutter
 
-A new Flutter project.
+Cliente Android, iOS e Web do Mapa de Karnaugh Estendido.
 
-## Getting Started
+## Configuração local
 
-This project is a starting point for a Flutter application.
+Crie `config/dev.json` a partir de `config/dev.example.json` e preencha somente
+a URL e a chave **publicável** do Supabase. Esse arquivo é ignorado pelo Git.
+Nunca coloque a chave secreta da API Python dentro da pasta `mobile`.
 
-A few resources to get you started if this is your first Flutter project:
+```powershell
+Copy-Item config/dev.example.json config/dev.json
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Executar no navegador
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Mantenha a API Python em outra janela e use uma porta fixa para o CORS:
+
+```powershell
+flutter pub get
+flutter run -d chrome --web-port 3000 --dart-define-from-file=config/dev.json
+```
+
+## Validar
+
+```powershell
+flutter test
+flutter analyze
+```
