@@ -54,9 +54,7 @@ void main() {
     final servico = AnaliseFake();
     await tester.pumpWidget(MaterialApp(home: TelaAnalise(servico: servico)));
 
-    final botao = find.widgetWithText(FilledButton, 'Realizar análise');
-    await tester.ensureVisible(botao);
-    await tester.tap(botao);
+    await _tocarBotaoAnalise(tester);
     await tester.pump();
 
     expect(
@@ -72,9 +70,7 @@ void main() {
 
     await tester.tap(find.text('Usar exemplo A+, B+, B-, A-'));
     await tester.pump();
-    final botao = find.widgetWithText(FilledButton, 'Realizar análise');
-    await tester.ensureVisible(botao);
-    await tester.tap(botao);
+    await _tocarBotaoAnalise(tester);
     await tester.pumpAndSettle();
 
     expect(find.text('Análise concluída'), findsOneWidget);
@@ -91,18 +87,22 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: TelaAnalise(servico: servico)));
 
     await tester.tap(find.text('Usar exemplo A+, B+, B-, A-'));
-    final botao = find.widgetWithText(FilledButton, 'Realizar análise');
-    await tester.ensureVisible(botao);
-    await tester.tap(botao);
+    await _tocarBotaoAnalise(tester);
     await tester.pumpAndSettle();
     expect(find.text('Falha temporária.'), findsOneWidget);
 
-    await tester.ensureVisible(botao);
-    await tester.tap(botao);
+    await _tocarBotaoAnalise(tester);
     await tester.pumpAndSettle();
 
     expect(servico.chamadas, 2);
     expect(servico.chavesRecebidas[1], servico.chavesRecebidas[0]);
     expect(find.text('Análise concluída'), findsOneWidget);
   });
+}
+
+Future<void> _tocarBotaoAnalise(WidgetTester tester) async {
+  final botao = find.widgetWithText(FilledButton, 'Realizar análise');
+  await tester.drag(find.byType(ListView), const Offset(0, -180));
+  await tester.pumpAndSettle();
+  await tester.tap(botao);
 }

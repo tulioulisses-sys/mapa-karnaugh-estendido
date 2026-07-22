@@ -11,14 +11,13 @@ import 'servico_analise.dart';
 class ServicoAnaliseApi implements ServicoAnalise {
   ServicoAnaliseApi({
     required String apiBaseUrl,
-    required ServicoAutenticacao autenticacao,
+    required this.autenticacao,
     http.Client? cliente,
   }) : _apiBaseUrl = apiBaseUrl.replaceFirst(RegExp(r'/+$'), ''),
-       _autenticacao = autenticacao,
        _cliente = cliente ?? http.Client();
 
   final String _apiBaseUrl;
-  final ServicoAutenticacao _autenticacao;
+  final ServicoAutenticacao autenticacao;
   final http.Client _cliente;
 
   @override
@@ -29,7 +28,7 @@ class ServicoAnaliseApi implements ServicoAnalise {
     required bool incluirMapa,
   }) async {
     try {
-      final token = await _autenticacao.obterTokenAcesso();
+      final token = await autenticacao.obterTokenAcesso();
       final resposta = await _cliente
           .post(
             Uri.parse('$_apiBaseUrl/api/v1/resolucoes'),
