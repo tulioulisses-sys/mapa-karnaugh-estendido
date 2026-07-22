@@ -86,3 +86,6 @@ O contrato está em [`docs/contrato-motor.md`](docs/contrato-motor.md).
 
 As regras planejadas de master, submaster, turmas, convites e cotas estão em
 [`docs/controle-acesso.md`](docs/controle-acesso.md).
+
+O esquema PostgreSQL/Supabase correspondente está em
+[`supabase/migrations`](supabase/migrations).

@@ -174,6 +174,11 @@ Senhas, tokens e conteúdo das sequências não devem aparecer na auditoria.
 | `transferencias_master` | confirmação segura de sucessão |
 | `auditoria` | histórico administrativo imutável |
 
+A primeira migração desse modelo está em
+[`../supabase/migrations/202607220001_controle_acesso.sql`](../supabase/migrations/202607220001_controle_acesso.sql).
+Ela cria as tabelas, restrições e políticas de leitura, mas ainda não contém
+credenciais nem está conectada a um projeto remoto.
+
 ## 12. Decisão de arquitetura
 
 O parser Dart permanece no Flutter para validação rápida e mensagens de erro.
