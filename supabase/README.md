@@ -10,8 +10,21 @@ do provedor de autenticação.
 - O aplicativo usa apenas a chave pública do projeto.
 - Operações administrativas passam pelo backend Python.
 - As políticas RLS protegem leituras feitas pelo aplicativo.
-- A criação do primeiro master será feita por um procedimento de bootstrap
-  separado e auditado.
+- A criação do primeiro master usa um procedimento de bootstrap separado,
+  restrito ao backend e registrado na auditoria.
+
+## Ordem das migrações
+
+1. `202607220001_controle_acesso.sql`: tabelas, restrições e RLS;
+2. `202607220002_cadastro_e_bootstrap.sql`: sincronização do Auth, aceite de
+   convites após a confirmação do email e bootstrap do primeiro master.
+
+Cadastros sem convite entram como `aguardando_aprovacao`. Um convite válido
+só é aceito quando o mesmo endereço aparece confirmado no Supabase Auth.
+
+O bootstrap exige que a conta já exista e que o email esteja confirmado. Ele
+recusa novas execuções assim que existe um master e nunca deve ser chamado
+diretamente pelo Flutter.
 
 ## Validação futura
 
@@ -23,5 +36,4 @@ supabase start
 supabase db reset
 ```
 
-O repositório ainda não contém credenciais nem está vinculado a um projeto
-remoto.
+O repositório não contém credenciais nem identificadores de projetos remotos.
