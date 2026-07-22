@@ -33,7 +33,7 @@ class _PortaoAutenticacaoState extends State<PortaoAutenticacao> {
           _avisoSessao = null;
         });
       },
-      onError: (_erro, _pilha) {
+      onError: (_, _) {
         if (!mounted) return;
         setState(() {
           _avisoSessao = 'A conexão com o login foi interrompida.';
