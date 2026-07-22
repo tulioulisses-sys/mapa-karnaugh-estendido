@@ -1,9 +1,13 @@
-# Migração do motor para Flutter offline
+# Estratégia do cliente Flutter e validação local
 
-O aplicativo móvel deve executar a resolução do Mapa de Karnaugh Estendido
-sem depender de uma API ou de conexão com a internet. O motor Python continua
-sendo a implementação de referência enquanto o equivalente em Dart é
-construído e validado.
+O plano inicial previa executar toda a resolução no Flutter sem conexão. Essa
+decisão foi revista após a definição de cotas por usuário: um motor completo
+distribuído no cliente permitiria contornar o consumo de análises.
+
+O parser Dart continua responsável pela validação rápida e pelas mensagens de
+erro. A resolução completa permanece no motor Python e será autorizada pela API
+antes do consumo de cada cota. As regras estão em
+[`controle-acesso.md`](controle-acesso.md).
 
 ## Estratégia de equivalência
 
@@ -15,9 +19,9 @@ canônicos produzidos pelo motor Python para quatro classes de entrada:
 - atuador multiposição;
 - loop condicional.
 
-Durante a migração, os testes Dart devem comparar cada parte da análise e da
-resolução com esses resultados. Uma alteração futura no motor Python só pode
-atualizar as referências de forma intencional e acompanhada pelos testes.
+Os testes Dart comparam a análise local com esses resultados. Uma alteração
+futura no motor Python só pode atualizar as referências de forma intencional e
+acompanhada pelos testes.
 
 ## Atualizar as referências
 
@@ -31,12 +35,13 @@ python -m pytest
 O teste `tests/test_referencias_mobile.py` falha quando o JSON salvo não
 corresponde mais ao resultado atual do motor Python.
 
-## Ordem planejada da migração
+## Ordem planejada
 
 1. modelos do domínio — concluído;
 2. parser de sequências — concluído;
-3. construção das etapas e estados;
-4. cálculo e alocação das memórias;
-5. qualificação e simplificação das equações;
-6. geração do mapa em SVG;
-7. interface Flutter para Android, iOS e Web.
+3. autenticação e autorização na API;
+4. consumo atômico de cotas;
+5. integração do Flutter com o motor Python;
+6. interface de resolução e resultados;
+7. painel administrativo;
+8. distribuição para Android e Web/PWA.
