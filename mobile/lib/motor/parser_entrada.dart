@@ -176,8 +176,8 @@ List<String> _separarTopo(String texto) {
 List<String> _separarMovimentosSimultaneos(String texto) {
   var conteudo = texto.trim();
 
-  if (conteudo.startsWith('(') || conteudo.endsWith(')')) {
-    if (!(conteudo.startsWith('(') && conteudo.endsWith(')'))) {
+  if (conteudo.startsWith('(')) {
+    if (!conteudo.endsWith(')')) {
       throw EntradaInvalidaException(
         "Parênteses inválidos na etapa '$texto'.",
       );
