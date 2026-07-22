@@ -7,6 +7,7 @@ import 'package:mapa_karnaugh_app/analise/servico_analise.dart';
 import 'package:mapa_karnaugh_app/app.dart';
 import 'package:mapa_karnaugh_app/autenticacao/modelos_autenticacao.dart';
 import 'package:mapa_karnaugh_app/autenticacao/servico_autenticacao.dart';
+import 'package:mapa_karnaugh_app/visual/identidade_visual.dart';
 
 class ServicoAutenticacaoFake implements ServicoAutenticacao {
   final _mudancas = StreamController<UsuarioSessao?>.broadcast();
@@ -87,6 +88,8 @@ void main() {
 
     expect(find.text('Configuração necessária'), findsOneWidget);
     expect(find.text('Configuração ausente.'), findsOneWidget);
+    final aplicativo = tester.widget<MaterialApp>(find.byType(MaterialApp));
+    expect(aplicativo.theme?.colorScheme.primary, CoresInstitucionais.vinho);
   });
 
   testWidgets('valida os campos antes de tentar login', (tester) async {

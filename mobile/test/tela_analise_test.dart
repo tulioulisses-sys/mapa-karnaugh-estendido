@@ -73,10 +73,11 @@ void main() {
     await _tocarBotaoAnalise(tester);
     await tester.pumpAndSettle();
 
-    expect(find.text('Análise concluída'), findsOneWidget);
+    expect(find.text('Resultado da análise'), findsOneWidget);
     expect(find.text('4 etapas'), findsOneWidget);
     expect(find.text('A+ = S.x0'), findsOneWidget);
     expect(find.text('Análises ilimitadas'), findsOneWidget);
+    expect(find.text('Validações'), findsNothing);
     expect(servico.chamadas, 1);
   });
 
@@ -96,13 +97,13 @@ void main() {
 
     expect(servico.chamadas, 2);
     expect(servico.chavesRecebidas[1], servico.chavesRecebidas[0]);
-    expect(find.text('Análise concluída'), findsOneWidget);
+    expect(find.text('Resultado da análise'), findsOneWidget);
   });
 }
 
 Future<void> _tocarBotaoAnalise(WidgetTester tester) async {
   final botao = find.widgetWithText(FilledButton, 'Realizar análise');
-  await tester.drag(find.byType(ListView), const Offset(0, -180));
+  await tester.ensureVisible(botao);
   await tester.pumpAndSettle();
   await tester.tap(botao);
 }

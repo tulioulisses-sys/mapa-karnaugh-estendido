@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../visual/identidade_visual.dart';
 import 'modelos_analise.dart';
 import 'servico_analise.dart';
 
@@ -98,17 +99,28 @@ class _TelaAnaliseState extends State<TelaAnalise> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nova análise')),
+      appBar: AppBar(title: const Text('Resolver')),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(24),
           children: [
             Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 980),
+                constraints: const BoxConstraints(maxWidth: 1180),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    const CabecalhoInstitucional(
+                      sobretitulo: 'UFPE · Engenharia Mecânica',
+                      titulo:
+                          'Resolução das Equações de Comando de Sistemas '
+                          'Fluídicos Utilizando o Método do Mapa de '
+                          'Karnaugh Estendido',
+                      descricao:
+                          'Informe a sequência de movimentos para determinar as '
+                          'memórias, equações de comando e o mapa estendido.',
+                    ),
+                    const SizedBox(height: 18),
                     _FormularioAnalise(
                       formulario: _formulario,
                       sequencia: _sequencia,
@@ -128,6 +140,8 @@ class _TelaAnaliseState extends State<TelaAnalise> {
                       const SizedBox(height: 24),
                       _Resultado(resultado: _resultado!),
                     ],
+                    const SizedBox(height: 28),
+                    const RodapeUfpe(),
                   ],
                 ),
               ),
@@ -164,82 +178,77 @@ class _FormularioAnalise extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: formulario,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Sequência de movimentos',
-                style: Theme.of(context).textTheme.headlineSmall,
+    return CartaoInstitucional(
+      child: Form(
+        key: formulario,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const CabecalhoEtapa(
+              numero: 1,
+              titulo: 'Informe a sequência de movimentos',
+              descricao:
+                  'Escreva os movimentos na ordem de execução. Movimentos '
+                  'simultâneos podem ser informados entre parênteses.',
+            ),
+            const SizedBox(height: 22),
+            TextFormField(
+              controller: sequencia,
+              enabled: !processando,
+              minLines: 3,
+              maxLines: 8,
+              maxLength: 20000,
+              decoration: const InputDecoration(
+                labelText: 'Sequência',
+                hintText: 'Exemplo: A+, B+, B-, A-',
+                alignLabelWithHint: true,
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Informe os movimentos na ordem de execução. Movimentos '
-                'simultâneos podem ser escritos entre parênteses.',
+              validator: (valor) {
+                if ((valor ?? '').trim().isEmpty) {
+                  return 'Informe a sequência que deseja analisar.';
+                }
+                return null;
+              },
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: processando ? null : onUsarExemplo,
+                icon: const Icon(Icons.auto_fix_high_outlined),
+                label: const Text('Usar exemplo A+, B+, B-, A-'),
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: sequencia,
-                enabled: !processando,
-                minLines: 3,
-                maxLines: 8,
-                maxLength: 20000,
-                decoration: const InputDecoration(
-                  labelText: 'Sequência',
-                  hintText: 'Exemplo: A+, B+, B-, A-',
-                  alignLabelWithHint: true,
-                ),
-                validator: (valor) {
-                  if ((valor ?? '').trim().isEmpty) {
-                    return 'Informe a sequência que deseja analisar.';
-                  }
-                  return null;
-                },
+            ),
+            const Divider(height: 28),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Ciclo contínuo'),
+              subtitle: const Text(
+                'Ative somente quando o estado final fechar o ciclo.',
               ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: processando ? null : onUsarExemplo,
-                  icon: const Icon(Icons.auto_fix_high_outlined),
-                  label: const Text('Usar exemplo A+, B+, B-, A-'),
-                ),
+              value: cicloContinuo,
+              onChanged: processando ? null : onAlterarCiclo,
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Gerar mapa de Karnaugh'),
+              subtitle: const Text(
+                'Inclui a representação visual completa no resultado.',
               ),
-              const Divider(height: 28),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Ciclo contínuo'),
-                subtitle: const Text(
-                  'Ative somente quando o estado final fechar o ciclo.',
-                ),
-                value: cicloContinuo,
-                onChanged: processando ? null : onAlterarCiclo,
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Gerar mapa de Karnaugh'),
-                subtitle: const Text(
-                  'Inclui a representação visual completa no resultado.',
-                ),
-                value: incluirMapa,
-                onChanged: processando ? null : onAlterarMapa,
-              ),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: processando ? null : onResolver,
-                icon: processando
-                    ? const SizedBox.square(
-                        dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.play_arrow),
-                label: Text(processando ? 'Analisando...' : 'Realizar análise'),
-              ),
-            ],
-          ),
+              value: incluirMapa,
+              onChanged: processando ? null : onAlterarMapa,
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: processando ? null : onResolver,
+              icon: processando
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.play_arrow),
+              label: Text(processando ? 'Analisando...' : 'Realizar análise'),
+            ),
+          ],
         ),
       ),
     );
@@ -256,46 +265,37 @@ class _Resultado extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle_outline,
-                      color: Theme.of(context).colorScheme.primary,
+        CartaoInstitucional(
+          destaque: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const CabecalhoEtapa(
+                numero: 2,
+                titulo: 'Resultado da análise',
+                descricao:
+                    'A sequência foi processada e as equações foram obtidas.',
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  Chip(label: Text('${resultado.etapas.length} etapas')),
+                  Chip(
+                    label: Text('${resultado.atuadores.length} atuador(es)'),
+                  ),
+                  Chip(
+                    label: Text(
+                      resultado.memorias.isEmpty
+                          ? 'Sem memórias'
+                          : 'Memórias: ${resultado.memorias.join(', ')}',
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Análise concluída',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    Chip(label: Text('${resultado.etapas.length} etapas')),
-                    Chip(
-                      label: Text('${resultado.atuadores.length} atuador(es)'),
-                    ),
-                    Chip(
-                      label: Text(
-                        resultado.memorias.isEmpty
-                            ? 'Sem memórias'
-                            : 'Memórias: ${resultado.memorias.join(', ')}',
-                      ),
-                    ),
-                    Chip(label: Text(resultado.controleAcesso.rotuloCota)),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                  Chip(label: Text(resultado.controleAcesso.rotuloCota)),
+                ],
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 16),
@@ -313,14 +313,6 @@ class _Resultado extends StatelessWidget {
         if (resultado.mapaSvg != null) ...[
           const SizedBox(height: 16),
           _SecaoMapa(resultado: resultado),
-        ],
-        if (resultado.validacoes.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          _SecaoLista(
-            titulo: 'Validações',
-            itens: resultado.validacoes,
-            icone: Icons.verified_outlined,
-          ),
         ],
         if (resultado.observacoes.isNotEmpty) ...[
           const SizedBox(height: 16),
@@ -366,14 +358,14 @@ class _SecaoEquacoes extends StatelessWidget {
                           vertical: 10,
                         ),
                         decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.surfaceContainerHighest,
+                          color: CoresInstitucionais.vinhoFundo,
+                          border: Border.all(color: const Color(0xFFEBD0D7)),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           '${equacao.key} = ${equacao.value}',
                           style: const TextStyle(
+                            color: CoresInstitucionais.vinhoEscuro,
                             fontFamily: 'monospace',
                             fontSize: 15,
                           ),
@@ -484,21 +476,21 @@ class _AvisoErro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cores = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cores.errorContainer,
+        color: const Color(0xFFFBECEF),
+        border: Border.all(color: const Color(0xFFF0C8D0)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: cores.onErrorContainer),
+          const Icon(Icons.error_outline, color: CoresInstitucionais.erro),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               mensagem,
-              style: TextStyle(color: cores.onErrorContainer),
+              style: const TextStyle(color: CoresInstitucionais.erro),
             ),
           ),
         ],

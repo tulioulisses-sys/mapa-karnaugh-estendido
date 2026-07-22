@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../analise/servico_analise.dart';
 import '../analise/tela_analise.dart';
+import '../visual/identidade_visual.dart';
 import 'modelos_autenticacao.dart';
 import 'servico_autenticacao.dart';
 
@@ -104,46 +105,58 @@ class _ConteudoConta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cores = Theme.of(context).colorScheme;
     final mensagem = _mensagemEstado(perfil);
 
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
+          constraints: const BoxConstraints(maxWidth: 900),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Olá!', style: Theme.of(context).textTheme.headlineMedium),
-              const SizedBox(height: 4),
-              Text(perfil.email),
-              const SizedBox(height: 24),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          Chip(
-                            avatar: const Icon(Icons.badge_outlined, size: 18),
-                            label: Text(perfil.papel.rotulo),
+              CabecalhoInstitucional(
+                sobretitulo: 'UFPE · Engenharia Mecânica',
+                titulo: 'Olá!',
+                descricao: perfil.email,
+              ),
+              const SizedBox(height: 18),
+              CartaoInstitucional(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        Chip(
+                          avatar: const Icon(Icons.badge_outlined, size: 18),
+                          label: Text(perfil.papel.rotulo),
+                        ),
+                        Chip(
+                          avatar: const Icon(
+                            Icons.analytics_outlined,
+                            size: 18,
                           ),
-                          Chip(
-                            avatar: const Icon(
-                              Icons.analytics_outlined,
-                              size: 18,
-                            ),
-                            label: Text(_rotuloAcesso(perfil)),
-                          ),
-                        ],
+                          label: Text(_rotuloAcesso(perfil)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: perfil.podeAnalisar
+                            ? CoresInstitucionais.sucessoFundo
+                            : CoresInstitucionais.vinhoFundo,
+                        border: Border.all(
+                          color: perfil.podeAnalisar
+                              ? const Color(0xFFCFE8D8)
+                              : const Color(0xFFEBD0D7),
+                        ),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      const SizedBox(height: 20),
-                      Row(
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(
@@ -151,8 +164,8 @@ class _ConteudoConta extends StatelessWidget {
                                 ? Icons.check_circle_outline
                                 : Icons.schedule_outlined,
                             color: perfil.podeAnalisar
-                                ? cores.primary
-                                : cores.tertiary,
+                                ? CoresInstitucionais.sucesso
+                                : CoresInstitucionais.vinhoClaro,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -174,19 +187,21 @@ class _ConteudoConta extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed: perfil.podeAnalisar ? onNovaAnalise : null,
-                          icon: const Icon(Icons.account_tree_outlined),
-                          label: const Text('Nova análise'),
-                        ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: perfil.podeAnalisar ? onNovaAnalise : null,
+                        icon: const Icon(Icons.account_tree_outlined),
+                        label: const Text('Nova análise'),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
+              const SizedBox(height: 24),
+              const RodapeUfpe(),
             ],
           ),
         ),
