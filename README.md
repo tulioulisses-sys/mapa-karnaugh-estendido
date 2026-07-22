@@ -36,6 +36,17 @@ python -m pip install -r requirements-dev.txt
 python -m pytest
 ```
 
+## Executar a API
+
+```bash
+python -m pip install -r requirements-api.txt
+python -m uvicorn api.main:app --reload
+```
+
+A documentação interativa ficará disponível em
+`http://127.0.0.1:8000/docs`. Para permitir um frontend em outro domínio,
+configure `CORS_ORIGINS` com uma lista separada por vírgulas.
+
 ## Entrada básica
 
 ```text
@@ -71,4 +82,3 @@ essa API no Android e no iOS. O contrato planejado para essa integração está 
 [`docs/contrato-motor.md`](docs/contrato-motor.md).
 
 > A API, a autenticação e o aplicativo móvel ainda não fazem parte desta versão.
-
