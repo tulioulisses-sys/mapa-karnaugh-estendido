@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 
+import 'analise/servico_analise.dart';
 import 'autenticacao/portao_autenticacao.dart';
 import 'autenticacao/servico_autenticacao.dart';
 
 class MapaKarnaughApp extends StatelessWidget {
-  const MapaKarnaughApp({super.key, this.servicoAutenticacao, this.erroInicial})
-    : assert(
-        servicoAutenticacao != null || erroInicial != null,
-        'Informe o serviço de autenticação ou um erro inicial.',
-      );
+  const MapaKarnaughApp({
+    super.key,
+    this.servicoAutenticacao,
+    this.servicoAnalise,
+    this.erroInicial,
+  }) : assert(
+         (servicoAutenticacao != null && servicoAnalise != null) ||
+             erroInicial != null,
+         'Informe os serviços do aplicativo ou um erro inicial.',
+       );
 
   final ServicoAutenticacao? servicoAutenticacao;
+  final ServicoAnalise? servicoAnalise;
   final String? erroInicial;
 
   @override
@@ -34,7 +41,10 @@ class MapaKarnaughApp extends StatelessWidget {
         ),
       ),
       home: erroInicial == null
-          ? PortaoAutenticacao(servico: servicoAutenticacao!)
+          ? PortaoAutenticacao(
+              servicoAutenticacao: servicoAutenticacao!,
+              servicoAnalise: servicoAnalise!,
+            )
           : TelaConfiguracaoAusente(mensagem: erroInicial!),
     );
   }

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mapa_karnaugh_app/analise/modelos_analise.dart';
+import 'package:mapa_karnaugh_app/analise/servico_analise.dart';
 import 'package:mapa_karnaugh_app/app.dart';
 import 'package:mapa_karnaugh_app/autenticacao/modelos_autenticacao.dart';
 import 'package:mapa_karnaugh_app/autenticacao/servico_autenticacao.dart';
@@ -45,12 +47,34 @@ class ServicoAutenticacaoFake implements ServicoAutenticacao {
   Future<PerfilUsuario> carregarPerfil(String usuarioId) async => perfil;
 
   @override
+  Future<String> obterTokenAcesso() async => 'token-teste';
+
+  @override
   Future<void> sair() async {
     usuario = null;
     _mudancas.add(null);
   }
 
   Future<void> fechar() => _mudancas.close();
+}
+
+class ServicoAnaliseFake implements ServicoAnalise {
+  @override
+  Future<ResultadoAnalise> resolver({
+    required String sequencia,
+    required String chaveIdempotencia,
+    required bool cicloContinuo,
+    required bool incluirMapa,
+  }) {
+    throw UnimplementedError();
+  }
+}
+
+MapaKarnaughApp _aplicativo(ServicoAutenticacao autenticacao) {
+  return MapaKarnaughApp(
+    servicoAutenticacao: autenticacao,
+    servicoAnalise: ServicoAnaliseFake(),
+  );
 }
 
 void main() {
@@ -67,7 +91,7 @@ void main() {
 
   testWidgets('valida os campos antes de tentar login', (tester) async {
     final servico = ServicoAutenticacaoFake();
-    await tester.pumpWidget(MapaKarnaughApp(servicoAutenticacao: servico));
+    await tester.pumpWidget(_aplicativo(servico));
 
     await tester.tap(find.widgetWithText(FilledButton, 'Entrar'));
     await tester.pump();
@@ -83,7 +107,7 @@ void main() {
 
   testWidgets('login abre o resumo da conta master', (tester) async {
     final servico = ServicoAutenticacaoFake();
-    await tester.pumpWidget(MapaKarnaughApp(servicoAutenticacao: servico));
+    await tester.pumpWidget(_aplicativo(servico));
 
     await tester.enterText(
       find.byType(TextFormField).first,
@@ -96,6 +120,7 @@ void main() {
     expect(find.text('Acesso liberado'), findsOneWidget);
     expect(find.text('Master'), findsOneWidget);
     expect(find.text('Análises ilimitadas'), findsOneWidget);
+    expect(find.text('Nova análise'), findsOneWidget);
     await servico.fechar();
   });
 
@@ -103,7 +128,7 @@ void main() {
     tester,
   ) async {
     final servico = ServicoAutenticacaoFake();
-    await tester.pumpWidget(MapaKarnaughApp(servicoAutenticacao: servico));
+    await tester.pumpWidget(_aplicativo(servico));
 
     await tester.tap(find.text('Criar uma conta'));
     await tester.pump();
@@ -137,7 +162,7 @@ void main() {
         analisesRestantes: 0,
       );
 
-    await tester.pumpWidget(MapaKarnaughApp(servicoAutenticacao: servico));
+    await tester.pumpWidget(_aplicativo(servico));
     await tester.pumpAndSettle();
 
     expect(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'analise/servico_api.dart';
 import 'app.dart';
 import 'autenticacao/servico_supabase.dart';
 import 'configuracao/configuracao_aplicativo.dart';
@@ -20,11 +21,15 @@ Future<void> main() async {
       url: configuracao.supabaseUrl,
       publishableKey: configuracao.supabasePublishableKey,
     );
+    final autenticacao = ServicoAutenticacaoSupabase(Supabase.instance.client);
+    final analise = ServicoAnaliseApi(
+      apiBaseUrl: configuracao.apiBaseUrl,
+      autenticacao: autenticacao,
+    );
     runApp(
       MapaKarnaughApp(
-        servicoAutenticacao: ServicoAutenticacaoSupabase(
-          Supabase.instance.client,
-        ),
+        servicoAutenticacao: autenticacao,
+        servicoAnalise: analise,
       ),
     );
   } catch (_) {

@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 
+import '../analise/servico_analise.dart';
+import '../analise/tela_analise.dart';
 import 'modelos_autenticacao.dart';
 import 'servico_autenticacao.dart';
 
 class TelaConta extends StatefulWidget {
-  const TelaConta({super.key, required this.servico, required this.usuario});
+  const TelaConta({
+    super.key,
+    required this.servicoAutenticacao,
+    required this.servicoAnalise,
+    required this.usuario,
+  });
 
-  final ServicoAutenticacao servico;
+  final ServicoAutenticacao servicoAutenticacao;
+  final ServicoAnalise servicoAnalise;
   final UsuarioSessao usuario;
 
   @override
@@ -20,12 +28,12 @@ class _TelaContaState extends State<TelaConta> {
   @override
   void initState() {
     super.initState();
-    _perfil = widget.servico.carregarPerfil(widget.usuario.id);
+    _perfil = widget.servicoAutenticacao.carregarPerfil(widget.usuario.id);
   }
 
   void _recarregar() {
     setState(() {
-      _perfil = widget.servico.carregarPerfil(widget.usuario.id);
+      _perfil = widget.servicoAutenticacao.carregarPerfil(widget.usuario.id);
     });
   }
 
@@ -33,7 +41,7 @@ class _TelaContaState extends State<TelaConta> {
     if (_saindo) return;
     setState(() => _saindo = true);
     try {
-      await widget.servico.sair();
+      await widget.servicoAutenticacao.sair();
     } on FalhaAutenticacao catch (erro) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -66,17 +74,33 @@ class _TelaContaState extends State<TelaConta> {
           if (snapshot.hasError || !snapshot.hasData) {
             return _FalhaPerfil(onTentarNovamente: _recarregar);
           }
-          return _ConteudoConta(perfil: snapshot.data!);
+          return _ConteudoConta(
+            perfil: snapshot.data!,
+            onNovaAnalise: () => _abrirAnalise(snapshot.data!),
+          );
         },
+      ),
+    );
+  }
+
+  Future<void> _abrirAnalise(PerfilUsuario perfil) async {
+    if (!perfil.podeAnalisar) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => TelaAnalise(
+          servico: widget.servicoAnalise,
+          onAnaliseConcluida: _recarregar,
+        ),
       ),
     );
   }
 }
 
 class _ConteudoConta extends StatelessWidget {
-  const _ConteudoConta({required this.perfil});
+  const _ConteudoConta({required this.perfil, required this.onNovaAnalise});
 
   final PerfilUsuario perfil;
+  final VoidCallback onNovaAnalise;
 
   @override
   Widget build(BuildContext context) {
@@ -154,9 +178,9 @@ class _ConteudoConta extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton.icon(
-                          onPressed: null,
+                          onPressed: perfil.podeAnalisar ? onNovaAnalise : null,
                           icon: const Icon(Icons.account_tree_outlined),
-                          label: const Text('Tela de análise em preparação'),
+                          label: const Text('Nova análise'),
                         ),
                       ),
                     ],

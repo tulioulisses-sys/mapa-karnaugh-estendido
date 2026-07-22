@@ -14,5 +14,7 @@ abstract interface class ServicoAutenticacao {
 
   Future<PerfilUsuario> carregarPerfil(String usuarioId);
 
+  Future<String> obterTokenAcesso();
+
   Future<void> sair();
 }

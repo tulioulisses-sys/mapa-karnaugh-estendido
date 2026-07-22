@@ -76,6 +76,17 @@ class ServicoAutenticacaoSupabase implements ServicoAutenticacao {
   }
 
   @override
+  Future<String> obterTokenAcesso() async {
+    final token = _cliente.auth.currentSession?.accessToken;
+    if (token == null || token.isEmpty) {
+      throw const FalhaAutenticacao(
+        'Sua sessão expirou. Entre novamente para continuar.',
+      );
+    }
+    return token;
+  }
+
+  @override
   Future<void> sair() async {
     try {
       await _cliente.auth.signOut();
