@@ -299,7 +299,7 @@ class ClienteSupabase:
         turma_id: UUID | None,
     ) -> dict[str, Any]:
         return self._rpc(
-            "reservar_analise",
+            "reservar_analise_com_turma_ativa",
             {
                 "p_usuario_id": str(usuario_id),
                 "p_chave_idempotencia": chave_idempotencia,

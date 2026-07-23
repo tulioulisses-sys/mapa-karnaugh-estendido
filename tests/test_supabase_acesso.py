@@ -115,7 +115,9 @@ def test_rpc_usa_somente_chave_secreta_no_backend(
 
     assert resposta["reserva_id"] == str(RESERVA_ID)
     chamada = http.posts[0]
-    assert chamada["url"].endswith("/rest/v1/rpc/reservar_analise")
+    assert chamada["url"].endswith(
+        "/rest/v1/rpc/reservar_analise_com_turma_ativa"
+    )
     assert chamada["headers"]["apikey"] == "sb_secret_teste"
     assert "Authorization" not in chamada["headers"]
     assert chamada["json"]["p_usuario_id"] == str(USUARIO_ID)

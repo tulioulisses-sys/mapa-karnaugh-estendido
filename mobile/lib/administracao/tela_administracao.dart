@@ -24,7 +24,6 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
   List<UsuarioAdministrado> _usuarios = const [];
   List<TurmaAdministrada> _turmas = const [];
   List<ConviteAdministrado> _convites = const [];
-  List<RegistroAuditoria> _auditoria = const [];
   TransferenciaMaster? _transferenciaMaster;
   bool _carregando = true;
   bool _processando = false;
@@ -45,14 +44,12 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
       final usuarios = await widget.servico.listarUsuarios();
       final turmas = await widget.servico.listarTurmas();
       final convites = await widget.servico.listarConvites();
-      final auditoria = await widget.servico.listarAuditoria();
       final transferencia = await widget.servico.obterTransferenciaMaster();
       if (!mounted) return;
       setState(() {
         _usuarios = usuarios;
         _turmas = turmas;
         _convites = convites;
-        _auditoria = auditoria;
         _transferenciaMaster = transferencia;
         _carregando = false;
       });
@@ -172,8 +169,6 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
                     child: _cartaoUsuario(usuario),
                   ),
                 ),
-              const SizedBox(height: 6),
-              _painelAuditoria(),
               const SizedBox(height: 12),
               const RodapeUfpe(),
             ],
@@ -484,104 +479,6 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
                 ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _painelAuditoria() {
-    final registros = _auditoria.take(30).toList();
-    return CartaoInstitucional(
-      destaque: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.history_outlined,
-                color: CoresInstitucionais.vinho,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Histórico administrativo',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Registro permanente das alterações de usuários, turmas, '
-            'convites, cotas e controle master.',
-          ),
-          const SizedBox(height: 16),
-          if (registros.isEmpty)
-            const Text(
-              'Nenhuma operação administrativa registrada.',
-              style: TextStyle(color: CoresInstitucionais.textoSuave),
-            )
-          else
-            ...registros.map(_linhaAuditoria),
-          if (_auditoria.length > registros.length)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                'Exibindo as ${registros.length} operações mais recentes.',
-                style: const TextStyle(
-                  color: CoresInstitucionais.textoSuave,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _linhaAuditoria(RegistroAuditoria registro) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 9),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
-        decoration: BoxDecoration(
-          color: CoresInstitucionais.creme,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: CoresInstitucionais.borda),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              _iconeAuditoria(registro.acao),
-              size: 21,
-              color: CoresInstitucionais.vinho,
-            ),
-            const SizedBox(width: 11),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _rotuloAcaoAuditoria(registro.acao),
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    _descricaoAuditoria(registro),
-                    style: const TextStyle(
-                      color: CoresInstitucionais.textoSuave,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    _atorEData(registro),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -1771,84 +1668,6 @@ String _rotuloEstadoConvite(String estado) => switch (estado) {
   'cancelado' => 'Cancelado',
   _ => estado,
 };
-
-IconData _iconeAuditoria(String acao) {
-  if (acao.contains('transferencia_master') || acao == 'bootstrap_master') {
-    return Icons.workspace_premium_outlined;
-  }
-  if (acao.contains('turma')) return Icons.groups_outlined;
-  if (acao.contains('convite')) return Icons.mail_outline;
-  if (acao.contains('cota') || acao.contains('analise')) {
-    return Icons.analytics_outlined;
-  }
-  if (acao.contains('papel')) return Icons.admin_panel_settings_outlined;
-  return Icons.manage_accounts_outlined;
-}
-
-String _rotuloAcaoAuditoria(String acao) => switch (acao) {
-  'cadastro_criado' => 'Conta cadastrada',
-  'convite_aceito' => 'Convite aceito',
-  'bootstrap_master' => 'Primeiro master definido',
-  'alterar_estado_usuario' => 'Estado da conta alterado',
-  'definir_acesso_usuario' => 'Acesso individual ajustado',
-  'ajustar_cota_em_lote' => 'Cota da turma ajustada',
-  'alterar_papel_usuario' => 'Papel do usuário alterado',
-  'criar_turma' => 'Turma criada',
-  'encerrar_turma' => 'Turma encerrada',
-  'encerrar_turma_usuario' => 'Acesso encerrado com a turma',
-  'criar_convite' => 'Convite enviado',
-  'cancelar_convite' => 'Convite cancelado',
-  'iniciar_transferencia_master' => 'Transferência master iniciada',
-  'cancelar_transferencia_master' => 'Transferência master cancelada',
-  'aceitar_transferencia_master' => 'Transferência master concluída',
-  'analise_reservada' => 'Análise reservada',
-  'analise_consumida' => 'Análise concluída',
-  'analise_estornada' => 'Análise estornada',
-  'reserva_expirada' => 'Reserva de análise expirada',
-  _ => acao.replaceAll('_', ' '),
-};
-
-String _descricaoAuditoria(RegistroAuditoria registro) {
-  final depois = registro.valorPosterior ?? const <String, dynamic>{};
-  final antes = registro.valorAnterior ?? const <String, dynamic>{};
-  final email = depois['email'] ?? antes['email'];
-  final codigo = depois['codigo'] ?? antes['codigo'];
-  final estado = depois['estado'];
-  final papel = depois['papel'];
-  final saldo = depois['analises_restantes'];
-
-  if (registro.acao == 'encerrar_turma') {
-    final alterados = depois['usuarios_alterados'] ?? 0;
-    return '${codigo ?? 'Turma'} · $alterados aluno(s) alterado(s)';
-  }
-  if (registro.acao.contains('convite') && email != null) {
-    return email.toString();
-  }
-  if (registro.acao.contains('transferencia_master')) {
-    final destino = depois['email_destino'] ?? depois['master_email'];
-    return destino?.toString() ?? 'Controle master';
-  }
-  if (registro.acao.contains('cota') || registro.acao.contains('analise')) {
-    return saldo == null ? 'Acesso ilimitado' : 'Saldo após a operação: $saldo';
-  }
-  if (email != null && estado != null) {
-    return '$email · ${estado.toString().replaceAll('_', ' ')}';
-  }
-  if (estado != null) {
-    return 'Novo estado: ${estado.toString().replaceAll('_', ' ')}';
-  }
-  if (papel != null) {
-    return 'Novo papel: ${papel.toString()}';
-  }
-  if (codigo != null) return codigo.toString();
-  return 'Registro de ${registro.entidade.replaceAll('_', ' ')}';
-}
-
-String _atorEData(RegistroAuditoria registro) {
-  final ator = registro.atorEmail ?? 'Sistema';
-  final data = registro.criadaEm;
-  return data == null ? ator : '$ator · ${_formatarData(data)}';
-}
 
 String _rotuloAcesso(UsuarioAdministrado usuario) {
   if (usuario.acesso == TipoAcesso.ilimitado) return 'Ilimitado';

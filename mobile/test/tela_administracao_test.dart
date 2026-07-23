@@ -234,8 +234,7 @@ void main() {
     expect(find.text('Convidar por e-mail'), findsOneWidget);
     expect(find.text('Criar turma'), findsOneWidget);
     expect(find.text('Transferir controle master'), findsOneWidget);
-    expect(find.text('Histórico administrativo'), findsOneWidget);
-    expect(find.text('Turma criada'), findsOneWidget);
+    expect(find.text('Histórico administrativo'), findsNothing);
   });
 
   testWidgets('master aprova cadastro pendente', (tester) async {
