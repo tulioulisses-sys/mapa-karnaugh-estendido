@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../metodo/tela_sobre_metodo.dart';
 import '../visual/identidade_visual.dart';
 import 'modelos_analise.dart';
+import 'resultado_analise.dart';
 import 'servico_analise.dart';
 
 class TelaAnalise extends StatefulWidget {
@@ -155,7 +155,7 @@ class _TelaAnaliseState extends State<TelaAnalise> {
                     ],
                     if (_resultado != null) ...[
                       const SizedBox(height: 24),
-                      _Resultado(resultado: _resultado!),
+                      ResultadoAnaliseView(resultado: _resultado!),
                     ],
                     const SizedBox(height: 28),
                     const RodapeUfpe(),
@@ -375,220 +375,6 @@ class _ExemploEntrada extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _Resultado extends StatelessWidget {
-  const _Resultado({required this.resultado});
-
-  final ResultadoAnalise resultado;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        CartaoInstitucional(
-          destaque: true,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const CabecalhoEtapa(
-                numero: 2,
-                titulo: 'Resultado da análise',
-                descricao:
-                    'A sequência foi processada e as equações foram obtidas.',
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  Chip(label: Text('${resultado.etapas.length} etapas')),
-                  Chip(
-                    label: Text('${resultado.atuadores.length} atuador(es)'),
-                  ),
-                  Chip(
-                    label: Text(
-                      resultado.memorias.isEmpty
-                          ? 'Sem memórias'
-                          : 'Memórias: ${resultado.memorias.join(', ')}',
-                    ),
-                  ),
-                  Chip(label: Text(resultado.controleAcesso.rotuloCota)),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        _SecaoEquacoes(
-          titulo: 'Equações dos comandos',
-          equacoes: resultado.equacoes,
-        ),
-        if (resultado.equacoesMemorias.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          _SecaoEquacoes(
-            titulo: 'Equações completas das memórias',
-            equacoes: resultado.equacoesMemorias,
-          ),
-        ],
-        if (resultado.mapaSvg != null) ...[
-          const SizedBox(height: 16),
-          _SecaoMapa(resultado: resultado),
-        ],
-        if (resultado.observacoes.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          _SecaoLista(
-            titulo: 'Observações',
-            itens: resultado.observacoes,
-            icone: Icons.info_outline,
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _SecaoEquacoes extends StatelessWidget {
-  const _SecaoEquacoes({required this.titulo, required this.equacoes});
-
-  final String titulo;
-  final Map<String, String> equacoes;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(titulo, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 16),
-            if (equacoes.isEmpty)
-              const Text('Nenhuma equação foi necessária.')
-            else
-              SelectionArea(
-                child: Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    for (final equacao in equacoes.entries)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: CoresInstitucionais.vinhoFundo,
-                          border: Border.all(color: const Color(0xFFEBD0D7)),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          '${equacao.key} = ${equacao.value}',
-                          style: const TextStyle(
-                            color: CoresInstitucionais.vinhoEscuro,
-                            fontFamily: 'monospace',
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SecaoMapa extends StatelessWidget {
-  const _SecaoMapa({required this.resultado});
-
-  final ResultadoAnalise resultado;
-
-  @override
-  Widget build(BuildContext context) {
-    final largura = resultado.mapaLargura ?? 1200;
-    final altura = resultado.mapaAltura ?? 720;
-    final alturaExibicao = (altura * (900 / largura))
-        .clamp(380.0, 720.0)
-        .toDouble();
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Mapa de Karnaugh estendido',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 4),
-            const Text('Use o gesto de pinça ou a roda do mouse para ampliar.'),
-            const SizedBox(height: 16),
-            ClipRect(
-              child: SizedBox(
-                height: alturaExibicao,
-                child: InteractiveViewer(
-                  minScale: 0.7,
-                  maxScale: 5,
-                  child: SvgPicture.string(
-                    resultado.mapaSvg!,
-                    width: largura,
-                    height: altura,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SecaoLista extends StatelessWidget {
-  const _SecaoLista({
-    required this.titulo,
-    required this.itens,
-    required this.icone,
-  });
-
-  final String titulo;
-  final List<String> itens;
-  final IconData icone;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(titulo, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 12),
-            for (final item in itens)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(icone, size: 18),
-                    const SizedBox(width: 10),
-                    Expanded(child: Text(item)),
-                  ],
-                ),
-              ),
-          ],
-        ),
       ),
     );
   }

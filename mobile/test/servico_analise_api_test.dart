@@ -51,7 +51,23 @@ void main() {
           ],
           'memorias': ['X'],
           'equacoes': {'A+': 'S.x0'},
+          'equacoes_comandos': {'A+': 'S.x0'},
+          'equacoes_fisicas': {'A+': 'S.x0'},
           'equacoes_memorias': {'X': '(b1 + x).¬(a0)'},
+          'sensores_por_atuador': {
+            'A': ['a0', 'a1'],
+            'B': ['b0', 'b1'],
+          },
+          'sensores_iniciais': {'A': 'a0', 'B': 'b0'},
+          'resolucao': [
+            {
+              'Passo': 1,
+              'Comando': 'A+',
+              'Pontos perigosos': 'Nenhum',
+              'Equação final': 'A+ = S.x0',
+            },
+          ],
+          'versao_motor': 'teste',
           'validacoes': ['Sequência validada.'],
           'observacoes': <String>[],
           'mapa_svg': '<svg></svg>',
@@ -91,6 +107,9 @@ void main() {
     expect(corpo['chave_idempotencia'], 'chave-001');
     expect(corpo['incluir_mapa'], isTrue);
     expect(resultado.etapas, hasLength(2));
+    expect(resultado.equacoesComandos['A+'], 'S.x0');
+    expect(resultado.sensoresIniciais, {'A': 'a0', 'B': 'b0'});
+    expect(resultado.resolucao.first['Pontos perigosos'], 'Nenhum');
     expect(resultado.controleAcesso.analisesRestantes, 2);
   });
 

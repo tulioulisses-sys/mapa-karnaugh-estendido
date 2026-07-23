@@ -5,6 +5,15 @@ class ResultadoAnalise {
     required this.memorias,
     required this.equacoes,
     required this.equacoesMemorias,
+    this.equacoesComandos = const {},
+    this.equacoesFisicas = const {},
+    this.sensoresPorAtuador = const {},
+    this.sensoresIniciais = const {},
+    this.atuadoresMultiposicao = const [],
+    this.entradasExternas = const [],
+    this.loops = const [],
+    this.resolucao = const [],
+    this.versaoMotor = '',
     required this.validacoes,
     required this.observacoes,
     required this.mapaSvg,
@@ -20,6 +29,15 @@ class ResultadoAnalise {
       memorias: _listaTextos(json['memorias']),
       equacoes: _mapaTextos(json['equacoes']),
       equacoesMemorias: _mapaTextos(json['equacoes_memorias']),
+      equacoesComandos: _mapaTextos(json['equacoes_comandos']),
+      equacoesFisicas: _mapaTextos(json['equacoes_fisicas']),
+      sensoresPorAtuador: _mapaListasTextos(json['sensores_por_atuador']),
+      sensoresIniciais: _mapaTextos(json['sensores_iniciais']),
+      atuadoresMultiposicao: _listaTextos(json['atuadores_multiposicao']),
+      entradasExternas: _listaTextos(json['entradas_externas']),
+      loops: _listaMapas(json['loops']),
+      resolucao: _listaMapas(json['resolucao']),
+      versaoMotor: json['versao_motor']?.toString() ?? '',
       validacoes: _listaTextos(json['validacoes']),
       observacoes: _listaTextos(json['observacoes']),
       mapaSvg: json['mapa_svg'] as String?,
@@ -36,6 +54,15 @@ class ResultadoAnalise {
   final List<String> memorias;
   final Map<String, String> equacoes;
   final Map<String, String> equacoesMemorias;
+  final Map<String, String> equacoesComandos;
+  final Map<String, String> equacoesFisicas;
+  final Map<String, List<String>> sensoresPorAtuador;
+  final Map<String, String> sensoresIniciais;
+  final List<String> atuadoresMultiposicao;
+  final List<String> entradasExternas;
+  final List<Map<String, dynamic>> loops;
+  final List<Map<String, dynamic>> resolucao;
+  final String versaoMotor;
   final List<String> validacoes;
   final List<String> observacoes;
   final String? mapaSvg;
@@ -99,6 +126,15 @@ List<Map<String, dynamic>> _listaMapas(Object? valor) => valor is List
 Map<String, String> _mapaTextos(Object? valor) => valor is Map
     ? valor.map(
         (chave, conteudo) => MapEntry(chave.toString(), conteudo.toString()),
+      )
+    : const {};
+
+Map<String, List<String>> _mapaListasTextos(Object? valor) => valor is Map
+    ? valor.map(
+        (chave, conteudo) => MapEntry(
+          chave.toString(),
+          _listaTextos(conteudo),
+        ),
       )
     : const {};
 

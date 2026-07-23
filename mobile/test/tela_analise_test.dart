@@ -26,14 +26,56 @@ class AnaliseFake implements ServicoAnalise {
     return const ResultadoAnalise(
       atuadores: ['A', 'B'],
       etapas: [
-        {'numero': 1},
-        {'numero': 2},
+        {
+          'numero': 1,
+          'comando_texto': 'A+',
+          'estado_antes_texto': 'a0 · b0',
+          'estado_depois_texto': 'a1 · b0',
+          'condicao_externa_texto': 'Nenhuma',
+          'pertence_loop': false,
+          'fase': 0,
+          'codigo_memorias': {'X': 0},
+        },
+        {
+          'numero': 2,
+          'comando_texto': 'B+',
+          'estado_antes_texto': 'a1 · b0',
+          'estado_depois_texto': 'a1 · b1',
+          'condicao_externa_texto': 'Nenhuma',
+          'pertence_loop': false,
+          'fase': 0,
+          'codigo_memorias': {'X': 0},
+        },
         {'numero': 3},
         {'numero': 4},
       ],
       memorias: ['X'],
       equacoes: {'A+': 'S.x0', 'B+': 'a1.x0'},
+      equacoesComandos: {'A+': 'S.x0', 'B+': 'a1.x0'},
+      equacoesFisicas: {'A+': 'S.x0', 'B+': 'a1.x0'},
       equacoesMemorias: {'X': '(b1 + x).¬(a0)'},
+      sensoresPorAtuador: {
+        'A': ['a0', 'a1'],
+        'B': ['b0', 'b1'],
+      },
+      sensoresIniciais: {'A': 'a0', 'B': 'b0'},
+      resolucao: [
+        {
+          'Passo': 1,
+          'Comando': 'A+',
+          'Condição mínima': 'S',
+          'Condição externa': 'Nenhuma',
+          'Restrição do ramo': 'Nenhuma',
+          'Contracomando': 'A-',
+          'Qualificador de diferenciação': 'x0',
+          'Contato de parada': 'Nenhum',
+          'Equação qualificada': 'A+ = S.x0',
+          'Pontos perigosos': 'Nenhum',
+          'Qualificador complementar': 'Nenhum',
+          'Equação final': 'A+ = S.x0',
+        },
+      ],
+      versaoMotor: 'teste',
       validacoes: ['Sequência validada.'],
       observacoes: [],
       mapaSvg: null,
@@ -72,12 +114,21 @@ void main() {
     await _tocarBotaoAnalise(tester);
     await tester.pumpAndSettle();
 
-    expect(find.text('Resultado da análise'), findsOneWidget);
+    expect(find.text('Resultado da resolução'), findsOneWidget);
     expect(find.text('4 etapas'), findsOneWidget);
-    expect(find.text('A+ = S.x0'), findsOneWidget);
     expect(find.text('Análises ilimitadas'), findsOneWidget);
     expect(find.text('Validações'), findsNothing);
     expect(servico.chamadas, 1);
+
+    await _tocarAba(tester, 'Equações');
+    expect(find.text('Ocorrência lógica'), findsWidgets);
+    expect(find.text('A+'), findsOneWidget);
+    expect(find.text('S.x0'), findsOneWidget);
+
+    await _tocarAba(tester, 'Resolução do método');
+    expect(find.text('Condição mínima'), findsOneWidget);
+    expect(find.text('Pontos perigosos'), findsOneWidget);
+    expect(find.text('Equação final'), findsOneWidget);
   });
 
   testWidgets('repetição após falha reutiliza a chave de idempotência', (
@@ -96,8 +147,16 @@ void main() {
 
     expect(servico.chamadas, 2);
     expect(servico.chavesRecebidas[1], servico.chavesRecebidas[0]);
-    expect(find.text('Resultado da análise'), findsOneWidget);
+    expect(find.text('Resultado da resolução'), findsOneWidget);
   });
+}
+
+Future<void> _tocarAba(WidgetTester tester, String nome) async {
+  final aba = find.text(nome);
+  await tester.ensureVisible(aba);
+  await tester.pumpAndSettle();
+  await tester.tap(aba);
+  await tester.pumpAndSettle();
 }
 
 Future<void> _tocarUsarExemplo(WidgetTester tester) async {
