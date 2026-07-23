@@ -349,11 +349,11 @@ class RodapeUfpe extends StatelessWidget {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final compacto = constraints.maxWidth < 620;
-                const marca = SizedBox(
+                final marca = SizedBox(
                   width: 78,
                   height: 86,
-                  child: Image(
-                    image: AssetImage('assets/images/logo_ufpe.png'),
+                  child: Image.asset(
+                    'assets/images/logo_ufpe.png',
                     fit: BoxFit.contain,
                     cacheWidth: 220,
                   ),
