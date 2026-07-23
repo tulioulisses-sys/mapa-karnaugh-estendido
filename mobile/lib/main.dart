@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'administracao/servico_administracao_api.dart';
@@ -16,6 +19,8 @@ Future<void> main() async {
     runApp(MapaKarnaughApp(erroInicial: erroConfiguracao));
     return;
   }
+
+  unawaited(_aquecerApi(configuracao.apiBaseUrl));
 
   try {
     await Supabase.initialize(
@@ -44,5 +49,16 @@ Future<void> main() async {
         erroInicial: 'Não foi possível iniciar o serviço de login.',
       ),
     );
+  }
+}
+
+Future<void> _aquecerApi(String apiBaseUrl) async {
+  final base = apiBaseUrl.replaceFirst(RegExp(r'/+$'), '');
+  try {
+    await http
+        .get(Uri.parse('$base/health'))
+        .timeout(const Duration(seconds: 75));
+  } catch (_) {
+    // O aquecimento é preventivo. As telas tratam uma indisponibilidade real.
   }
 }

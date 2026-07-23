@@ -306,7 +306,7 @@ class ServicoAdministracaoApi implements ServicoAdministracao {
 
       final fluxo = await _cliente
           .send(requisicao)
-          .timeout(const Duration(seconds: 20));
+          .timeout(const Duration(seconds: 120));
       final resposta = await http.Response.fromStream(fluxo);
       final dados = resposta.body.isEmpty ? <String, dynamic>{} : jsonDecode(
         resposta.body,

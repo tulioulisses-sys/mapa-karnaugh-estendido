@@ -43,7 +43,7 @@ class ServicoAnaliseApi implements ServicoAnalise {
               'incluir_mapa': incluirMapa,
             }),
           )
-          .timeout(const Duration(seconds: 60));
+          .timeout(const Duration(seconds: 120));
 
       final corpo = _decodificarCorpo(resposta.body);
       if (resposta.statusCode < 200 || resposta.statusCode >= 300) {
@@ -61,7 +61,7 @@ class ServicoAnaliseApi implements ServicoAnalise {
       );
     } on http.ClientException {
       throw const FalhaAnalise(
-        'Não foi possível conectar à API. Verifique se ela está ligada.',
+        'Não foi possível acessar o servidor da análise. Tente novamente.',
         codigo: 'API_INDISPONIVEL',
       );
     } on FormatException {
