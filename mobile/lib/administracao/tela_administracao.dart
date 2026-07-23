@@ -1024,7 +1024,7 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
   }
 
   Future<void> _encerrarTurma(TurmaAdministrada turma) async {
-    final confirmacao = TextEditingController();
+    var confirmacao = '';
     var estado = EstadoConta.suspenso;
     String? erro;
 
@@ -1080,7 +1080,7 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: confirmacao,
+                    onChanged: (valor) => confirmacao = valor,
                     decoration: InputDecoration(
                       labelText: 'Digite ${turma.codigo} para confirmar',
                     ),
@@ -1105,7 +1105,7 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
             ),
             FilledButton.icon(
               onPressed: () {
-                if (confirmacao.text.trim() != turma.codigo) {
+                if (confirmacao.trim() != turma.codigo) {
                   atualizar(
                     () => erro = 'Digite exatamente ${turma.codigo}.',
                   );
@@ -1120,7 +1120,6 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
         ),
       ),
     );
-    confirmacao.dispose();
     if (estadoEscolhido == null || !mounted) return;
 
     await _executar(
