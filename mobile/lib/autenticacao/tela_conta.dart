@@ -29,18 +29,30 @@ class TelaConta extends StatefulWidget {
 
 class _TelaContaState extends State<TelaConta> {
   late Future<PerfilUsuario> _perfil;
+  PerfilUsuario? _perfilAtual;
   bool _saindo = false;
 
   @override
   void initState() {
     super.initState();
-    _perfil = widget.servicoAutenticacao.carregarPerfil(widget.usuario.id);
+    _perfil = _buscarPerfil();
   }
 
   void _recarregar() {
     setState(() {
-      _perfil = widget.servicoAutenticacao.carregarPerfil(widget.usuario.id);
+      _perfilAtual = null;
+      _perfil = _buscarPerfil();
     });
+  }
+
+  Future<PerfilUsuario> _buscarPerfil() async {
+    final perfil = await widget.servicoAutenticacao.carregarPerfil(
+      widget.usuario.id,
+    );
+    if (mounted) {
+      setState(() => _perfilAtual = perfil);
+    }
+    return perfil;
   }
 
   Future<void> _sair() async {
@@ -74,6 +86,12 @@ class _TelaContaState extends State<TelaConta> {
             tooltip: 'Sobre o método',
             icon: const Icon(Icons.menu_book_outlined),
           ),
+          if (_podeAdministrar)
+            IconButton(
+              onPressed: () => _abrirAdministracao(_perfilAtual!),
+              tooltip: 'Gerenciar contas',
+              icon: const Icon(Icons.manage_accounts_outlined),
+            ),
           TextButton.icon(
             onPressed: _saindo ? null : _sair,
             icon: const Icon(Icons.logout),
@@ -94,13 +112,18 @@ class _TelaContaState extends State<TelaConta> {
           return _ConteudoConta(
             perfil: snapshot.data!,
             onNovaAnalise: () => _abrirAnalise(snapshot.data!),
-            onAdministrar: widget.servicoAdministracao == null
-                ? null
-                : () => _abrirAdministracao(snapshot.data!),
           );
         },
       ),
     );
+  }
+
+  bool get _podeAdministrar {
+    final perfil = _perfilAtual;
+    return widget.servicoAdministracao != null &&
+        perfil != null &&
+        perfil.estado == EstadoConta.ativo &&
+        perfil.papel != PapelUsuario.usuario;
   }
 
   Future<void> _abrirAnalise(PerfilUsuario perfil) async {
@@ -139,12 +162,10 @@ class _ConteudoConta extends StatelessWidget {
   const _ConteudoConta({
     required this.perfil,
     required this.onNovaAnalise,
-    required this.onAdministrar,
   });
 
   final PerfilUsuario perfil;
   final VoidCallback onNovaAnalise;
-  final VoidCallback? onAdministrar;
 
   @override
   Widget build(BuildContext context) {
@@ -240,20 +261,6 @@ class _ConteudoConta extends StatelessWidget {
                         label: const Text('Nova análise'),
                       ),
                     ),
-                    if (onAdministrar != null &&
-                        perfil.papel != PapelUsuario.usuario) ...[
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: onAdministrar,
-                          icon: const Icon(
-                            Icons.admin_panel_settings_outlined,
-                          ),
-                          label: const Text('Gerenciar acessos'),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),

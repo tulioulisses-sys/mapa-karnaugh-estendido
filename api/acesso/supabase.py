@@ -4,6 +4,7 @@ import os
 from math import isfinite
 from dataclasses import dataclass
 from typing import Any, Protocol
+from urllib.parse import urlencode
 from uuid import UUID
 
 import httpx2
@@ -16,12 +17,18 @@ class ConfiguracaoSupabase:
     url: str
     chave_publicavel: str
     chave_secreta: str
+    url_aplicativo: str | None = None
     timeout_segundos: float = 10.0
 
     def __post_init__(self) -> None:
         url = self.url.strip().rstrip("/")
         publicavel = self.chave_publicavel.strip()
         secreta = self.chave_secreta.strip()
+        url_aplicativo = (
+            self.url_aplicativo.strip().rstrip("/")
+            if self.url_aplicativo
+            else None
+        )
 
         if not url or not publicavel or not secreta:
             raise ValueError("A configuração do Supabase está incompleta.")
@@ -29,12 +36,17 @@ class ConfiguracaoSupabase:
             raise ValueError("A URL do Supabase é inválida.")
         if publicavel == secreta:
             raise ValueError("As chaves pública e secreta devem ser distintas.")
+        if url_aplicativo and not url_aplicativo.startswith(
+            ("https://", "http://127.0.0.1:", "http://localhost:")
+        ):
+            raise ValueError("A URL pública do aplicativo é inválida.")
         if not isfinite(self.timeout_segundos) or self.timeout_segundos <= 0:
             raise ValueError("O timeout do Supabase deve ser positivo.")
 
         object.__setattr__(self, "url", url)
         object.__setattr__(self, "chave_publicavel", publicavel)
         object.__setattr__(self, "chave_secreta", secreta)
+        object.__setattr__(self, "url_aplicativo", url_aplicativo)
 
     @classmethod
     def do_ambiente(cls) -> ConfiguracaoSupabase:
@@ -47,6 +59,7 @@ class ConfiguracaoSupabase:
                     "",
                 ),
                 chave_secreta=os.getenv("SUPABASE_SECRET_KEY", ""),
+                url_aplicativo=os.getenv("APP_PUBLIC_URL") or None,
                 timeout_segundos=timeout,
             )
         except (TypeError, ValueError) as erro:
@@ -120,6 +133,44 @@ class ProvedorAcesso(Protocol):
         usuario_id: UUID,
         papel: str,
     ) -> dict[str, Any]: ...
+
+    def listar_turmas(self, ator_id: UUID) -> list[dict[str, Any]]: ...
+
+    def criar_turma(
+        self,
+        *,
+        ator_id: UUID,
+        codigo: str,
+        nome: str,
+    ) -> dict[str, Any]: ...
+
+    def listar_convites(self, ator_id: UUID) -> list[dict[str, Any]]: ...
+
+    def criar_convites_lote(
+        self,
+        *,
+        ator_id: UUID,
+        emails: list[str],
+        papel_destino: str,
+        acesso_destino: str,
+        analises_iniciais: int | None,
+        turma_id: UUID | None,
+        dias_validade: int,
+    ) -> dict[str, Any]: ...
+
+    def cancelar_convite(
+        self,
+        *,
+        ator_id: UUID,
+        convite_id: UUID,
+    ) -> dict[str, Any]: ...
+
+    def enviar_email_acesso(
+        self,
+        *,
+        email: str,
+        tipo: str,
+    ) -> None: ...
 
 
 class ClienteSupabase:
@@ -296,6 +347,123 @@ class ClienteSupabase:
             },
         )
 
+    def listar_turmas(self, ator_id: UUID) -> list[dict[str, Any]]:
+        dados = self._rpc_json(
+            "listar_turmas_administracao",
+            {"p_ator_id": str(ator_id)},
+        )
+        return _validar_lista_controle(dados)
+
+    def criar_turma(
+        self,
+        *,
+        ator_id: UUID,
+        codigo: str,
+        nome: str,
+    ) -> dict[str, Any]:
+        return self._rpc(
+            "criar_turma",
+            {
+                "p_ator_id": str(ator_id),
+                "p_codigo": codigo,
+                "p_nome": nome,
+            },
+        )
+
+    def listar_convites(self, ator_id: UUID) -> list[dict[str, Any]]:
+        dados = self._rpc_json(
+            "listar_convites_administracao",
+            {"p_ator_id": str(ator_id)},
+        )
+        return _validar_lista_controle(dados)
+
+    def criar_convites_lote(
+        self,
+        *,
+        ator_id: UUID,
+        emails: list[str],
+        papel_destino: str,
+        acesso_destino: str,
+        analises_iniciais: int | None,
+        turma_id: UUID | None,
+        dias_validade: int,
+    ) -> dict[str, Any]:
+        return self._rpc(
+            "criar_convites_em_lote",
+            {
+                "p_ator_id": str(ator_id),
+                "p_emails": emails,
+                "p_papel_destino": papel_destino,
+                "p_acesso_destino": acesso_destino,
+                "p_analises_iniciais": analises_iniciais,
+                "p_turma_id": str(turma_id) if turma_id else None,
+                "p_dias_validade": dias_validade,
+            },
+        )
+
+    def cancelar_convite(
+        self,
+        *,
+        ator_id: UUID,
+        convite_id: UUID,
+    ) -> dict[str, Any]:
+        return self._rpc(
+            "cancelar_convite",
+            {
+                "p_ator_id": str(ator_id),
+                "p_convite_id": str(convite_id),
+            },
+        )
+
+    def enviar_email_acesso(
+        self,
+        *,
+        email: str,
+        tipo: str,
+    ) -> None:
+        caminho: str
+        corpo: dict[str, Any]
+        if tipo == "convite":
+            caminho = "/auth/v1/invite"
+            corpo = {"email": email}
+        elif tipo == "confirmacao":
+            caminho = "/auth/v1/resend"
+            corpo = {"email": email, "type": "signup"}
+        elif tipo == "magic_link":
+            caminho = "/auth/v1/otp"
+            corpo = {"email": email, "create_user": False}
+        else:
+            raise ErroAPI(
+                status_code=422,
+                codigo="TIPO_EMAIL_INVALIDO",
+                mensagem="O tipo de convite solicitado é inválido.",
+            )
+
+        consulta = ""
+        if self._configuracao.url_aplicativo:
+            consulta = "?" + urlencode(
+                {"redirect_to": self._configuracao.url_aplicativo}
+            )
+
+        try:
+            resposta = self._http.post(
+                f"{self._configuracao.url}{caminho}{consulta}",
+                headers={
+                    "apikey": self._configuracao.chave_secreta,
+                    "Authorization": (
+                        f"Bearer {self._configuracao.chave_secreta}"
+                    ),
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                },
+                json=corpo,
+            )
+        except httpx2.HTTPError as erro:
+            raise _erro_email_convite() from erro
+
+        if resposta.status_code >= 400:
+            raise _erro_email_convite()
+
     def _rpc(
         self,
         funcao: str,
@@ -357,6 +525,24 @@ def _erro_resposta_controle_invalida() -> ErroAPI:
     )
 
 
+def _validar_lista_controle(dados: Any) -> list[dict[str, Any]]:
+    if not isinstance(dados, list) or not all(
+        isinstance(item, dict) for item in dados
+    ):
+        raise _erro_resposta_controle_invalida()
+    return dados
+
+
+def _erro_email_convite() -> ErroAPI:
+    return ErroAPI(
+        status_code=502,
+        codigo="EMAIL_CONVITE_NAO_ENVIADO",
+        mensagem=(
+            "O acesso foi preparado, mas o e-mail não pôde ser enviado."
+        ),
+    )
+
+
 def _traduzir_erro_rpc(resposta: Any) -> ErroAPI:
     try:
         corpo = resposta.json()
@@ -383,6 +569,12 @@ def _traduzir_erro_rpc(resposta: Any) -> ErroAPI:
             codigo="USUARIO_NAO_ENCONTRADO",
             mensagem="O usuário selecionado não foi encontrado.",
         )
+    if "convite não encontrado" in normalizada:
+        return ErroAPI(
+            status_code=404,
+            codigo="CONVITE_NAO_ENCONTRADO",
+            mensagem="O convite selecionado não foi encontrado.",
+        )
     if (
         "não pode administrar esse usuário" in normalizada
         or "master não pode ser alterado" in normalizada
@@ -396,6 +588,11 @@ def _traduzir_erro_rpc(resposta: Any) -> ErroAPI:
     if (
         "quantidade" in normalizada
         or "saldo" in normalizada
+        or "email" in normalizada
+        or "convite" in normalizada
+        or "validade" in normalizada
+        or "código de turma" in normalizada
+        or "nome de turma" in normalizada
         or "tipo de acesso" in normalizada
         or "papel de destino" in normalizada
         or "operação de cota" in normalizada

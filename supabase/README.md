@@ -19,7 +19,11 @@ do provedor de autenticação.
 2. `202607220002_cadastro_e_bootstrap.sql`: sincronização do Auth, aceite de
    convites após a confirmação do email e bootstrap do primeiro master;
 3. `202607220003_cotas_atomicas.sql`: reserva idempotente, consumo, estorno e
-   expiração de análises.
+   expiração de análises;
+4. `202607230001_admin_usuarios_cotas.sql`: administração segura de contas,
+   papéis e cotas;
+5. `202607230002_turmas_convites.sql`: turmas, convites em lote, perfil e cota
+   inicial aplicados após a confirmação do endereço.
 
 Cadastros sem convite entram como `aguardando_aprovacao`. Um convite válido
 só é aceito quando o mesmo endereço aparece confirmado no Supabase Auth.
@@ -38,6 +42,17 @@ Usuários comuns também precisam estar matriculados em uma turma ativa.
 Essas operações usam bloqueios transacionais no PostgreSQL e só podem ser
 executadas pelo `service_role` mantido no backend. A chave correspondente
 nunca pode ser enviada ao Flutter.
+
+## Envio dos convites
+
+A API cria primeiro a autorização auditada no banco e depois solicita o envio
+ao Supabase Auth. Configure `APP_PUBLIC_URL` no servidor para que o link do
+email leve à versão publicada do aplicativo. Em desenvolvimento, o valor pode
+ser `http://localhost:3000`.
+
+Para uso com turmas reais, configure um SMTP próprio no painel do Supabase.
+A chave SMTP e a `SUPABASE_SECRET_KEY` pertencem somente ao ambiente do
+backend; nenhuma delas entra no `mobile/config/dev.json`.
 
 ## Validação futura
 

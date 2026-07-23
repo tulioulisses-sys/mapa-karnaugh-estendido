@@ -74,6 +74,60 @@ class SolicitacaoPapelUsuario(ModeloEntrada):
     papel: Literal["usuario", "submaster"]
 
 
+class SolicitacaoTurma(ModeloEntrada):
+    codigo: str = Field(min_length=1, max_length=40)
+    nome: str = Field(min_length=1, max_length=120)
+
+
+class SolicitacaoConvitesLote(ModeloEntrada):
+    emails: list[str] = Field(min_length=1, max_length=300)
+    papel_destino: Literal["usuario", "submaster"] = "usuario"
+    acesso_destino: Literal["ilimitado", "limitado"] = "limitado"
+    analises_iniciais: int | None = Field(default=0, ge=0)
+    turma_id: UUID | None = None
+    dias_validade: int = Field(default=7, ge=1, le=30)
+
+    @field_validator("emails")
+    @classmethod
+    def normalizar_emails(cls, valores: list[str]) -> list[str]:
+        normalizados: list[str] = []
+        vistos: set[str] = set()
+        for valor in valores:
+            email = valor.strip().casefold()
+            partes = email.split("@")
+            if (
+                len(partes) != 2
+                or not partes[0]
+                or "." not in partes[1]
+                or partes[1].startswith(".")
+                or partes[1].endswith(".")
+                or any(caractere.isspace() for caractere in email)
+                or len(email) > 254
+            ):
+                raise ValueError(f"E-mail inválido: {valor}.")
+            if email not in vistos:
+                vistos.add(email)
+                normalizados.append(email)
+        if not normalizados:
+            raise ValueError("Informe pelo menos um e-mail.")
+        return normalizados
+
+    @model_validator(mode="after")
+    def validar_acesso_inicial(self) -> SolicitacaoConvitesLote:
+        if self.papel_destino == "submaster":
+            if (
+                self.acesso_destino != "ilimitado"
+                or self.analises_iniciais is not None
+            ):
+                raise ValueError("Submaster deve possuir acesso ilimitado.")
+        elif self.acesso_destino == "ilimitado":
+            if self.analises_iniciais is not None:
+                raise ValueError("O acesso ilimitado não possui saldo.")
+        elif self.analises_iniciais is None:
+            raise ValueError("Informe a cota inicial dos alunos.")
+        return self
+
+
 class DetalheErro(BaseModel):
     codigo: str
     mensagem: str

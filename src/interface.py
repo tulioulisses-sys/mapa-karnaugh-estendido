@@ -198,7 +198,7 @@ def mostrar_rodape() -> None:
 
                 <br>
 
-                Disciplina: Circuitos Fluídicos Mecânicos
+                Disciplina: Circuitos Fluido Mecânicos
 
                 <br>
 

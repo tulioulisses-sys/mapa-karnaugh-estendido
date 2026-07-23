@@ -49,3 +49,89 @@ class ResultadoCotasLote {
   final int usuariosAlterados;
   final int usuariosIgnorados;
 }
+
+class TurmaAdministrada {
+  const TurmaAdministrada({
+    required this.id,
+    required this.codigo,
+    required this.nome,
+    required this.ativa,
+    required this.quantidadeAlunos,
+  });
+
+  factory TurmaAdministrada.deJson(Map<String, dynamic> json) {
+    return TurmaAdministrada(
+      id: json['id']?.toString() ?? '',
+      codigo: json['codigo']?.toString() ?? '',
+      nome: json['nome']?.toString() ?? '',
+      ativa: json['ativa'] == true,
+      quantidadeAlunos: (json['quantidade_alunos'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  final String id;
+  final String codigo;
+  final String nome;
+  final bool ativa;
+  final int quantidadeAlunos;
+}
+
+class ConviteAdministrado {
+  const ConviteAdministrado({
+    required this.id,
+    required this.email,
+    required this.papelDestino,
+    required this.acessoDestino,
+    required this.analisesIniciais,
+    required this.turmaId,
+    required this.turmaCodigo,
+    required this.estado,
+    required this.expiraEm,
+  });
+
+  factory ConviteAdministrado.deJson(Map<String, dynamic> json) {
+    return ConviteAdministrado(
+      id: json['id']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      papelDestino: PapelUsuario.deTexto(json['papel_destino']?.toString()),
+      acessoDestino: TipoAcesso.deTexto(json['acesso_destino']?.toString()),
+      analisesIniciais: (json['analises_iniciais'] as num?)?.toInt(),
+      turmaId: json['turma_id']?.toString(),
+      turmaCodigo: json['turma_codigo']?.toString(),
+      estado: json['estado']?.toString() ?? '',
+      expiraEm: DateTime.tryParse(json['expira_em']?.toString() ?? ''),
+    );
+  }
+
+  final String id;
+  final String email;
+  final PapelUsuario papelDestino;
+  final TipoAcesso acessoDestino;
+  final int? analisesIniciais;
+  final String? turmaId;
+  final String? turmaCodigo;
+  final String estado;
+  final DateTime? expiraEm;
+
+  bool get pendente => estado == 'pendente';
+}
+
+class ResultadoConvitesLote {
+  const ResultadoConvitesLote({
+    required this.total,
+    required this.emailsEnviados,
+    required this.emailsComFalha,
+  });
+
+  factory ResultadoConvitesLote.deJson(Map<String, dynamic> json) {
+    return ResultadoConvitesLote(
+      total: (json['total'] as num?)?.toInt() ?? 0,
+      emailsEnviados: (json['emails_enviados'] as num?)?.toInt() ?? 0,
+      emailsComFalha: (json['emails_com_falha'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  final int total;
+  final int emailsEnviados;
+  final int emailsComFalha;
+}

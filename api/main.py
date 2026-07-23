@@ -25,14 +25,16 @@ from .modelos import (
     RespostaSaude,
     SolicitacaoAcessoUsuario,
     SolicitacaoAnalise,
+    SolicitacaoConvitesLote,
     SolicitacaoCotasLote,
     SolicitacaoEstadoUsuario,
     SolicitacaoPapelUsuario,
     SolicitacaoResolucao,
+    SolicitacaoTurma,
 )
 
 
-API_VERSION = "1.2.0"
+API_VERSION = "1.3.0"
 
 
 def _origens_permitidas() -> list[str]:
@@ -414,6 +416,160 @@ def alterar_papel_usuario(
         usuario_id=usuario_id,
         papel=solicitacao.papel,
     )
+
+
+@app.get(
+    "/api/v1/admin/turmas",
+    response_model=list[dict[str, Any]],
+    tags=["administração"],
+)
+def listar_turmas_administracao(
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> list[dict[str, Any]]:
+    return provedor.listar_turmas(usuario.id)
+
+
+@app.post(
+    "/api/v1/admin/turmas",
+    response_model=dict[str, Any],
+    tags=["administração"],
+)
+def criar_turma(
+    solicitacao: SolicitacaoTurma,
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> dict[str, Any]:
+    return provedor.criar_turma(
+        ator_id=usuario.id,
+        codigo=solicitacao.codigo,
+        nome=solicitacao.nome,
+    )
+
+
+@app.get(
+    "/api/v1/admin/convites",
+    response_model=list[dict[str, Any]],
+    tags=["administração"],
+)
+def listar_convites_administracao(
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> list[dict[str, Any]]:
+    return provedor.listar_convites(usuario.id)
+
+
+@app.post(
+    "/api/v1/admin/convites/lote",
+    response_model=dict[str, Any],
+    tags=["administração"],
+)
+def criar_convites_em_lote(
+    solicitacao: SolicitacaoConvitesLote,
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> dict[str, Any]:
+    resultado = provedor.criar_convites_lote(
+        ator_id=usuario.id,
+        emails=solicitacao.emails,
+        papel_destino=solicitacao.papel_destino,
+        acesso_destino=solicitacao.acesso_destino,
+        analises_iniciais=solicitacao.analises_iniciais,
+        turma_id=solicitacao.turma_id,
+        dias_validade=solicitacao.dias_validade,
+    )
+    return _enviar_emails_convites(provedor, resultado)
+
+
+@app.patch(
+    "/api/v1/admin/convites/{convite_id}/cancelar",
+    response_model=dict[str, Any],
+    tags=["administração"],
+)
+def cancelar_convite(
+    convite_id: UUID,
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> dict[str, Any]:
+    return provedor.cancelar_convite(
+        ator_id=usuario.id,
+        convite_id=convite_id,
+    )
+
+
+def _enviar_emails_convites(
+    provedor: ProvedorAcesso,
+    resultado: dict[str, Any],
+) -> dict[str, Any]:
+    convites_brutos = resultado.get("convites")
+    if not isinstance(convites_brutos, list):
+        raise ErroAPI(
+            status_code=503,
+            codigo="RESPOSTA_CONTROLE_ACESSO_INVALIDA",
+            mensagem="O controle de acesso retornou uma resposta inválida.",
+        )
+
+    convites: list[dict[str, Any]] = []
+    enviados = 0
+    falhas = 0
+    for bruto in convites_brutos:
+        if not isinstance(bruto, dict):
+            raise ErroAPI(
+                status_code=503,
+                codigo="RESPOSTA_CONTROLE_ACESSO_INVALIDA",
+                mensagem=(
+                    "O controle de acesso retornou uma resposta inválida."
+                ),
+            )
+        convite = dict(bruto)
+        try:
+            provedor.enviar_email_acesso(
+                email=str(convite["email"]),
+                tipo=str(convite["envio_tipo"]),
+            )
+            convite["envio_email"] = "enviado"
+            enviados += 1
+        except (KeyError, ErroAPI):
+            convite["envio_email"] = "falhou"
+            falhas += 1
+        convites.append(convite)
+
+    return {
+        **resultado,
+        "convites": convites,
+        "emails_enviados": enviados,
+        "emails_com_falha": falhas,
+    }
 
 
 def _id_reserva(reserva: dict[str, Any]) -> UUID:

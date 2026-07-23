@@ -19,6 +19,26 @@ abstract interface class ServicoAdministracao {
   });
 
   Future<void> alterarPapel(String usuarioId, PapelUsuario papel);
+
+  Future<List<TurmaAdministrada>> listarTurmas();
+
+  Future<TurmaAdministrada> criarTurma({
+    required String codigo,
+    required String nome,
+  });
+
+  Future<List<ConviteAdministrado>> listarConvites();
+
+  Future<ResultadoConvitesLote> convidarEmLote({
+    required List<String> emails,
+    required PapelUsuario papelDestino,
+    required TipoAcesso acessoDestino,
+    required int? analisesIniciais,
+    String? turmaId,
+    int diasValidade = 7,
+  });
+
+  Future<void> cancelarConvite(String conviteId);
 }
 
 class FalhaAdministracao implements Exception {

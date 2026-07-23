@@ -106,6 +106,46 @@ void main() {
     });
   });
 
+  test('envia convites em lote com turma e cota inicial', () async {
+    late http.Request recebida;
+    final cliente = MockClient((requisicao) async {
+      recebida = requisicao;
+      return http.Response(
+        jsonEncode({
+          'total': 2,
+          'emails_enviados': 2,
+          'emails_com_falha': 0,
+          'convites': <Object>[],
+        }),
+        200,
+      );
+    });
+    final servico = ServicoAdministracaoApi(
+      apiBaseUrl: 'http://localhost:8000',
+      autenticacao: _AutenticacaoFake(),
+      cliente: cliente,
+    );
+
+    final resultado = await servico.convidarEmLote(
+      emails: ['aluno1@ufpe.br', 'aluno2@ufpe.br'],
+      papelDestino: PapelUsuario.usuario,
+      acessoDestino: TipoAcesso.limitado,
+      analisesIniciais: 3,
+      turmaId: 'turma-1',
+    );
+
+    expect(resultado.emailsEnviados, 2);
+    expect(recebida.url.path, '/api/v1/admin/convites/lote');
+    expect(jsonDecode(recebida.body), {
+      'emails': ['aluno1@ufpe.br', 'aluno2@ufpe.br'],
+      'papel_destino': 'usuario',
+      'acesso_destino': 'limitado',
+      'analises_iniciais': 3,
+      'turma_id': 'turma-1',
+      'dias_validade': 7,
+    });
+  });
+
   test('preserva mensagem segura da API administrativa', () async {
     final cliente = MockClient(
       (_) async => http.Response(

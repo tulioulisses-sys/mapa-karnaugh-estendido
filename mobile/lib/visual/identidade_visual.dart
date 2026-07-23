@@ -360,7 +360,7 @@ class RodapeUfpe extends StatelessWidget {
                 );
                 const descricao = Text(
                   'Universidade Federal de Pernambuco\n'
-                  'Engenharia Mecânica · Circuitos Fluídicos Mecânicos\n'
+                  'Engenharia Mecânica · Circuitos Fluido Mecânicos\n'
                   'Professor: Antonio Marques da Costa Soares Junior',
                   style: TextStyle(
                     color: CoresInstitucionais.textoSuave,

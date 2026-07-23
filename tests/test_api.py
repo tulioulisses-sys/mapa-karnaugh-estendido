@@ -163,6 +163,88 @@ class ProvedorAcessoFake:
         self.operacoes_admin.append(("papel", dados))
         return {"id": str(usuario_id), "papel": papel}
 
+    def listar_turmas(self, ator_id: UUID) -> list[dict[str, Any]]:
+        self.operacoes_admin.append(("listar_turmas", {"ator_id": ator_id}))
+        return [
+            {
+                "id": "c19c03e5-bbf3-4f2a-88d6-b121043f5eb8",
+                "codigo": "2026.1",
+                "nome": "Circuitos Fluido Mecânicos",
+                "ativa": True,
+                "quantidade_alunos": 0,
+            }
+        ]
+
+    def criar_turma(
+        self,
+        *,
+        ator_id: UUID,
+        codigo: str,
+        nome: str,
+    ) -> dict[str, Any]:
+        dados = {"ator_id": ator_id, "codigo": codigo, "nome": nome}
+        self.operacoes_admin.append(("criar_turma", dados))
+        return {
+            "id": "c19c03e5-bbf3-4f2a-88d6-b121043f5eb8",
+            "codigo": codigo,
+            "nome": nome,
+            "ativa": True,
+            "quantidade_alunos": 0,
+        }
+
+    def listar_convites(self, ator_id: UUID) -> list[dict[str, Any]]:
+        self.operacoes_admin.append(("listar_convites", {"ator_id": ator_id}))
+        return []
+
+    def criar_convites_lote(
+        self,
+        *,
+        ator_id: UUID,
+        emails: list[str],
+        papel_destino: str,
+        acesso_destino: str,
+        analises_iniciais: int | None,
+        turma_id: UUID | None,
+        dias_validade: int,
+    ) -> dict[str, Any]:
+        dados = {
+            "ator_id": ator_id,
+            "emails": emails,
+            "papel_destino": papel_destino,
+            "acesso_destino": acesso_destino,
+            "analises_iniciais": analises_iniciais,
+            "turma_id": turma_id,
+            "dias_validade": dias_validade,
+        }
+        self.operacoes_admin.append(("criar_convites", dados))
+        return {
+            "total": len(emails),
+            "convites": [
+                {
+                    "id": f"convite-{indice}",
+                    "email": email,
+                    "estado": "pendente",
+                    "envio_tipo": "convite",
+                }
+                for indice, email in enumerate(emails)
+            ],
+        }
+
+    def cancelar_convite(
+        self,
+        *,
+        ator_id: UUID,
+        convite_id: UUID,
+    ) -> dict[str, Any]:
+        dados = {"ator_id": ator_id, "convite_id": convite_id}
+        self.operacoes_admin.append(("cancelar_convite", dados))
+        return {"id": str(convite_id), "estado": "cancelado"}
+
+    def enviar_email_acesso(self, *, email: str, tipo: str) -> None:
+        self.operacoes_admin.append(
+            ("enviar_email", {"email": email, "tipo": tipo})
+        )
+
 
 client = TestClient(app)
 
@@ -189,7 +271,7 @@ def test_health() -> None:
 
     assert resposta.status_code == 200
     assert resposta.json()["status"] == "ok"
-    assert resposta.json()["api_version"] == "1.2.0"
+    assert resposta.json()["api_version"] == "1.3.0"
     assert resposta.headers["x-content-type-options"] == "nosniff"
 
 
@@ -352,6 +434,10 @@ def test_openapi_publica_endpoints_v1() -> None:
     assert "/api/v1/admin/usuarios/{usuario_id}/acesso" in caminhos
     assert "/api/v1/admin/usuarios/cotas-em-lote" in caminhos
     assert "/api/v1/admin/usuarios/{usuario_id}/papel" in caminhos
+    assert "/api/v1/admin/turmas" in caminhos
+    assert "/api/v1/admin/convites" in caminhos
+    assert "/api/v1/admin/convites/lote" in caminhos
+    assert "/api/v1/admin/convites/{convite_id}/cancelar" in caminhos
 
 
 def test_lista_usuarios_para_painel_admin(
@@ -437,3 +523,72 @@ def test_promove_submaster(provedor: ProvedorAcessoFake) -> None:
 
     assert resposta.status_code == 200
     assert resposta.json()["papel"] == "submaster"
+
+
+def test_cria_turma_para_convites(provedor: ProvedorAcessoFake) -> None:
+    resposta = client.post(
+        "/api/v1/admin/turmas",
+        headers=CABECALHO_LOGIN,
+        json={
+            "codigo": "2026.1",
+            "nome": "Circuitos Fluido Mecânicos",
+        },
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["codigo"] == "2026.1"
+    assert provedor.operacoes_admin[-1][0] == "criar_turma"
+
+
+def test_cria_convites_em_lote_e_envia_emails(
+    provedor: ProvedorAcessoFake,
+) -> None:
+    turma_id = "c19c03e5-bbf3-4f2a-88d6-b121043f5eb8"
+    resposta = client.post(
+        "/api/v1/admin/convites/lote",
+        headers=CABECALHO_LOGIN,
+        json={
+            "emails": [
+                "ALUNO1@UFPE.BR",
+                "aluno2@ufpe.br",
+                "aluno1@ufpe.br",
+            ],
+            "papel_destino": "usuario",
+            "acesso_destino": "limitado",
+            "analises_iniciais": 3,
+            "turma_id": turma_id,
+            "dias_validade": 7,
+        },
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["total"] == 2
+    assert resposta.json()["emails_enviados"] == 2
+    criacao = next(
+        dados
+        for operacao, dados in provedor.operacoes_admin
+        if operacao == "criar_convites"
+    )
+    assert criacao["emails"] == ["aluno1@ufpe.br", "aluno2@ufpe.br"]
+    assert criacao["analises_iniciais"] == 3
+    assert sum(
+        operacao == "enviar_email"
+        for operacao, _dados in provedor.operacoes_admin
+    ) == 2
+
+
+def test_rejeita_convite_ilimitado_com_saldo(
+    provedor: ProvedorAcessoFake,
+) -> None:
+    resposta = client.post(
+        "/api/v1/admin/convites/lote",
+        headers=CABECALHO_LOGIN,
+        json={
+            "emails": ["aluno@ufpe.br"],
+            "acesso_destino": "ilimitado",
+            "analises_iniciais": 1,
+        },
+    )
+
+    assert resposta.status_code == 422
+    assert provedor.operacoes_admin == []

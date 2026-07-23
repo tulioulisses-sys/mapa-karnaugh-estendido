@@ -54,6 +54,7 @@ def configuracao() -> ConfiguracaoSupabase:
         url="https://projeto.supabase.co/",
         chave_publicavel="sb_publishable_teste",
         chave_secreta="sb_secret_teste",
+        url_aplicativo="https://mapa.example.com/",
     )
 
 
@@ -158,6 +159,53 @@ def test_ajuste_em_lote_serializa_ids(
     )
 
     assert http.posts[0]["json"]["p_usuario_ids"] == [str(USUARIO_ID)]
+
+
+def test_convites_em_lote_serializam_perfil_turma_e_cota(
+    configuracao: ConfiguracaoSupabase,
+) -> None:
+    http = HTTPFake()
+    http.resposta_post = RespostaFake(200, {"total": 1, "convites": []})
+    cliente = ClienteSupabase(configuracao, cliente_http=http)
+
+    cliente.criar_convites_lote(
+        ator_id=USUARIO_ID,
+        emails=["aluno@ufpe.br"],
+        papel_destino="usuario",
+        acesso_destino="limitado",
+        analises_iniciais=3,
+        turma_id=USUARIO_ID,
+        dias_validade=7,
+    )
+
+    chamada = http.posts[0]
+    assert chamada["url"].endswith(
+        "/rest/v1/rpc/criar_convites_em_lote"
+    )
+    assert chamada["json"]["p_analises_iniciais"] == 3
+    assert chamada["json"]["p_turma_id"] == str(USUARIO_ID)
+
+
+def test_email_de_convite_usa_service_role_somente_no_backend(
+    configuracao: ConfiguracaoSupabase,
+) -> None:
+    http = HTTPFake()
+    http.resposta_post = RespostaFake(200, {"id": str(USUARIO_ID)})
+    cliente = ClienteSupabase(configuracao, cliente_http=http)
+
+    cliente.enviar_email_acesso(
+        email="aluno@ufpe.br",
+        tipo="convite",
+    )
+
+    chamada = http.posts[0]
+    assert chamada["url"].startswith(
+        "https://projeto.supabase.co/auth/v1/invite?"
+    )
+    assert "redirect_to=https%3A%2F%2Fmapa.example.com" in chamada["url"]
+    assert chamada["headers"]["apikey"] == "sb_secret_teste"
+    assert chamada["headers"]["Authorization"] == "Bearer sb_secret_teste"
+    assert chamada["json"] == {"email": "aluno@ufpe.br"}
 
 
 @pytest.mark.parametrize(

@@ -22,6 +22,8 @@ class TelaAdministracao extends StatefulWidget {
 
 class _TelaAdministracaoState extends State<TelaAdministracao> {
   List<UsuarioAdministrado> _usuarios = const [];
+  List<TurmaAdministrada> _turmas = const [];
+  List<ConviteAdministrado> _convites = const [];
   bool _carregando = true;
   bool _processando = false;
   String? _erro;
@@ -39,9 +41,13 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
     });
     try {
       final usuarios = await widget.servico.listarUsuarios();
+      final turmas = await widget.servico.listarTurmas();
+      final convites = await widget.servico.listarConvites();
       if (!mounted) return;
       setState(() {
         _usuarios = usuarios;
+        _turmas = turmas;
+        _convites = convites;
         _carregando = false;
       });
     } on FalhaAdministracao catch (erro) {
@@ -129,6 +135,8 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
                           'dos alunos.',
               ),
               const SizedBox(height: 18),
+              _painelConvitesTurmas(),
+              const SizedBox(height: 18),
               _ResumoAdministracao(
                 total: _usuarios.length,
                 alunos: alunos,
@@ -200,6 +208,147 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _painelConvitesTurmas() {
+    final turmasAtivas = _turmas.where((turma) => turma.ativa).toList();
+    final convitesVisiveis = _convites.take(8).toList();
+
+    return CartaoInstitucional(
+      destaque: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Turmas e convites',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Convide vários alunos de uma vez e já defina a turma, '
+            'o perfil e a quantidade inicial de análises.',
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              FilledButton.icon(
+                onPressed: _processando ? null : _abrirConviteEmLote,
+                icon: const Icon(Icons.forward_to_inbox_outlined),
+                label: const Text('Convidar por e-mail'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _processando ? null : _abrirNovaTurma,
+                icon: const Icon(Icons.group_add_outlined),
+                label: const Text('Criar turma'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Text(
+            'Turmas ativas',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          if (turmasAtivas.isEmpty)
+            const Text(
+              'Nenhuma turma criada. Crie uma turma antes de convidar '
+              'os alunos deste período.',
+              style: TextStyle(color: CoresInstitucionais.textoSuave),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: turmasAtivas
+                  .map(
+                    (turma) => Chip(
+                      avatar: const Icon(Icons.groups_outlined, size: 18),
+                      label: Text(
+                        '${turma.codigo} · ${turma.quantidadeAlunos} aluno(s)',
+                      ),
+                      tooltip: turma.nome,
+                    ),
+                  )
+                  .toList(growable: false),
+            ),
+          const Divider(height: 30),
+          Text(
+            'Convites recentes',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          if (convitesVisiveis.isEmpty)
+            const Text(
+              'Nenhum convite enviado.',
+              style: TextStyle(color: CoresInstitucionais.textoSuave),
+            )
+          else
+            ...convitesVisiveis.map(_linhaConvite),
+        ],
+      ),
+    );
+  }
+
+  Widget _linhaConvite(ConviteAdministrado convite) {
+    final cota = convite.acessoDestino == TipoAcesso.ilimitado
+        ? 'Ilimitado'
+        : '${convite.analisesIniciais ?? 0} análise(s)';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 9),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: CoresInstitucionais.fundo,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: CoresInstitucionais.borda),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.mail_outline,
+                color: CoresInstitucionais.vinho,
+              ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      convite.email,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      [
+                        _rotuloEstadoConvite(convite.estado),
+                        convite.turmaCodigo,
+                        convite.papelDestino.rotulo,
+                        cota,
+                      ].whereType<String>().join(' · '),
+                      style: const TextStyle(
+                        color: CoresInstitucionais.textoSuave,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (convite.pendente)
+                IconButton(
+                  onPressed: _processando
+                      ? null
+                      : () => _cancelarConvite(convite),
+                  tooltip: 'Cancelar convite',
+                  icon: const Icon(Icons.close),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -538,6 +687,319 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
     }, 'Cotas em lote atualizadas.');
   }
 
+  Future<void> _abrirNovaTurma() async {
+    final codigo = TextEditingController();
+    final nome = TextEditingController(text: 'Circuitos Fluido Mecânicos');
+    String? erro;
+
+    final dados = await showDialog<(String, String)>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, atualizar) => AlertDialog(
+          title: const Text('Criar turma'),
+          content: SizedBox(
+            width: 460,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: codigo,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Código ou período',
+                    hintText: 'Ex.: 2026.1',
+                  ),
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: nome,
+                  decoration: const InputDecoration(
+                    labelText: 'Nome da turma',
+                  ),
+                ),
+                if (erro != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    erro!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final codigoInformado = codigo.text.trim();
+                final nomeInformado = nome.text.trim();
+                if (codigoInformado.isEmpty || nomeInformado.isEmpty) {
+                  atualizar(() => erro = 'Preencha o código e o nome.');
+                  return;
+                }
+                Navigator.pop(context, (codigoInformado, nomeInformado));
+              },
+              child: const Text('Criar turma'),
+            ),
+          ],
+        ),
+      ),
+    );
+    codigo.dispose();
+    nome.dispose();
+    if (dados == null || !mounted) return;
+
+    await _executar(
+      () async {
+        await widget.servico.criarTurma(codigo: dados.$1, nome: dados.$2);
+      },
+      'Turma criada.',
+    );
+  }
+
+  Future<void> _abrirConviteEmLote() async {
+    final emails = TextEditingController();
+    final quantidade = TextEditingController(text: '1');
+    var papel = PapelUsuario.usuario;
+    var acesso = TipoAcesso.limitado;
+    final turmasAtivas = _turmas.where((turma) => turma.ativa).toList();
+    var turmaId = turmasAtivas.isEmpty ? '' : turmasAtivas.first.id;
+    String? erro;
+
+    final dados = await showDialog<_DadosConvite>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, atualizar) => AlertDialog(
+          title: const Text('Convidar por e-mail'),
+          content: SizedBox(
+            width: 560,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Cole os e-mails separados por espaço, vírgula, '
+                    'ponto e vírgula ou quebra de linha.',
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: emails,
+                    autofocus: true,
+                    minLines: 5,
+                    maxLines: 10,
+                    decoration: const InputDecoration(
+                      labelText: 'E-mails',
+                      hintText: 'aluno1@ufpe.br\naluno2@ufpe.br',
+                      alignLabelWithHint: true,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  DropdownButtonFormField<String>(
+                    initialValue: turmaId,
+                    decoration: const InputDecoration(
+                      labelText: 'Turma',
+                    ),
+                    items: [
+                      const DropdownMenuItem(
+                        value: '',
+                        child: Text('Sem turma'),
+                      ),
+                      ..._turmas.where((turma) => turma.ativa).map(
+                        (turma) => DropdownMenuItem(
+                          value: turma.id,
+                          child: Text('${turma.codigo} · ${turma.nome}'),
+                        ),
+                      ),
+                    ],
+                    onChanged: (valor) {
+                      atualizar(() => turmaId = valor ?? '');
+                    },
+                  ),
+                  if (widget.perfilAtual.papel == PapelUsuario.master) ...[
+                    const SizedBox(height: 14),
+                    DropdownButtonFormField<PapelUsuario>(
+                      initialValue: papel,
+                      decoration: const InputDecoration(
+                        labelText: 'Perfil',
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: PapelUsuario.usuario,
+                          child: Text('Aluno'),
+                        ),
+                        DropdownMenuItem(
+                          value: PapelUsuario.submaster,
+                          child: Text('Submaster'),
+                        ),
+                      ],
+                      onChanged: (valor) {
+                        if (valor == null) return;
+                        atualizar(() {
+                          papel = valor;
+                          if (papel == PapelUsuario.submaster) {
+                            acesso = TipoAcesso.ilimitado;
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                  if (papel == PapelUsuario.usuario) ...[
+                    const SizedBox(height: 14),
+                    SegmentedButton<TipoAcesso>(
+                      segments: const [
+                        ButtonSegment(
+                          value: TipoAcesso.limitado,
+                          label: Text('Limitado'),
+                          icon: Icon(Icons.pin_outlined),
+                        ),
+                        ButtonSegment(
+                          value: TipoAcesso.ilimitado,
+                          label: Text('Ilimitado'),
+                          icon: Icon(Icons.all_inclusive),
+                        ),
+                      ],
+                      selected: {acesso},
+                      onSelectionChanged: (selecionados) {
+                        atualizar(() => acesso = selecionados.first);
+                      },
+                    ),
+                    if (acesso == TipoAcesso.limitado) ...[
+                      const SizedBox(height: 14),
+                      TextField(
+                        controller: quantidade,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        decoration: const InputDecoration(
+                          labelText: 'Análises iniciais por aluno',
+                        ),
+                      ),
+                    ],
+                  ],
+                  if (erro != null) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      erro!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton.icon(
+              onPressed: () {
+                final lista = emails.text
+                    .split(RegExp(r'[\s,;]+'))
+                    .map((email) => email.trim().toLowerCase())
+                    .where((email) => email.isNotEmpty)
+                    .toSet()
+                    .toList(growable: false);
+                final saldo =
+                    papel == PapelUsuario.usuario &&
+                        acesso == TipoAcesso.limitado
+                    ? int.tryParse(quantidade.text)
+                    : null;
+                if (lista.isEmpty) {
+                  atualizar(() => erro = 'Informe pelo menos um e-mail.');
+                  return;
+                }
+                if (lista.length > 300) {
+                  atualizar(
+                    () => erro = 'Envie no máximo 300 convites por vez.',
+                  );
+                  return;
+                }
+                if (papel == PapelUsuario.usuario &&
+                    acesso == TipoAcesso.limitado &&
+                    saldo == null) {
+                  atualizar(() => erro = 'Informe a quantidade inicial.');
+                  return;
+                }
+                Navigator.pop(
+                  context,
+                  _DadosConvite(
+                    emails: lista,
+                    papel: papel,
+                    acesso: papel == PapelUsuario.submaster
+                        ? TipoAcesso.ilimitado
+                        : acesso,
+                    analisesIniciais: saldo,
+                    turmaId: turmaId.isEmpty ? null : turmaId,
+                  ),
+                );
+              },
+              icon: const Icon(Icons.send_outlined),
+              label: const Text('Enviar convites'),
+            ),
+          ],
+        ),
+      ),
+    );
+    emails.dispose();
+    quantidade.dispose();
+    if (dados == null || !mounted) return;
+
+    await _enviarConvites(dados);
+  }
+
+  Future<void> _enviarConvites(_DadosConvite dados) async {
+    if (_processando) return;
+    setState(() => _processando = true);
+    try {
+      final resultado = await widget.servico.convidarEmLote(
+        emails: dados.emails,
+        papelDestino: dados.papel,
+        acessoDestino: dados.acesso,
+        analisesIniciais: dados.analisesIniciais,
+        turmaId: dados.turmaId,
+      );
+      await _carregar();
+      if (!mounted) return;
+      final mensagem = resultado.emailsComFalha == 0
+          ? '${resultado.emailsEnviados} convite(s) enviado(s).'
+          : '${resultado.emailsEnviados} enviado(s) e '
+                '${resultado.emailsComFalha} com falha de e-mail.';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(mensagem)));
+    } on FalhaAdministracao catch (erro) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(erro.mensagem)));
+    } finally {
+      if (mounted) setState(() => _processando = false);
+    }
+  }
+
+  Future<void> _cancelarConvite(ConviteAdministrado convite) async {
+    final confirmou = await _confirmar(
+      titulo: 'Cancelar convite?',
+      mensagem: '${convite.email} não poderá mais aceitar este convite.',
+      rotuloConfirmacao: 'Cancelar convite',
+    );
+    if (confirmou != true || !mounted) return;
+    await _executar(
+      () => widget.servico.cancelarConvite(convite.id),
+      'Convite cancelado.',
+    );
+  }
+
   Future<bool?> _confirmar({
     required String titulo,
     required String mensagem,
@@ -561,6 +1023,22 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
       ),
     );
   }
+}
+
+class _DadosConvite {
+  const _DadosConvite({
+    required this.emails,
+    required this.papel,
+    required this.acesso,
+    required this.analisesIniciais,
+    required this.turmaId,
+  });
+
+  final List<String> emails;
+  final PapelUsuario papel;
+  final TipoAcesso acesso;
+  final int? analisesIniciais;
+  final String? turmaId;
 }
 
 class _ResumoAdministracao extends StatelessWidget {
@@ -731,6 +1209,14 @@ String _rotuloEstado(EstadoConta estado) => switch (estado) {
   EstadoConta.ativo => 'Ativo',
   EstadoConta.suspenso => 'Suspenso',
   EstadoConta.revogado => 'Acesso removido',
+};
+
+String _rotuloEstadoConvite(String estado) => switch (estado) {
+  'pendente' => 'Pendente',
+  'aceito' => 'Aceito',
+  'expirado' => 'Expirado',
+  'cancelado' => 'Cancelado',
+  _ => estado,
 };
 
 String _rotuloAcesso(UsuarioAdministrado usuario) {

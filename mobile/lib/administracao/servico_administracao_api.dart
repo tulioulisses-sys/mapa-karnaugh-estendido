@@ -95,6 +95,92 @@ class ServicoAdministracaoApi implements ServicoAdministracao {
     );
   }
 
+  @override
+  Future<List<TurmaAdministrada>> listarTurmas() async {
+    final dados = await _requisitar('GET', '/api/v1/admin/turmas');
+    if (dados is! List) throw _respostaInvalida();
+
+    try {
+      return dados
+          .map(
+            (item) => TurmaAdministrada.deJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(growable: false);
+    } on Object {
+      throw _respostaInvalida();
+    }
+  }
+
+  @override
+  Future<TurmaAdministrada> criarTurma({
+    required String codigo,
+    required String nome,
+  }) async {
+    final dados = await _requisitar('POST', '/api/v1/admin/turmas', {
+      'codigo': codigo,
+      'nome': nome,
+    });
+    if (dados is! Map) throw _respostaInvalida();
+    return TurmaAdministrada.deJson(Map<String, dynamic>.from(dados));
+  }
+
+  @override
+  Future<List<ConviteAdministrado>> listarConvites() async {
+    final dados = await _requisitar('GET', '/api/v1/admin/convites');
+    if (dados is! List) throw _respostaInvalida();
+
+    try {
+      return dados
+          .map(
+            (item) => ConviteAdministrado.deJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(growable: false);
+    } on Object {
+      throw _respostaInvalida();
+    }
+  }
+
+  @override
+  Future<ResultadoConvitesLote> convidarEmLote({
+    required List<String> emails,
+    required PapelUsuario papelDestino,
+    required TipoAcesso acessoDestino,
+    required int? analisesIniciais,
+    String? turmaId,
+    int diasValidade = 7,
+  }) async {
+    final dados = await _requisitar(
+      'POST',
+      '/api/v1/admin/convites/lote',
+      {
+        'emails': emails,
+        'papel_destino': papelDestino == PapelUsuario.submaster
+            ? 'submaster'
+            : 'usuario',
+        'acesso_destino': acessoDestino == TipoAcesso.ilimitado
+            ? 'ilimitado'
+            : 'limitado',
+        'analises_iniciais': analisesIniciais,
+        'turma_id': turmaId,
+        'dias_validade': diasValidade,
+      },
+    );
+    if (dados is! Map) throw _respostaInvalida();
+    return ResultadoConvitesLote.deJson(Map<String, dynamic>.from(dados));
+  }
+
+  @override
+  Future<void> cancelarConvite(String conviteId) async {
+    await _requisitar(
+      'PATCH',
+      '/api/v1/admin/convites/$conviteId/cancelar',
+    );
+  }
+
   Future<Object?> _requisitar(
     String metodo,
     String caminho, [

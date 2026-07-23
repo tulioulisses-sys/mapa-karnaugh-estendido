@@ -75,6 +75,57 @@ class _AdministracaoFake implements ServicoAdministracao {
   ) async {
     operacoes.add('acesso:$usuarioId:${acesso.name}:$analisesRestantes');
   }
+
+  @override
+  Future<List<TurmaAdministrada>> listarTurmas() async => const [
+    TurmaAdministrada(
+      id: 'turma-1',
+      codigo: '2026.1',
+      nome: 'Circuitos Fluido Mecânicos',
+      ativa: true,
+      quantidadeAlunos: 0,
+    ),
+  ];
+
+  @override
+  Future<TurmaAdministrada> criarTurma({
+    required String codigo,
+    required String nome,
+  }) async {
+    operacoes.add('turma:$codigo:$nome');
+    return TurmaAdministrada(
+      id: 'turma-2',
+      codigo: codigo,
+      nome: nome,
+      ativa: true,
+      quantidadeAlunos: 0,
+    );
+  }
+
+  @override
+  Future<List<ConviteAdministrado>> listarConvites() async => const [];
+
+  @override
+  Future<ResultadoConvitesLote> convidarEmLote({
+    required List<String> emails,
+    required PapelUsuario papelDestino,
+    required TipoAcesso acessoDestino,
+    required int? analisesIniciais,
+    String? turmaId,
+    int diasValidade = 7,
+  }) async {
+    operacoes.add('convites:${emails.length}:$analisesIniciais:$turmaId');
+    return ResultadoConvitesLote(
+      total: emails.length,
+      emailsEnviados: emails.length,
+      emailsComFalha: 0,
+    );
+  }
+
+  @override
+  Future<void> cancelarConvite(String conviteId) async {
+    operacoes.add('cancelar-convite:$conviteId');
+  }
 }
 
 const _perfilMaster = PerfilUsuario(
@@ -108,6 +159,8 @@ void main() {
     expect(find.text('Aguardando aprovação'), findsOneWidget);
     expect(find.text('Aprovar'), findsOneWidget);
     expect(find.text('Tornar submaster'), findsOneWidget);
+    expect(find.text('Convidar por e-mail'), findsOneWidget);
+    expect(find.text('Criar turma'), findsOneWidget);
   });
 
   testWidgets('master aprova cadastro pendente', (tester) async {
