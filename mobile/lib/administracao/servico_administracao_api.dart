@@ -69,11 +69,13 @@ class ServicoAdministracaoApi implements ServicoAdministracao {
   Future<ResultadoCotasLote> ajustarCotasEmLote({
     required bool adicionar,
     required int quantidade,
+    required String turmaId,
     List<String>? usuarioIds,
   }) async {
     final corpo = <String, dynamic>{
       'operacao': adicionar ? 'adicionar' : 'definir',
       'quantidade': quantidade,
+      'turma_id': turmaId,
     };
     if (usuarioIds != null) corpo['usuario_ids'] = usuarioIds;
 
@@ -186,6 +188,47 @@ class ServicoAdministracaoApi implements ServicoAdministracao {
     });
     if (dados is! Map) throw _respostaInvalida();
     return TurmaAdministrada.deJson(Map<String, dynamic>.from(dados));
+  }
+
+  @override
+  Future<ResultadoEncerramentoTurma> encerrarTurma({
+    required String turmaId,
+    required EstadoConta estadoUsuarios,
+  }) async {
+    final dados = await _requisitar(
+      'PATCH',
+      '/api/v1/admin/turmas/$turmaId/encerrar',
+      {
+        'estado_usuarios': estadoUsuarios == EstadoConta.revogado
+            ? 'revogado'
+            : 'suspenso',
+      },
+    );
+    if (dados is! Map) throw _respostaInvalida();
+    return ResultadoEncerramentoTurma.deJson(
+      Map<String, dynamic>.from(dados),
+    );
+  }
+
+  @override
+  Future<List<RegistroAuditoria>> listarAuditoria({int limite = 80}) async {
+    final dados = await _requisitar(
+      'GET',
+      '/api/v1/admin/auditoria?limite=$limite',
+    );
+    if (dados is! List) throw _respostaInvalida();
+
+    try {
+      return dados
+          .map(
+            (item) => RegistroAuditoria.deJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(growable: false);
+    } on Object {
+      throw _respostaInvalida();
+    }
   }
 
   @override

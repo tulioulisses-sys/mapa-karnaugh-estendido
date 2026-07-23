@@ -105,7 +105,7 @@ st.title("Sobre o método")
 st.markdown(
     """
     O **Método do Mapa de Karnaugh Estendido** é uma técnica utilizada
-    no projeto de comandos para sistemas sequenciais fluídicos, como
+    no projeto de comandos para circuitos fluido mecânicos, como
     circuitos pneumáticos, eletropneumáticos e hidráulicos.
 
     O método parte da sequência de movimentos desejada para os atuadores
@@ -313,7 +313,7 @@ st.header("Materiais de referência e apoio")
 st.write(
     """
     Os materiais abaixo apresentam a fundamentação do método, exemplos de
-    aplicação em sistemas sequenciais fluídicos e orientações para utilizar
+    aplicação em circuitos fluido mecânicos e orientações para utilizar
     a plataforma.
     """
 )
@@ -344,7 +344,8 @@ with coluna_2:
             titulo="Artigo sobre o método",
             descricao=(
                 "Documento que apresenta o método de projeto ótimo para "
-                "circuitos sequenciais fluídicos e discute a utilização "
+                "circuitos sequenciais fluido mecânicos e discute a "
+                "utilização "
                 "de memórias e a obtenção das equações de comando."
             ),
             caminho=CAMINHO_ARTIGO,

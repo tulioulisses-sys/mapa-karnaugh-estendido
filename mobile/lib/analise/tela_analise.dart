@@ -130,8 +130,8 @@ class _TelaAnaliseState extends State<TelaAnalise> {
                     const CabecalhoInstitucional(
                       sobretitulo: 'UFPE · Engenharia Mecânica',
                       titulo:
-                          'Resolução das Equações de Comando de Sistemas '
-                          'Fluídicos Utilizando o Método do Mapa de '
+                          'Resolução das Equações de Comando de Circuitos '
+                          'Fluido Mecânicos Utilizando o Método do Mapa de '
                           'Karnaugh Estendido',
                       descricao:
                           'Informe a sequência de movimentos para determinar as '

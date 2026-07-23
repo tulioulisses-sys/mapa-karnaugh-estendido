@@ -24,6 +24,7 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
   List<UsuarioAdministrado> _usuarios = const [];
   List<TurmaAdministrada> _turmas = const [];
   List<ConviteAdministrado> _convites = const [];
+  List<RegistroAuditoria> _auditoria = const [];
   TransferenciaMaster? _transferenciaMaster;
   bool _carregando = true;
   bool _processando = false;
@@ -44,12 +45,14 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
       final usuarios = await widget.servico.listarUsuarios();
       final turmas = await widget.servico.listarTurmas();
       final convites = await widget.servico.listarConvites();
+      final auditoria = await widget.servico.listarAuditoria();
       final transferencia = await widget.servico.obterTransferenciaMaster();
       if (!mounted) return;
       setState(() {
         _usuarios = usuarios;
         _turmas = turmas;
         _convites = convites;
+        _auditoria = auditoria;
         _transferenciaMaster = transferencia;
         _carregando = false;
       });
@@ -151,7 +154,7 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
                 submasters: submasters,
               ),
               const SizedBox(height: 18),
-              _painelLote(alunos),
+              _painelLote(),
               const SizedBox(height: 18),
               Text(
                 'Contas cadastradas',
@@ -169,6 +172,8 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
                     child: _cartaoUsuario(usuario),
                   ),
                 ),
+              const SizedBox(height: 6),
+              _painelAuditoria(),
               const SizedBox(height: 12),
               const RodapeUfpe(),
             ],
@@ -254,7 +259,12 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
     );
   }
 
-  Widget _painelLote(int quantidadeAlunos) {
+  Widget _painelLote() {
+    final turmasAtivas = _turmas.where((turma) => turma.ativa).toList();
+    final quantidadeAlunos = turmasAtivas.fold<int>(
+      0,
+      (total, turma) => total + turma.quantidadeAlunos,
+    );
     return CartaoInstitucional(
       destaque: true,
       child: Column(
@@ -266,8 +276,9 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
           ),
           const SizedBox(height: 6),
           Text(
-            'A operação alcança todas as contas de alunos não removidas '
-            '($quantidadeAlunos cadastrada(s)).',
+            'Escolha uma turma para definir ou adicionar análises sem '
+            'afetar estudantes de períodos anteriores '
+            '($quantidadeAlunos matrícula(s) ativa(s)).',
           ),
           const SizedBox(height: 16),
           Wrap(
@@ -275,14 +286,14 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
             runSpacing: 10,
             children: [
               FilledButton.tonalIcon(
-                onPressed: _processando || quantidadeAlunos == 0
+                onPressed: _processando || turmasAtivas.isEmpty
                     ? null
                     : () => _ajustarLote(adicionar: false),
                 icon: const Icon(Icons.tune),
                 label: const Text('Definir para todos'),
               ),
               OutlinedButton.icon(
-                onPressed: _processando || quantidadeAlunos == 0
+                onPressed: _processando || turmasAtivas.isEmpty
                     ? null
                     : () => _ajustarLote(adicionar: true),
                 icon: const Icon(Icons.exposure_plus_1),
@@ -343,24 +354,18 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
               style: TextStyle(color: CoresInstitucionais.textoSuave),
             )
           else
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: turmasAtivas
-                  .map<Widget>(
-                    (turma) => Tooltip(
-                      message: turma.nome,
-                      child: Chip(
-                        avatar: const Icon(Icons.groups_outlined, size: 18),
-                        label: Text(
-                          '${turma.codigo} · '
-                          '${turma.quantidadeAlunos} aluno(s)',
-                        ),
-                      ),
-                    ),
-                  )
-                  .toList(growable: false),
+            ...turmasAtivas.map(_linhaTurmaAtiva),
+          if (_turmas.any((turma) => !turma.ativa)) ...[
+            const SizedBox(height: 12),
+            Text(
+              'Encerradas: ${_turmas.where((turma) => !turma.ativa).map(
+                    (turma) => turma.codigo,
+                  ).join(', ')}',
+              style: const TextStyle(
+                color: CoresInstitucionais.textoSuave,
+              ),
             ),
+          ],
           const Divider(height: 30),
           Text(
             'Convites recentes',
@@ -375,6 +380,51 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
           else
             ...convitesVisiveis.map(_linhaConvite),
         ],
+      ),
+    );
+  }
+
+  Widget _linhaTurmaAtiva(TurmaAdministrada turma) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 9),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+        decoration: BoxDecoration(
+          color: CoresInstitucionais.creme,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: CoresInstitucionais.borda),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.groups_outlined,
+              color: CoresInstitucionais.vinho,
+            ),
+            const SizedBox(width: 11),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${turma.codigo} · ${turma.nome}',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  Text(
+                    '${turma.quantidadeAlunos} aluno(s) com matrícula ativa',
+                    style: const TextStyle(
+                      color: CoresInstitucionais.textoSuave,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            TextButton.icon(
+              onPressed: _processando ? null : () => _encerrarTurma(turma),
+              icon: const Icon(Icons.archive_outlined),
+              label: const Text('Encerrar'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -434,6 +484,104 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
                 ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _painelAuditoria() {
+    final registros = _auditoria.take(30).toList();
+    return CartaoInstitucional(
+      destaque: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.history_outlined,
+                color: CoresInstitucionais.vinho,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Histórico administrativo',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Registro permanente das alterações de usuários, turmas, '
+            'convites, cotas e controle master.',
+          ),
+          const SizedBox(height: 16),
+          if (registros.isEmpty)
+            const Text(
+              'Nenhuma operação administrativa registrada.',
+              style: TextStyle(color: CoresInstitucionais.textoSuave),
+            )
+          else
+            ...registros.map(_linhaAuditoria),
+          if (_auditoria.length > registros.length)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                'Exibindo as ${registros.length} operações mais recentes.',
+                style: const TextStyle(
+                  color: CoresInstitucionais.textoSuave,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _linhaAuditoria(RegistroAuditoria registro) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 9),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+        decoration: BoxDecoration(
+          color: CoresInstitucionais.creme,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: CoresInstitucionais.borda),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              _iconeAuditoria(registro.acao),
+              size: 21,
+              color: CoresInstitucionais.vinho,
+            ),
+            const SizedBox(width: 11),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _rotuloAcaoAuditoria(registro.acao),
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _descricaoAuditoria(registro),
+                    style: const TextStyle(
+                      color: CoresInstitucionais.textoSuave,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    _atorEData(registro),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -715,60 +863,87 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
   }
 
   Future<void> _ajustarLote({required bool adicionar}) async {
+    final turmasAtivas = _turmas.where((turma) => turma.ativa).toList();
+    if (turmasAtivas.isEmpty) return;
     final controlador = TextEditingController(text: '1');
-    final quantidade = await showDialog<int>(
+    var turmaId = turmasAtivas.first.id;
+    final dados = await showDialog<(int, String)>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          adicionar
-              ? 'Adicionar análises para todos'
-              : 'Definir análises para todos',
+      builder: (context) => StatefulBuilder(
+        builder: (context, atualizar) => AlertDialog(
+          title: Text(
+            adicionar
+                ? 'Adicionar análises para a turma'
+                : 'Definir análises para a turma',
+          ),
+          content: SizedBox(
+            width: 440,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  adicionar
+                      ? 'A quantidade será somada ao saldo atual de cada '
+                            'aluno da turma selecionada.'
+                      : 'O saldo atual de cada aluno da turma selecionada '
+                            'será substituído.',
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: turmaId,
+                  decoration: const InputDecoration(labelText: 'Turma'),
+                  items: turmasAtivas
+                      .map(
+                        (turma) => DropdownMenuItem(
+                          value: turma.id,
+                          child: Text(
+                            '${turma.codigo} · '
+                            '${turma.quantidadeAlunos} aluno(s)',
+                          ),
+                        ),
+                      )
+                      .toList(growable: false),
+                  onChanged: (valor) {
+                    if (valor != null) atualizar(() => turmaId = valor);
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: controlador,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: const InputDecoration(labelText: 'Quantidade'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final valor = int.tryParse(controlador.text);
+                if (valor == null || (adicionar && valor < 1)) return;
+                Navigator.pop(context, (valor, turmaId));
+              },
+              child: const Text('Confirmar'),
+            ),
+          ],
         ),
-        content: SizedBox(
-          width: 420,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                adicionar
-                    ? 'A quantidade será somada ao saldo atual de cada aluno.'
-                    : 'O saldo atual de cada aluno será substituído.',
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: controlador,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: const InputDecoration(labelText: 'Quantidade'),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () {
-              final valor = int.tryParse(controlador.text);
-              if (valor == null || (adicionar && valor < 1)) return;
-              Navigator.pop(context, valor);
-            },
-            child: const Text('Confirmar'),
-          ),
-        ],
       ),
     );
     controlador.dispose();
-    if (quantidade == null) return;
+    if (dados == null) return;
     if (!mounted) return;
 
     await _executar(() async {
       await widget.servico.ajustarCotasEmLote(
         adicionar: adicionar,
-        quantidade: quantidade,
+        quantidade: dados.$1,
+        turmaId: dados.$2,
       );
     }, 'Cotas em lote atualizadas.');
   }
@@ -845,6 +1020,119 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
         await widget.servico.criarTurma(codigo: dados.$1, nome: dados.$2);
       },
       'Turma criada.',
+    );
+  }
+
+  Future<void> _encerrarTurma(TurmaAdministrada turma) async {
+    final confirmacao = TextEditingController();
+    var estado = EstadoConta.suspenso;
+    String? erro;
+
+    final estadoEscolhido = await showDialog<EstadoConta>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, atualizar) => AlertDialog(
+          title: Text('Encerrar ${turma.codigo}?'),
+          content: SizedBox(
+            width: 510,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'A turma será arquivada, as matrículas serão encerradas '
+                    'e os convites pendentes serão cancelados. O histórico '
+                    'será preservado.',
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('O que deve acontecer com os alunos?'),
+                  const SizedBox(height: 8),
+                  SegmentedButton<EstadoConta>(
+                    segments: const [
+                      ButtonSegment(
+                        value: EstadoConta.suspenso,
+                        label: Text('Suspender'),
+                        icon: Icon(Icons.pause_circle_outline),
+                      ),
+                      ButtonSegment(
+                        value: EstadoConta.revogado,
+                        label: Text('Remover acessos'),
+                        icon: Icon(Icons.person_remove_outlined),
+                      ),
+                    ],
+                    selected: {estado},
+                    onSelectionChanged: (selecionados) {
+                      atualizar(() => estado = selecionados.first);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    estado == EstadoConta.revogado
+                        ? 'A remoção bloqueia definitivamente as contas '
+                              'desta turma. Elas só voltarão se um '
+                              'administrador conceder novo acesso.'
+                        : 'A suspensão é reversível e bloqueia as análises '
+                              'até uma aprovação individual posterior.',
+                    style: const TextStyle(
+                      color: CoresInstitucionais.textoSuave,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: confirmacao,
+                    decoration: InputDecoration(
+                      labelText: 'Digite ${turma.codigo} para confirmar',
+                    ),
+                  ),
+                  if (erro != null) ...[
+                    const SizedBox(height: 9),
+                    Text(
+                      erro!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton.icon(
+              onPressed: () {
+                if (confirmacao.text.trim() != turma.codigo) {
+                  atualizar(
+                    () => erro = 'Digite exatamente ${turma.codigo}.',
+                  );
+                  return;
+                }
+                Navigator.pop(context, estado);
+              },
+              icon: const Icon(Icons.archive_outlined),
+              label: const Text('Encerrar turma'),
+            ),
+          ],
+        ),
+      ),
+    );
+    confirmacao.dispose();
+    if (estadoEscolhido == null || !mounted) return;
+
+    await _executar(
+      () async {
+        await widget.servico.encerrarTurma(
+          turmaId: turma.id,
+          estadoUsuarios: estadoEscolhido,
+        );
+      },
+      estadoEscolhido == EstadoConta.revogado
+          ? 'Turma encerrada e acessos dos alunos removidos.'
+          : 'Turma encerrada e alunos suspensos.',
     );
   }
 
@@ -1484,6 +1772,84 @@ String _rotuloEstadoConvite(String estado) => switch (estado) {
   'cancelado' => 'Cancelado',
   _ => estado,
 };
+
+IconData _iconeAuditoria(String acao) {
+  if (acao.contains('transferencia_master') || acao == 'bootstrap_master') {
+    return Icons.workspace_premium_outlined;
+  }
+  if (acao.contains('turma')) return Icons.groups_outlined;
+  if (acao.contains('convite')) return Icons.mail_outline;
+  if (acao.contains('cota') || acao.contains('analise')) {
+    return Icons.analytics_outlined;
+  }
+  if (acao.contains('papel')) return Icons.admin_panel_settings_outlined;
+  return Icons.manage_accounts_outlined;
+}
+
+String _rotuloAcaoAuditoria(String acao) => switch (acao) {
+  'cadastro_criado' => 'Conta cadastrada',
+  'convite_aceito' => 'Convite aceito',
+  'bootstrap_master' => 'Primeiro master definido',
+  'alterar_estado_usuario' => 'Estado da conta alterado',
+  'definir_acesso_usuario' => 'Acesso individual ajustado',
+  'ajustar_cota_em_lote' => 'Cota da turma ajustada',
+  'alterar_papel_usuario' => 'Papel do usuário alterado',
+  'criar_turma' => 'Turma criada',
+  'encerrar_turma' => 'Turma encerrada',
+  'encerrar_turma_usuario' => 'Acesso encerrado com a turma',
+  'criar_convite' => 'Convite enviado',
+  'cancelar_convite' => 'Convite cancelado',
+  'iniciar_transferencia_master' => 'Transferência master iniciada',
+  'cancelar_transferencia_master' => 'Transferência master cancelada',
+  'aceitar_transferencia_master' => 'Transferência master concluída',
+  'analise_reservada' => 'Análise reservada',
+  'analise_consumida' => 'Análise concluída',
+  'analise_estornada' => 'Análise estornada',
+  'reserva_expirada' => 'Reserva de análise expirada',
+  _ => acao.replaceAll('_', ' '),
+};
+
+String _descricaoAuditoria(RegistroAuditoria registro) {
+  final depois = registro.valorPosterior ?? const <String, dynamic>{};
+  final antes = registro.valorAnterior ?? const <String, dynamic>{};
+  final email = depois['email'] ?? antes['email'];
+  final codigo = depois['codigo'] ?? antes['codigo'];
+  final estado = depois['estado'];
+  final papel = depois['papel'];
+  final saldo = depois['analises_restantes'];
+
+  if (registro.acao == 'encerrar_turma') {
+    final alterados = depois['usuarios_alterados'] ?? 0;
+    return '${codigo ?? 'Turma'} · $alterados aluno(s) alterado(s)';
+  }
+  if (registro.acao.contains('convite') && email != null) {
+    return email.toString();
+  }
+  if (registro.acao.contains('transferencia_master')) {
+    final destino = depois['email_destino'] ?? depois['master_email'];
+    return destino?.toString() ?? 'Controle master';
+  }
+  if (registro.acao.contains('cota') || registro.acao.contains('analise')) {
+    return saldo == null ? 'Acesso ilimitado' : 'Saldo após a operação: $saldo';
+  }
+  if (email != null && estado != null) {
+    return '$email · ${estado.toString().replaceAll('_', ' ')}';
+  }
+  if (estado != null) {
+    return 'Novo estado: ${estado.toString().replaceAll('_', ' ')}';
+  }
+  if (papel != null) {
+    return 'Novo papel: ${papel.toString()}';
+  }
+  if (codigo != null) return codigo.toString();
+  return 'Registro de ${registro.entidade.replaceAll('_', ' ')}';
+}
+
+String _atorEData(RegistroAuditoria registro) {
+  final ator = registro.atorEmail ?? 'Sistema';
+  final data = registro.criadaEm;
+  return data == null ? ator : '$ator · ${_formatarData(data)}';
+}
 
 String _rotuloAcesso(UsuarioAdministrado usuario) {
   if (usuario.acesso == TipoAcesso.ilimitado) return 'Ilimitado';

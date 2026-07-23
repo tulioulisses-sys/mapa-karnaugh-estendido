@@ -61,6 +61,7 @@ class SolicitacaoAcessoUsuario(ModeloEntrada):
 class SolicitacaoCotasLote(ModeloEntrada):
     operacao: Literal["definir", "adicionar"]
     quantidade: int = Field(ge=0)
+    turma_id: UUID
     usuario_ids: list[UUID] | None = Field(default=None, min_length=1)
 
     @model_validator(mode="after")
@@ -98,6 +99,10 @@ class SolicitacaoTransferenciaMaster(ModeloEntrada):
 class SolicitacaoTurma(ModeloEntrada):
     codigo: str = Field(min_length=1, max_length=40)
     nome: str = Field(min_length=1, max_length=120)
+
+
+class SolicitacaoEncerramentoTurma(ModeloEntrada):
+    estado_usuarios: Literal["suspenso", "revogado"]
 
 
 class SolicitacaoConvitesLote(ModeloEntrada):

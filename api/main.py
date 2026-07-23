@@ -4,7 +4,7 @@ import os
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -27,6 +27,7 @@ from .modelos import (
     SolicitacaoAnalise,
     SolicitacaoConvitesLote,
     SolicitacaoCotasLote,
+    SolicitacaoEncerramentoTurma,
     SolicitacaoEstadoUsuario,
     SolicitacaoPapelUsuario,
     SolicitacaoResolucao,
@@ -35,7 +36,7 @@ from .modelos import (
 )
 
 
-API_VERSION = "1.4.0"
+API_VERSION = "1.5.0"
 
 
 def _origens_permitidas() -> list[str]:
@@ -391,6 +392,7 @@ def ajustar_cotas_em_lote(
         ator_id=usuario.id,
         operacao=solicitacao.operacao,
         quantidade=solicitacao.quantidade,
+        turma_id=solicitacao.turma_id,
         usuario_ids=solicitacao.usuario_ids,
     )
 
@@ -559,6 +561,52 @@ def criar_turma(
         ator_id=usuario.id,
         codigo=solicitacao.codigo,
         nome=solicitacao.nome,
+    )
+
+
+@app.patch(
+    "/api/v1/admin/turmas/{turma_id}/encerrar",
+    response_model=dict[str, Any],
+    tags=["administração"],
+)
+def encerrar_turma(
+    turma_id: UUID,
+    solicitacao: SolicitacaoEncerramentoTurma,
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> dict[str, Any]:
+    return provedor.encerrar_turma(
+        ator_id=usuario.id,
+        turma_id=turma_id,
+        estado_usuarios=solicitacao.estado_usuarios,
+    )
+
+
+@app.get(
+    "/api/v1/admin/auditoria",
+    response_model=list[dict[str, Any]],
+    tags=["administração"],
+)
+def listar_auditoria_administracao(
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+    limite: Annotated[int, Query(ge=1, le=200)] = 80,
+) -> list[dict[str, Any]]:
+    return provedor.listar_auditoria(
+        ator_id=usuario.id,
+        limite=limite,
     )
 
 

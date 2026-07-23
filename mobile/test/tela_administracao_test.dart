@@ -100,9 +100,10 @@ class _AdministracaoFake implements ServicoAdministracao {
   Future<ResultadoCotasLote> ajustarCotasEmLote({
     required bool adicionar,
     required int quantidade,
+    required String turmaId,
     List<String>? usuarioIds,
   }) async {
-    operacoes.add('lote:$adicionar:$quantidade');
+    operacoes.add('lote:$adicionar:$quantidade:$turmaId');
     return const ResultadoCotasLote(
       usuariosAlterados: 1,
       usuariosIgnorados: 0,
@@ -143,6 +144,35 @@ class _AdministracaoFake implements ServicoAdministracao {
       quantidadeAlunos: 0,
     );
   }
+
+  @override
+  Future<ResultadoEncerramentoTurma> encerrarTurma({
+    required String turmaId,
+    required EstadoConta estadoUsuarios,
+  }) async {
+    operacoes.add('encerrar:$turmaId:${estadoUsuarios.name}');
+    return const ResultadoEncerramentoTurma(
+      usuariosAlterados: 1,
+      matriculasEncerradas: 1,
+      convitesCancelados: 0,
+    );
+  }
+
+  @override
+  Future<List<RegistroAuditoria>> listarAuditoria({int limite = 80}) async =>
+      [
+        RegistroAuditoria(
+          id: 1,
+          atorId: 'master-1',
+          atorEmail: 'professor@ufpe.br',
+          acao: 'criar_turma',
+          entidade: 'turma',
+          entidadeId: 'turma-1',
+          valorAnterior: null,
+          valorPosterior: const {'codigo': '2026.1'},
+          criadaEm: DateTime.utc(2026, 7, 23, 12),
+        ),
+      ];
 
   @override
   Future<List<ConviteAdministrado>> listarConvites() async => const [];
@@ -204,6 +234,8 @@ void main() {
     expect(find.text('Convidar por e-mail'), findsOneWidget);
     expect(find.text('Criar turma'), findsOneWidget);
     expect(find.text('Transferir controle master'), findsOneWidget);
+    expect(find.text('Histórico administrativo'), findsOneWidget);
+    expect(find.text('Turma criada'), findsOneWidget);
   });
 
   testWidgets('master aprova cadastro pendente', (tester) async {
@@ -227,5 +259,39 @@ void main() {
     expect(servico.operacoes, contains('estado:aluno-1:ativo'));
     expect(find.text('Usuário aprovado.'), findsOneWidget);
     expect(find.text('Suspender'), findsOneWidget);
+  });
+
+  testWidgets('encerramento de turma exige o código e remove acessos', (
+    tester,
+  ) async {
+    final servico = _AdministracaoFake();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: criarTemaInstitucional(),
+        home: TelaAdministracao(
+          servico: servico,
+          perfilAtual: _perfilMaster,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final encerrar = find.widgetWithText(TextButton, 'Encerrar');
+    await tester.ensureVisible(encerrar);
+    await tester.tap(encerrar);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Remover acessos'));
+    await tester.enterText(
+      find.byType(TextField),
+      '2026.1',
+    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Encerrar turma'));
+    await tester.pumpAndSettle();
+
+    expect(
+      servico.operacoes,
+      contains('encerrar:turma-1:revogado'),
+    );
   });
 }

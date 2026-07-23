@@ -87,7 +87,9 @@ podem ser afetados por engano.
 
 Encerrar uma turma não apaga seus registros. A operação pode suspender ou
 revogar todos os usuários comuns daquela turma, conforme confirmação do
-administrador.
+administrador. Ela também encerra as matrículas ativas e cancela os convites
+pendentes da turma. Para evitar enganos, o código da turma precisa ser
+digitado novamente na confirmação.
 
 ## 6. Tipos de acesso e cotas
 
@@ -150,6 +152,8 @@ Devem ser registrados:
 - início e conclusão de transferências de propriedade.
 
 Senhas, tokens e conteúdo das sequências não devem aparecer na auditoria.
+Master e submasters podem consultar no painel as operações mais recentes, com
+ator, data, ação e um resumo seguro da alteração.
 
 ## 10. Fronteiras de segurança
 
@@ -175,10 +179,11 @@ Senhas, tokens e conteúdo das sequências não devem aparecer na auditoria.
 | `transferencias_master` | confirmação segura de sucessão |
 | `auditoria` | histórico administrativo imutável |
 
-A primeira migração desse modelo está em
+As migrações incrementais desse modelo estão em
 [`../supabase/migrations/202607220001_controle_acesso.sql`](../supabase/migrations/202607220001_controle_acesso.sql).
-Ela cria as tabelas, restrições e políticas de leitura, mas ainda não contém
-credenciais nem está conectada a um projeto remoto.
+A migração `202607230004_auditoria_encerramento_turmas.sql` expõe o histórico
+administrativo somente ao backend, implementa o encerramento preservando os
+registros e obriga operações de cota em lote a selecionar uma turma ativa.
 
 ## 12. Decisão de arquitetura
 

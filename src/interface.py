@@ -122,8 +122,8 @@ def mostrar_cabecalho() -> None:
         """
         <section class="hero">
             <h1 class="hero-title">
-                Resolução das Equações de Comando de Sistemas
-                Fluídicos Utilizando o Método do Mapa de
+                Resolução das Equações de Comando de Circuitos
+                Fluido Mecânicos Utilizando o Método do Mapa de
                 Karnaugh Estendido
             </h1>
         </section>

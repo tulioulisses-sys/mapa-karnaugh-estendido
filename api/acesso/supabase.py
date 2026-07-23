@@ -136,6 +136,7 @@ class ProvedorAcesso(Protocol):
         ator_id: UUID,
         operacao: str,
         quantidade: int,
+        turma_id: UUID,
         usuario_ids: list[UUID] | None,
     ) -> dict[str, Any]: ...
 
@@ -183,6 +184,21 @@ class ProvedorAcesso(Protocol):
         codigo: str,
         nome: str,
     ) -> dict[str, Any]: ...
+
+    def encerrar_turma(
+        self,
+        *,
+        ator_id: UUID,
+        turma_id: UUID,
+        estado_usuarios: str,
+    ) -> dict[str, Any]: ...
+
+    def listar_auditoria(
+        self,
+        *,
+        ator_id: UUID,
+        limite: int,
+    ) -> list[dict[str, Any]]: ...
 
     def listar_convites(self, ator_id: UUID) -> list[dict[str, Any]]: ...
 
@@ -361,6 +377,7 @@ class ClienteSupabase:
         ator_id: UUID,
         operacao: str,
         quantidade: int,
+        turma_id: UUID,
         usuario_ids: list[UUID] | None,
     ) -> dict[str, Any]:
         return self._rpc(
@@ -369,6 +386,7 @@ class ClienteSupabase:
                 "p_ator_id": str(ator_id),
                 "p_operacao": operacao,
                 "p_quantidade": quantidade,
+                "p_turma_id": str(turma_id),
                 "p_usuario_ids": (
                     [str(usuario_id) for usuario_id in usuario_ids]
                     if usuario_ids is not None
@@ -471,6 +489,37 @@ class ClienteSupabase:
                 "p_nome": nome,
             },
         )
+
+    def encerrar_turma(
+        self,
+        *,
+        ator_id: UUID,
+        turma_id: UUID,
+        estado_usuarios: str,
+    ) -> dict[str, Any]:
+        return self._rpc(
+            "encerrar_turma",
+            {
+                "p_ator_id": str(ator_id),
+                "p_turma_id": str(turma_id),
+                "p_estado_usuarios": estado_usuarios,
+            },
+        )
+
+    def listar_auditoria(
+        self,
+        *,
+        ator_id: UUID,
+        limite: int,
+    ) -> list[dict[str, Any]]:
+        dados = self._rpc_json(
+            "listar_auditoria_administracao",
+            {
+                "p_ator_id": str(ator_id),
+                "p_limite": limite,
+            },
+        )
+        return _validar_lista_controle(dados)
 
     def listar_convites(self, ator_id: UUID) -> list[dict[str, Any]]:
         dados = self._rpc_json(
@@ -727,6 +776,18 @@ def _traduzir_erro_rpc(resposta: Any) -> ErroAPI:
             status_code=404,
             codigo="CONVITE_NAO_ENCONTRADO",
             mensagem="O convite selecionado não foi encontrado.",
+        )
+    if "turma não encontrada" in normalizada:
+        return ErroAPI(
+            status_code=404,
+            codigo="TURMA_NAO_ENCONTRADA",
+            mensagem="A turma selecionada não foi encontrada.",
+        )
+    if "turma já está encerrada" in normalizada:
+        return ErroAPI(
+            status_code=409,
+            codigo="TURMA_JA_ENCERRADA",
+            mensagem="Essa turma já foi encerrada.",
         )
     if (
         "não pode administrar esse usuário" in normalizada

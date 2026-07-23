@@ -138,12 +138,14 @@ class ProvedorAcessoFake:
         ator_id: UUID,
         operacao: str,
         quantidade: int,
+        turma_id: UUID,
         usuario_ids: list[UUID] | None,
     ) -> dict[str, Any]:
         dados = {
             "ator_id": ator_id,
             "operacao": operacao,
             "quantidade": quantidade,
+            "turma_id": turma_id,
             "usuario_ids": usuario_ids,
         }
         self.operacoes_admin.append(("lote", dados))
@@ -261,6 +263,51 @@ class ProvedorAcessoFake:
             "quantidade_alunos": 0,
         }
 
+    def encerrar_turma(
+        self,
+        *,
+        ator_id: UUID,
+        turma_id: UUID,
+        estado_usuarios: str,
+    ) -> dict[str, Any]:
+        dados = {
+            "ator_id": ator_id,
+            "turma_id": turma_id,
+            "estado_usuarios": estado_usuarios,
+        }
+        self.operacoes_admin.append(("encerrar_turma", dados))
+        return {
+            "id": str(turma_id),
+            "ativa": False,
+            "estado_usuarios": estado_usuarios,
+            "usuarios_alterados": 2,
+            "matriculas_encerradas": 2,
+            "convites_cancelados": 1,
+        }
+
+    def listar_auditoria(
+        self,
+        *,
+        ator_id: UUID,
+        limite: int,
+    ) -> list[dict[str, Any]]:
+        self.operacoes_admin.append(
+            ("listar_auditoria", {"ator_id": ator_id, "limite": limite})
+        )
+        return [
+            {
+                "id": 1,
+                "ator_id": str(ator_id),
+                "ator_email": "professor@ufpe.br",
+                "acao": "criar_turma",
+                "entidade": "turma",
+                "entidade_id": str(RESERVA_ID),
+                "valor_anterior": None,
+                "valor_posterior": {"codigo": "2026.1"},
+                "criada_em": "2026-07-23T12:00:00Z",
+            }
+        ]
+
     def listar_convites(self, ator_id: UUID) -> list[dict[str, Any]]:
         self.operacoes_admin.append(("listar_convites", {"ator_id": ator_id}))
         return []
@@ -340,7 +387,7 @@ def test_health() -> None:
 
     assert resposta.status_code == 200
     assert resposta.json()["status"] == "ok"
-    assert resposta.json()["api_version"] == "1.4.0"
+    assert resposta.json()["api_version"] == "1.5.0"
     assert resposta.headers["x-content-type-options"] == "nosniff"
 
 
@@ -513,6 +560,8 @@ def test_openapi_publica_endpoints_v1() -> None:
         "/api/v1/transferencia-master/{transferencia_id}/aceitar"
     ) in caminhos
     assert "/api/v1/admin/turmas" in caminhos
+    assert "/api/v1/admin/turmas/{turma_id}/encerrar" in caminhos
+    assert "/api/v1/admin/auditoria" in caminhos
     assert "/api/v1/admin/convites" in caminhos
     assert "/api/v1/admin/convites/lote" in caminhos
     assert "/api/v1/admin/convites/{convite_id}/cancelar" in caminhos
@@ -580,15 +629,21 @@ def test_rejeita_acesso_limitado_sem_saldo(
 
 
 def test_adiciona_cota_em_lote(provedor: ProvedorAcessoFake) -> None:
+    turma_id = "c19c03e5-bbf3-4f2a-88d6-b121043f5eb8"
     resposta = client.post(
         "/api/v1/admin/usuarios/cotas-em-lote",
         headers=CABECALHO_LOGIN,
-        json={"operacao": "adicionar", "quantidade": 1},
+        json={
+            "operacao": "adicionar",
+            "quantidade": 1,
+            "turma_id": turma_id,
+        },
     )
 
     assert resposta.status_code == 200
     assert resposta.json()["usuarios_alterados"] == 2
     assert provedor.operacoes_admin[-1][1]["usuario_ids"] is None
+    assert str(provedor.operacoes_admin[-1][1]["turma_id"]) == turma_id
 
 
 def test_promove_submaster(provedor: ProvedorAcessoFake) -> None:
@@ -694,6 +749,57 @@ def test_cria_turma_para_convites(provedor: ProvedorAcessoFake) -> None:
     assert resposta.status_code == 200
     assert resposta.json()["codigo"] == "2026.1"
     assert provedor.operacoes_admin[-1][0] == "criar_turma"
+
+
+def test_encerra_turma_e_revoga_alunos(
+    provedor: ProvedorAcessoFake,
+) -> None:
+    turma_id = "c19c03e5-bbf3-4f2a-88d6-b121043f5eb8"
+    resposta = client.patch(
+        f"/api/v1/admin/turmas/{turma_id}/encerrar",
+        headers=CABECALHO_LOGIN,
+        json={"estado_usuarios": "revogado"},
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["ativa"] is False
+    assert resposta.json()["usuarios_alterados"] == 2
+    assert provedor.operacoes_admin[-1] == (
+        "encerrar_turma",
+        {
+            "ator_id": USUARIO_ID,
+            "turma_id": UUID(turma_id),
+            "estado_usuarios": "revogado",
+        },
+    )
+
+
+def test_lista_auditoria_com_limite(
+    provedor: ProvedorAcessoFake,
+) -> None:
+    resposta = client.get(
+        "/api/v1/admin/auditoria?limite=25",
+        headers=CABECALHO_LOGIN,
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()[0]["acao"] == "criar_turma"
+    assert provedor.operacoes_admin[-1] == (
+        "listar_auditoria",
+        {"ator_id": USUARIO_ID, "limite": 25},
+    )
+
+
+def test_rejeita_limite_invalido_da_auditoria(
+    provedor: ProvedorAcessoFake,
+) -> None:
+    resposta = client.get(
+        "/api/v1/admin/auditoria?limite=201",
+        headers=CABECALHO_LOGIN,
+    )
+
+    assert resposta.status_code == 422
+    assert provedor.operacoes_admin == []
 
 
 def test_cria_convites_em_lote_e_envia_emails(

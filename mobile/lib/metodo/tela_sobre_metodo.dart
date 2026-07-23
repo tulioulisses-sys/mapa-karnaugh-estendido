@@ -25,7 +25,7 @@ class TelaSobreMetodo extends StatelessWidget {
                       titulo: 'Sobre o método',
                       descricao:
                           'Técnica utilizada no projeto de comandos para '
-                          'sistemas sequenciais fluídicos, como circuitos '
+                          'circuitos fluido mecânicos, como sistemas '
                           'pneumáticos, eletropneumáticos e hidráulicos. O '
                           'método parte da sequência de movimentos desejada, '
                           'analisa os estados do sistema e determina as '
@@ -301,7 +301,8 @@ class _MateriaisReferencia extends StatelessWidget {
       titulo: 'Artigo sobre o método',
       descricao:
           'Apresenta o método de projeto ótimo para circuitos sequenciais '
-          'fluídicos, o uso de memórias e a obtenção das equações de comando.',
+          'fluido mecânicos, o uso de memórias e a obtenção das equações de '
+          'comando.',
       caminho: 'assets/documentos/metodo_projeto_otimo.pdf',
     ),
     _MaterialPdf(

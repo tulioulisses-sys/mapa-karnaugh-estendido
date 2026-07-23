@@ -76,6 +76,72 @@ class TurmaAdministrada {
   final int quantidadeAlunos;
 }
 
+class ResultadoEncerramentoTurma {
+  const ResultadoEncerramentoTurma({
+    required this.usuariosAlterados,
+    required this.matriculasEncerradas,
+    required this.convitesCancelados,
+  });
+
+  factory ResultadoEncerramentoTurma.deJson(Map<String, dynamic> json) {
+    return ResultadoEncerramentoTurma(
+      usuariosAlterados:
+          (json['usuarios_alterados'] as num?)?.toInt() ?? 0,
+      matriculasEncerradas:
+          (json['matriculas_encerradas'] as num?)?.toInt() ?? 0,
+      convitesCancelados:
+          (json['convites_cancelados'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  final int usuariosAlterados;
+  final int matriculasEncerradas;
+  final int convitesCancelados;
+}
+
+class RegistroAuditoria {
+  const RegistroAuditoria({
+    required this.id,
+    required this.atorId,
+    required this.atorEmail,
+    required this.acao,
+    required this.entidade,
+    required this.entidadeId,
+    required this.valorAnterior,
+    required this.valorPosterior,
+    required this.criadaEm,
+  });
+
+  factory RegistroAuditoria.deJson(Map<String, dynamic> json) {
+    return RegistroAuditoria(
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      atorId: json['ator_id']?.toString(),
+      atorEmail: json['ator_email']?.toString(),
+      acao: json['acao']?.toString() ?? '',
+      entidade: json['entidade']?.toString() ?? '',
+      entidadeId: json['entidade_id']?.toString(),
+      valorAnterior: _mapaOpcional(json['valor_anterior']),
+      valorPosterior: _mapaOpcional(json['valor_posterior']),
+      criadaEm: DateTime.tryParse(json['criada_em']?.toString() ?? ''),
+    );
+  }
+
+  final int id;
+  final String? atorId;
+  final String? atorEmail;
+  final String acao;
+  final String entidade;
+  final String? entidadeId;
+  final Map<String, dynamic>? valorAnterior;
+  final Map<String, dynamic>? valorPosterior;
+  final DateTime? criadaEm;
+}
+
+Map<String, dynamic>? _mapaOpcional(Object? valor) {
+  if (valor is! Map) return null;
+  return Map<String, dynamic>.from(valor);
+}
+
 class ConviteAdministrado {
   const ConviteAdministrado({
     required this.id,

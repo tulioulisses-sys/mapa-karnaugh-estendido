@@ -15,6 +15,7 @@ abstract interface class ServicoAdministracao {
   Future<ResultadoCotasLote> ajustarCotasEmLote({
     required bool adicionar,
     required int quantidade,
+    required String turmaId,
     List<String>? usuarioIds,
   });
 
@@ -39,6 +40,13 @@ abstract interface class ServicoAdministracao {
     required String codigo,
     required String nome,
   });
+
+  Future<ResultadoEncerramentoTurma> encerrarTurma({
+    required String turmaId,
+    required EstadoConta estadoUsuarios,
+  });
+
+  Future<List<RegistroAuditoria>> listarAuditoria({int limite = 80});
 
   Future<List<ConviteAdministrado>> listarConvites();
 

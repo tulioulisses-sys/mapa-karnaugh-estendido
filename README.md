@@ -1,7 +1,7 @@
 # Mapa de Karnaugh Estendido
 
-Ferramenta para resolver sistemas sequenciais pneumáticos, eletropneumáticos e
-fluídicos pelo Método do Mapa de Karnaugh Estendido.
+Ferramenta para resolver circuitos fluido mecânicos pneumáticos,
+eletropneumáticos e hidráulicos pelo Método do Mapa de Karnaugh Estendido.
 
 O projeto interpreta a sequência de movimentos, determina estados físicos,
 calcula as memórias necessárias, qualifica os comandos, verifica condições de
@@ -95,8 +95,9 @@ O motor Python é exposto por uma API HTTP. O aplicativo Flutter fará a
 validação inicial no dispositivo e solicitará a resolução completa ao servidor.
 O contrato está em [`docs/contrato-motor.md`](docs/contrato-motor.md).
 
-As regras planejadas de master, submaster, turmas, convites e cotas estão em
+As regras implementadas de master, submaster, turmas, convites, cotas e
+auditoria estão em
 [`docs/controle-acesso.md`](docs/controle-acesso.md).
 
-O esquema PostgreSQL/Supabase correspondente está em
+O esquema PostgreSQL/Supabase e suas operações administrativas estão em
 [`supabase/migrations`](supabase/migrations).

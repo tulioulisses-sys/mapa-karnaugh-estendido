@@ -142,6 +142,35 @@ void main() {
     });
   });
 
+  test('limita ajuste em lote à turma selecionada', () async {
+    late http.Request recebida;
+    final cliente = MockClient((requisicao) async {
+      recebida = requisicao;
+      return http.Response(
+        '{"usuarios_alterados":2,"usuarios_ignorados":0}',
+        200,
+      );
+    });
+    final servico = ServicoAdministracaoApi(
+      apiBaseUrl: 'http://localhost:8000',
+      autenticacao: _AutenticacaoFake(),
+      cliente: cliente,
+    );
+
+    await servico.ajustarCotasEmLote(
+      adicionar: true,
+      quantidade: 1,
+      turmaId: 'turma-1',
+    );
+
+    expect(recebida.url.path, '/api/v1/admin/usuarios/cotas-em-lote');
+    expect(jsonDecode(recebida.body), {
+      'operacao': 'adicionar',
+      'quantidade': 1,
+      'turma_id': 'turma-1',
+    });
+  });
+
   test('envia convites em lote com turma e cota inicial', () async {
     late http.Request recebida;
     final cliente = MockClient((requisicao) async {
@@ -216,6 +245,69 @@ void main() {
       'email_destino': 'novo.professor@ufpe.br',
       'dias_validade': 7,
     });
+  });
+
+  test('encerra turma com remoção de acessos', () async {
+    late http.Request recebida;
+    final cliente = MockClient((requisicao) async {
+      recebida = requisicao;
+      return http.Response(
+        '{"usuarios_alterados":2,'
+        '"matriculas_encerradas":2,"convites_cancelados":1}',
+        200,
+      );
+    });
+    final servico = ServicoAdministracaoApi(
+      apiBaseUrl: 'http://localhost:8000',
+      autenticacao: _AutenticacaoFake(),
+      cliente: cliente,
+    );
+
+    final resultado = await servico.encerrarTurma(
+      turmaId: 'turma-1',
+      estadoUsuarios: EstadoConta.revogado,
+    );
+
+    expect(resultado.usuariosAlterados, 2);
+    expect(resultado.convitesCancelados, 1);
+    expect(recebida.method, 'PATCH');
+    expect(
+      recebida.url.path,
+      '/api/v1/admin/turmas/turma-1/encerrar',
+    );
+    expect(jsonDecode(recebida.body), {'estado_usuarios': 'revogado'});
+  });
+
+  test('lista histórico administrativo', () async {
+    late http.Request recebida;
+    final cliente = MockClient((requisicao) async {
+      recebida = requisicao;
+      return http.Response(
+        jsonEncode([
+          {
+            'id': 10,
+            'ator_email': 'professor@ufpe.br',
+            'acao': 'criar_turma',
+            'entidade': 'turma',
+            'valor_posterior': {'codigo': '2026.1'},
+            'criada_em': '2026-07-23T12:00:00Z',
+          },
+        ]),
+        200,
+      );
+    });
+    final servico = ServicoAdministracaoApi(
+      apiBaseUrl: 'http://localhost:8000',
+      autenticacao: _AutenticacaoFake(),
+      cliente: cliente,
+    );
+
+    final registros = await servico.listarAuditoria(limite: 30);
+
+    expect(registros.single.acao, 'criar_turma');
+    expect(registros.single.atorEmail, 'professor@ufpe.br');
+    expect(recebida.url.path, '/api/v1/admin/auditoria');
+    expect(recebida.url.queryParameters['limite'], '30');
   });
 
   test('aceita transferência master autenticada', () async {

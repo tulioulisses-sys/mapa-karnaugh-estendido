@@ -161,10 +161,51 @@ def test_ajuste_em_lote_serializa_ids(
         ator_id=USUARIO_ID,
         operacao="adicionar",
         quantidade=1,
+        turma_id=RESERVA_ID,
         usuario_ids=[USUARIO_ID],
     )
 
     assert http.posts[0]["json"]["p_usuario_ids"] == [str(USUARIO_ID)]
+    assert http.posts[0]["json"]["p_turma_id"] == str(RESERVA_ID)
+
+
+def test_encerramento_de_turma_serializa_estado_dos_alunos(
+    configuracao: ConfiguracaoSupabase,
+) -> None:
+    http = HTTPFake()
+    http.resposta_post = RespostaFake(200, {"ativa": False})
+    cliente = ClienteSupabase(configuracao, cliente_http=http)
+
+    cliente.encerrar_turma(
+        ator_id=USUARIO_ID,
+        turma_id=RESERVA_ID,
+        estado_usuarios="revogado",
+    )
+
+    chamada = http.posts[0]
+    assert chamada["url"].endswith("/rest/v1/rpc/encerrar_turma")
+    assert chamada["json"]["p_turma_id"] == str(RESERVA_ID)
+    assert chamada["json"]["p_estado_usuarios"] == "revogado"
+
+
+def test_lista_auditoria_com_limite(
+    configuracao: ConfiguracaoSupabase,
+) -> None:
+    http = HTTPFake()
+    http.resposta_post = RespostaFake(200, [{"id": 1}])
+    cliente = ClienteSupabase(configuracao, cliente_http=http)
+
+    registros = cliente.listar_auditoria(
+        ator_id=USUARIO_ID,
+        limite=80,
+    )
+
+    assert registros == [{"id": 1}]
+    chamada = http.posts[0]
+    assert chamada["url"].endswith(
+        "/rest/v1/rpc/listar_auditoria_administracao"
+    )
+    assert chamada["json"]["p_limite"] == 80
 
 
 def test_convites_em_lote_serializam_perfil_turma_e_cota(

@@ -122,6 +122,7 @@ class _AdministracaoFake implements ServicoAdministracao {
   Future<ResultadoCotasLote> ajustarCotasEmLote({
     required bool adicionar,
     required int quantidade,
+    required String turmaId,
     List<String>? usuarioIds,
   }) {
     throw UnimplementedError();
@@ -141,6 +142,14 @@ class _AdministracaoFake implements ServicoAdministracao {
   Future<TurmaAdministrada> criarTurma({
     required String codigo,
     required String nome,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<ResultadoEncerramentoTurma> encerrarTurma({
+    required String turmaId,
+    required EstadoConta estadoUsuarios,
   }) {
     throw UnimplementedError();
   }
@@ -176,6 +185,11 @@ class _AdministracaoFake implements ServicoAdministracao {
 
   @override
   Future<List<ConviteAdministrado>> listarConvites() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<RegistroAuditoria>> listarAuditoria({int limite = 80}) {
     throw UnimplementedError();
   }
 
