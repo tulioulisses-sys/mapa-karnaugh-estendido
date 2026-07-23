@@ -133,8 +133,9 @@ A transferência exige:
 - transação única que mantenha exatamente um master;
 - registro imutável na auditoria.
 
-Ao final, o antigo master deve escolher entre tornar-se submaster, usuário ou
-ter o acesso revogado. Um fluxo de recuperação administrativa separado será
+Ao final, o antigo master torna-se submaster automaticamente. O novo master
+pode remover ou rebaixar essa conta depois, mas a troca nunca deixa o sistema
+sem um administrador. Um fluxo de recuperação administrativa separado será
 necessário para a perda definitiva do email do master.
 
 ## 9. Auditoria mínima

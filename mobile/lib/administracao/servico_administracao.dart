@@ -20,6 +20,19 @@ abstract interface class ServicoAdministracao {
 
   Future<void> alterarPapel(String usuarioId, PapelUsuario papel);
 
+  Future<void> reautenticar(String senha);
+
+  Future<TransferenciaMaster?> obterTransferenciaMaster();
+
+  Future<TransferenciaMaster> iniciarTransferenciaMaster({
+    required String emailDestino,
+    int diasValidade = 7,
+  });
+
+  Future<void> cancelarTransferenciaMaster(String transferenciaId);
+
+  Future<void> aceitarTransferenciaMaster(String transferenciaId);
+
   Future<List<TurmaAdministrada>> listarTurmas();
 
   Future<TurmaAdministrada> criarTurma({

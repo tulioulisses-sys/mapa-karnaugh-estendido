@@ -24,6 +24,7 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
   List<UsuarioAdministrado> _usuarios = const [];
   List<TurmaAdministrada> _turmas = const [];
   List<ConviteAdministrado> _convites = const [];
+  TransferenciaMaster? _transferenciaMaster;
   bool _carregando = true;
   bool _processando = false;
   String? _erro;
@@ -43,11 +44,13 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
       final usuarios = await widget.servico.listarUsuarios();
       final turmas = await widget.servico.listarTurmas();
       final convites = await widget.servico.listarConvites();
+      final transferencia = await widget.servico.obterTransferenciaMaster();
       if (!mounted) return;
       setState(() {
         _usuarios = usuarios;
         _turmas = turmas;
         _convites = convites;
+        _transferenciaMaster = transferencia;
         _carregando = false;
       });
     } on FalhaAdministracao catch (erro) {
@@ -135,6 +138,10 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
                           'dos alunos.',
               ),
               const SizedBox(height: 18),
+              if (widget.perfilAtual.papel == PapelUsuario.master) ...[
+                _painelTransferenciaMaster(),
+                const SizedBox(height: 18),
+              ],
               _painelConvitesTurmas(),
               const SizedBox(height: 18),
               _ResumoAdministracao(
@@ -167,6 +174,82 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _painelTransferenciaMaster() {
+    final transferencia = _transferenciaMaster;
+    return CartaoInstitucional(
+      destaque: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Controle master',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Transfira a responsabilidade para outro professor sem deixar '
+            'o aplicativo sem um responsável. Você continuará como master '
+            'até o destinatário aceitar.',
+          ),
+          const SizedBox(height: 16),
+          if (transferencia == null)
+            FilledButton.tonalIcon(
+              onPressed: _processando ? null : _abrirTransferenciaMaster,
+              icon: const Icon(Icons.swap_horiz),
+              label: const Text('Transferir controle master'),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: CoresInstitucionais.vinhoFundo,
+                border: Border.all(color: CoresInstitucionais.borda),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.schedule_send_outlined,
+                    color: CoresInstitucionais.vinho,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Transferência aguardando aceite',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(transferencia.emailDestino),
+                        if (transferencia.expiraEm != null)
+                          Text(
+                            'Válida até '
+                            '${_formatarData(transferencia.expiraEm!)}.',
+                            style: const TextStyle(
+                              color: CoresInstitucionais.textoSuave,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: _processando
+                        ? null
+                        : () => _cancelarTransferenciaMaster(transferencia),
+                    icon: const Icon(Icons.close),
+                    label: const Text('Cancelar'),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -1003,6 +1086,176 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
     );
   }
 
+  Future<void> _abrirTransferenciaMaster() async {
+    final email = TextEditingController();
+    final confirmacao = TextEditingController();
+    final senha = TextEditingController();
+    var ocultarSenha = true;
+    String? erro;
+
+    final dados = await showDialog<_DadosTransferencia>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, atualizar) => AlertDialog(
+          title: const Text('Transferir controle master'),
+          content: SizedBox(
+            width: 500,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'O destinatário receberá um e-mail e precisará aceitar '
+                    'a transferência autenticado. Após o aceite, ele será '
+                    'o master e você continuará como submaster.',
+                  ),
+                  const SizedBox(height: 18),
+                  TextField(
+                    controller: email,
+                    autofocus: true,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      labelText: 'E-mail do novo professor',
+                      prefixIcon: Icon(Icons.email_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: confirmacao,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      labelText: 'Confirme o e-mail',
+                      prefixIcon: Icon(Icons.email_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: senha,
+                    obscureText: ocultarSenha,
+                    textInputAction: TextInputAction.done,
+                    decoration: InputDecoration(
+                      labelText: 'Sua senha atual',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      helperText:
+                          'Confirmação de segurança para esta operação.',
+                      suffixIcon: IconButton(
+                        tooltip: ocultarSenha
+                            ? 'Mostrar senha'
+                            : 'Ocultar senha',
+                        onPressed: () {
+                          atualizar(() => ocultarSenha = !ocultarSenha);
+                        },
+                        icon: Icon(
+                          ocultarSenha
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (erro != null) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      erro!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton.icon(
+              onPressed: () {
+                final informado = email.text.trim().toLowerCase();
+                final repetido = confirmacao.text.trim().toLowerCase();
+                if (!_emailValido(informado)) {
+                  atualizar(() => erro = 'Informe um e-mail válido.');
+                  return;
+                }
+                if (informado != repetido) {
+                  atualizar(() => erro = 'Os e-mails não coincidem.');
+                  return;
+                }
+                if (informado == widget.perfilAtual.email.toLowerCase()) {
+                  atualizar(
+                    () => erro =
+                        'Informe o e-mail de outra pessoa.',
+                  );
+                  return;
+                }
+                if (senha.text.length < 6) {
+                  atualizar(() => erro = 'Informe sua senha atual.');
+                  return;
+                }
+                Navigator.pop(
+                  context,
+                  _DadosTransferencia(
+                    emailDestino: informado,
+                    senhaAtual: senha.text,
+                  ),
+                );
+              },
+              icon: const Icon(Icons.send_outlined),
+              label: const Text('Enviar transferência'),
+            ),
+          ],
+        ),
+      ),
+    );
+    email.dispose();
+    confirmacao.dispose();
+    senha.dispose();
+    if (dados == null || !mounted || _processando) return;
+
+    setState(() => _processando = true);
+    try {
+      await widget.servico.reautenticar(dados.senhaAtual);
+      final transferencia = await widget.servico
+          .iniciarTransferenciaMaster(emailDestino: dados.emailDestino);
+      await _carregar();
+      if (!mounted) return;
+      final mensagem = transferencia.emailEnviado
+          ? 'Transferência enviada. Você permanece master até o aceite.'
+          : 'A transferência foi preparada, mas o e-mail não foi enviado. '
+                'Cancele e tente novamente.';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(mensagem)));
+    } on FalhaAdministracao catch (falha) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(falha.mensagem)));
+    } finally {
+      if (mounted) setState(() => _processando = false);
+    }
+  }
+
+  Future<void> _cancelarTransferenciaMaster(
+    TransferenciaMaster transferencia,
+  ) async {
+    final confirmou = await _confirmar(
+      titulo: 'Cancelar transferência?',
+      mensagem:
+          'O convite enviado para ${transferencia.emailDestino} deixará '
+          'de permitir a troca de master.',
+      rotuloConfirmacao: 'Cancelar transferência',
+    );
+    if (confirmou != true || !mounted) return;
+    await _executar(
+      () => widget.servico.cancelarTransferenciaMaster(transferencia.id),
+      'Transferência cancelada.',
+    );
+  }
+
   Future<bool?> _confirmar({
     required String titulo,
     required String mensagem,
@@ -1042,6 +1295,16 @@ class _DadosConvite {
   final TipoAcesso acesso;
   final int? analisesIniciais;
   final String? turmaId;
+}
+
+class _DadosTransferencia {
+  const _DadosTransferencia({
+    required this.emailDestino,
+    required this.senhaAtual,
+  });
+
+  final String emailDestino;
+  final String senhaAtual;
 }
 
 class _ResumoAdministracao extends StatelessWidget {
@@ -1225,4 +1488,23 @@ String _rotuloEstadoConvite(String estado) => switch (estado) {
 String _rotuloAcesso(UsuarioAdministrado usuario) {
   if (usuario.acesso == TipoAcesso.ilimitado) return 'Ilimitado';
   return '${usuario.analisesRestantes ?? 0} análise(s)';
+}
+
+bool _emailValido(String email) {
+  final partes = email.split('@');
+  return partes.length == 2 &&
+      partes.first.isNotEmpty &&
+      partes.last.contains('.') &&
+      !partes.last.startsWith('.') &&
+      !partes.last.endsWith('.') &&
+      !email.contains(RegExp(r'\s'));
+}
+
+String _formatarData(DateTime data) {
+  final local = data.toLocal();
+  final dia = local.day.toString().padLeft(2, '0');
+  final mes = local.month.toString().padLeft(2, '0');
+  return '$dia/$mes/${local.year} às '
+      '${local.hour.toString().padLeft(2, '0')}:'
+      '${local.minute.toString().padLeft(2, '0')}';
 }

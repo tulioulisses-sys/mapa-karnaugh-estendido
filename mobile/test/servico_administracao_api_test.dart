@@ -10,8 +10,12 @@ import 'package:mapa_karnaugh_app/autenticacao/modelos_autenticacao.dart';
 import 'package:mapa_karnaugh_app/autenticacao/servico_autenticacao.dart';
 
 class _AutenticacaoFake implements ServicoAutenticacao {
+  String? emailEntrada;
+  String? senhaEntrada;
+
   @override
-  UsuarioSessao? get usuarioAtual => null;
+  UsuarioSessao? get usuarioAtual =>
+      const UsuarioSessao(id: 'master-1', email: 'professor@ufpe.br');
 
   @override
   MotivoDefinicaoSenha? get definicaoSenhaPendente => null;
@@ -37,8 +41,9 @@ class _AutenticacaoFake implements ServicoAutenticacao {
   }
 
   @override
-  Future<void> entrar({required String email, required String senha}) {
-    throw UnimplementedError();
+  Future<void> entrar({required String email, required String senha}) async {
+    emailEntrada = email;
+    senhaEntrada = senha;
   }
 
   @override
@@ -61,6 +66,20 @@ class _AutenticacaoFake implements ServicoAutenticacao {
 }
 
 void main() {
+  test('reautentica o master diretamente no provedor de login', () async {
+    final autenticacao = _AutenticacaoFake();
+    final servico = ServicoAdministracaoApi(
+      apiBaseUrl: 'http://localhost:8000',
+      autenticacao: autenticacao,
+      cliente: MockClient((_) async => http.Response('{}', 200)),
+    );
+
+    await servico.reautenticar('senha-atual');
+
+    expect(autenticacao.emailEntrada, 'professor@ufpe.br');
+    expect(autenticacao.senhaEntrada, 'senha-atual');
+  });
+
   test('lista usuários com o token da sessão', () async {
     late http.Request recebida;
     final cliente = MockClient((requisicao) async {
@@ -161,6 +180,63 @@ void main() {
       'turma_id': 'turma-1',
       'dias_validade': 7,
     });
+  });
+
+  test('inicia transferência master com e-mail confirmado', () async {
+    late http.Request recebida;
+    final cliente = MockClient((requisicao) async {
+      recebida = requisicao;
+      return http.Response(
+        jsonEncode({
+          'id': 'transferencia-1',
+          'master_atual_id': 'master-1',
+          'master_atual_email': 'professor@ufpe.br',
+          'email_destino': 'novo.professor@ufpe.br',
+          'estado': 'pendente',
+          'sou_origem': true,
+          'sou_destino': false,
+          'envio_email': 'enviado',
+        }),
+        200,
+      );
+    });
+    final servico = ServicoAdministracaoApi(
+      apiBaseUrl: 'http://localhost:8000',
+      autenticacao: _AutenticacaoFake(),
+      cliente: cliente,
+    );
+
+    final transferencia = await servico.iniciarTransferenciaMaster(
+      emailDestino: 'novo.professor@ufpe.br',
+    );
+
+    expect(transferencia.emailEnviado, isTrue);
+    expect(recebida.url.path, '/api/v1/admin/transferencia-master');
+    expect(jsonDecode(recebida.body), {
+      'email_destino': 'novo.professor@ufpe.br',
+      'dias_validade': 7,
+    });
+  });
+
+  test('aceita transferência master autenticada', () async {
+    late http.Request recebida;
+    final cliente = MockClient((requisicao) async {
+      recebida = requisicao;
+      return http.Response('{"estado":"aceita"}', 200);
+    });
+    final servico = ServicoAdministracaoApi(
+      apiBaseUrl: 'http://localhost:8000',
+      autenticacao: _AutenticacaoFake(),
+      cliente: cliente,
+    );
+
+    await servico.aceitarTransferenciaMaster('transferencia-1');
+
+    expect(recebida.method, 'POST');
+    expect(
+      recebida.url.path,
+      '/api/v1/transferencia-master/transferencia-1/aceitar',
+    );
   });
 
   test('preserva mensagem segura da API administrativa', () async {

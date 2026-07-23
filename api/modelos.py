@@ -74,6 +74,27 @@ class SolicitacaoPapelUsuario(ModeloEntrada):
     papel: Literal["usuario", "submaster"]
 
 
+class SolicitacaoTransferenciaMaster(ModeloEntrada):
+    email_destino: str = Field(min_length=3, max_length=254)
+    dias_validade: int = Field(default=7, ge=1, le=30)
+
+    @field_validator("email_destino")
+    @classmethod
+    def validar_email_destino(cls, valor: str) -> str:
+        email = valor.strip().casefold()
+        partes = email.split("@")
+        if (
+            len(partes) != 2
+            or not partes[0]
+            or "." not in partes[1]
+            or partes[1].startswith(".")
+            or partes[1].endswith(".")
+            or any(caractere.isspace() for caractere in email)
+        ):
+            raise ValueError("Informe um e-mail válido.")
+        return email
+
+
 class SolicitacaoTurma(ModeloEntrada):
     codigo: str = Field(min_length=1, max_length=40)
     nome: str = Field(min_length=1, max_length=120)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import UUID
 
@@ -24,6 +25,7 @@ class ProvedorAcessoFake:
         self.estornos: list[tuple[UUID, str]] = []
         self.operacoes_admin: list[tuple[str, dict[str, Any]]] = []
         self.erro_reserva: ErroAPI | None = None
+        self.autenticado_em = datetime.now(timezone.utc)
 
     def autenticar(self, token: str) -> UsuarioAutenticado:
         if token != "token-valido":
@@ -32,7 +34,11 @@ class ProvedorAcessoFake:
                 codigo="TOKEN_INVALIDO",
                 mensagem="Entre novamente para continuar.",
             )
-        return UsuarioAutenticado(id=USUARIO_ID, email="teste@example.com")
+        return UsuarioAutenticado(
+            id=USUARIO_ID,
+            email="teste@example.com",
+            autenticado_em=self.autenticado_em,
+        )
 
     def reservar(
         self,
@@ -163,6 +169,69 @@ class ProvedorAcessoFake:
         self.operacoes_admin.append(("papel", dados))
         return {"id": str(usuario_id), "papel": papel}
 
+    def obter_transferencia_master(
+        self,
+        usuario_id: UUID,
+    ) -> dict[str, Any] | None:
+        self.operacoes_admin.append(
+            ("obter_transferencia", {"usuario_id": usuario_id})
+        )
+        return {
+            "id": str(RESERVA_ID),
+            "master_atual_id": str(USUARIO_ID),
+            "master_atual_email": "master@ufpe.br",
+            "email_destino": "novo.master@ufpe.br",
+            "estado": "pendente",
+            "sou_origem": True,
+            "sou_destino": False,
+        }
+
+    def iniciar_transferencia_master(
+        self,
+        *,
+        ator_id: UUID,
+        email_destino: str,
+        dias_validade: int,
+    ) -> dict[str, Any]:
+        dados = {
+            "ator_id": ator_id,
+            "email_destino": email_destino,
+            "dias_validade": dias_validade,
+        }
+        self.operacoes_admin.append(("iniciar_transferencia", dados))
+        return {
+            "id": str(RESERVA_ID),
+            "email_destino": email_destino,
+            "estado": "pendente",
+            "envio_tipo": "magic_link",
+        }
+
+    def cancelar_transferencia_master(
+        self,
+        *,
+        ator_id: UUID,
+        transferencia_id: UUID,
+    ) -> dict[str, Any]:
+        dados = {
+            "ator_id": ator_id,
+            "transferencia_id": transferencia_id,
+        }
+        self.operacoes_admin.append(("cancelar_transferencia", dados))
+        return {"id": str(transferencia_id), "estado": "cancelada"}
+
+    def aceitar_transferencia_master(
+        self,
+        *,
+        usuario_id: UUID,
+        transferencia_id: UUID,
+    ) -> dict[str, Any]:
+        dados = {
+            "usuario_id": usuario_id,
+            "transferencia_id": transferencia_id,
+        }
+        self.operacoes_admin.append(("aceitar_transferencia", dados))
+        return {"id": str(transferencia_id), "estado": "aceita"}
+
     def listar_turmas(self, ator_id: UUID) -> list[dict[str, Any]]:
         self.operacoes_admin.append(("listar_turmas", {"ator_id": ator_id}))
         return [
@@ -271,7 +340,7 @@ def test_health() -> None:
 
     assert resposta.status_code == 200
     assert resposta.json()["status"] == "ok"
-    assert resposta.json()["api_version"] == "1.3.0"
+    assert resposta.json()["api_version"] == "1.4.0"
     assert resposta.headers["x-content-type-options"] == "nosniff"
 
 
@@ -434,6 +503,15 @@ def test_openapi_publica_endpoints_v1() -> None:
     assert "/api/v1/admin/usuarios/{usuario_id}/acesso" in caminhos
     assert "/api/v1/admin/usuarios/cotas-em-lote" in caminhos
     assert "/api/v1/admin/usuarios/{usuario_id}/papel" in caminhos
+    assert "/api/v1/transferencia-master" in caminhos
+    assert "/api/v1/admin/transferencia-master" in caminhos
+    assert (
+        "/api/v1/admin/transferencia-master/"
+        "{transferencia_id}/cancelar"
+    ) in caminhos
+    assert (
+        "/api/v1/transferencia-master/{transferencia_id}/aceitar"
+    ) in caminhos
     assert "/api/v1/admin/turmas" in caminhos
     assert "/api/v1/admin/convites" in caminhos
     assert "/api/v1/admin/convites/lote" in caminhos
@@ -523,6 +601,84 @@ def test_promove_submaster(provedor: ProvedorAcessoFake) -> None:
 
     assert resposta.status_code == 200
     assert resposta.json()["papel"] == "submaster"
+
+
+def test_inicia_transferencia_master_e_envia_email(
+    provedor: ProvedorAcessoFake,
+) -> None:
+    resposta = client.post(
+        "/api/v1/admin/transferencia-master",
+        headers=CABECALHO_LOGIN,
+        json={
+            "email_destino": "NOVO.MASTER@UFPE.BR",
+            "dias_validade": 7,
+        },
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["envio_email"] == "enviado"
+    assert (
+        "iniciar_transferencia",
+        {
+            "ator_id": USUARIO_ID,
+            "email_destino": "novo.master@ufpe.br",
+            "dias_validade": 7,
+        },
+    ) in provedor.operacoes_admin
+    assert (
+        "enviar_email",
+        {
+            "email": "novo.master@ufpe.br",
+            "tipo": "magic_link",
+        },
+    ) in provedor.operacoes_admin
+
+
+def test_transferencia_master_exige_login_recente(
+    provedor: ProvedorAcessoFake,
+) -> None:
+    provedor.autenticado_em = datetime.now(timezone.utc) - timedelta(hours=1)
+
+    resposta = client.post(
+        "/api/v1/admin/transferencia-master",
+        headers=CABECALHO_LOGIN,
+        json={"email_destino": "novo.master@ufpe.br"},
+    )
+
+    assert resposta.status_code == 403
+    assert resposta.json()["erro"]["codigo"] == "REAUTENTICACAO_NECESSARIA"
+    assert provedor.operacoes_admin == []
+
+
+def test_destinatario_aceita_transferencia_master(
+    provedor: ProvedorAcessoFake,
+) -> None:
+    resposta = client.post(
+        f"/api/v1/transferencia-master/{RESERVA_ID}/aceitar",
+        headers=CABECALHO_LOGIN,
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["estado"] == "aceita"
+    assert provedor.operacoes_admin[-1] == (
+        "aceitar_transferencia",
+        {
+            "usuario_id": USUARIO_ID,
+            "transferencia_id": RESERVA_ID,
+        },
+    )
+
+
+def test_master_cancela_transferencia_pendente(
+    provedor: ProvedorAcessoFake,
+) -> None:
+    resposta = client.patch(
+        f"/api/v1/admin/transferencia-master/{RESERVA_ID}/cancelar",
+        headers=CABECALHO_LOGIN,
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["estado"] == "cancelada"
 
 
 def test_cria_turma_para_convites(provedor: ProvedorAcessoFake) -> None:

@@ -96,6 +96,68 @@ class ServicoAdministracaoApi implements ServicoAdministracao {
   }
 
   @override
+  Future<void> reautenticar(String senha) async {
+    final email = autenticacao.usuarioAtual?.email;
+    if (email == null || email.isEmpty) {
+      throw const FalhaAdministracao(
+        'Sua sessão não possui um e-mail válido.',
+        codigo: 'SESSAO_INVALIDA',
+      );
+    }
+    try {
+      await autenticacao.entrar(email: email, senha: senha);
+    } on FalhaAutenticacao catch (erro) {
+      throw FalhaAdministracao(
+        erro.mensagem,
+        codigo: 'REAUTENTICACAO_FALHOU',
+      );
+    }
+  }
+
+  @override
+  Future<TransferenciaMaster?> obterTransferenciaMaster() async {
+    final dados = await _requisitar('GET', '/api/v1/transferencia-master');
+    if (dados == null) return null;
+    if (dados is! Map) throw _respostaInvalida();
+    return TransferenciaMaster.deJson(Map<String, dynamic>.from(dados));
+  }
+
+  @override
+  Future<TransferenciaMaster> iniciarTransferenciaMaster({
+    required String emailDestino,
+    int diasValidade = 7,
+  }) async {
+    final dados = await _requisitar(
+      'POST',
+      '/api/v1/admin/transferencia-master',
+      {
+        'email_destino': emailDestino,
+        'dias_validade': diasValidade,
+      },
+    );
+    if (dados is! Map) throw _respostaInvalida();
+    return TransferenciaMaster.deJson(
+      Map<String, dynamic>.from(dados),
+    );
+  }
+
+  @override
+  Future<void> cancelarTransferenciaMaster(String transferenciaId) async {
+    await _requisitar(
+      'PATCH',
+      '/api/v1/admin/transferencia-master/$transferenciaId/cancelar',
+    );
+  }
+
+  @override
+  Future<void> aceitarTransferenciaMaster(String transferenciaId) async {
+    await _requisitar(
+      'POST',
+      '/api/v1/transferencia-master/$transferenciaId/aceitar',
+    );
+  }
+
+  @override
   Future<List<TurmaAdministrada>> listarTurmas() async {
     final dados = await _requisitar('GET', '/api/v1/admin/turmas');
     if (dados is! List) throw _respostaInvalida();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../administracao/modelos_administracao.dart';
 import '../administracao/servico_administracao.dart';
 import '../administracao/tela_administracao.dart';
 import '../analise/servico_analise.dart';
@@ -30,7 +31,9 @@ class TelaConta extends StatefulWidget {
 class _TelaContaState extends State<TelaConta> {
   late Future<PerfilUsuario> _perfil;
   PerfilUsuario? _perfilAtual;
+  TransferenciaMaster? _transferenciaMaster;
   bool _saindo = false;
+  bool _aceitandoTransferencia = false;
 
   @override
   void initState() {
@@ -41,6 +44,7 @@ class _TelaContaState extends State<TelaConta> {
   void _recarregar() {
     setState(() {
       _perfilAtual = null;
+      _transferenciaMaster = null;
       _perfil = _buscarPerfil();
     });
   }
@@ -49,8 +53,20 @@ class _TelaContaState extends State<TelaConta> {
     final perfil = await widget.servicoAutenticacao.carregarPerfil(
       widget.usuario.id,
     );
+    TransferenciaMaster? transferencia;
+    final administracao = widget.servicoAdministracao;
+    if (administracao != null) {
+      try {
+        transferencia = await administracao.obterTransferenciaMaster();
+      } on FalhaAdministracao {
+        transferencia = null;
+      }
+    }
     if (mounted) {
-      setState(() => _perfilAtual = perfil);
+      setState(() {
+        _perfilAtual = perfil;
+        _transferenciaMaster = transferencia;
+      });
     }
     return perfil;
   }
@@ -111,6 +127,9 @@ class _TelaContaState extends State<TelaConta> {
           }
           return _ConteudoConta(
             perfil: snapshot.data!,
+            transferenciaMaster: _transferenciaParaAceitar,
+            aceitandoTransferencia: _aceitandoTransferencia,
+            onAceitarTransferencia: _aceitarTransferenciaMaster,
             onNovaAnalise: () => _abrirAnalise(snapshot.data!),
           );
         },
@@ -124,6 +143,68 @@ class _TelaContaState extends State<TelaConta> {
         perfil != null &&
         perfil.estado == EstadoConta.ativo &&
         perfil.papel != PapelUsuario.usuario;
+  }
+
+  TransferenciaMaster? get _transferenciaParaAceitar {
+    final transferencia = _transferenciaMaster;
+    if (transferencia == null ||
+        !transferencia.pendente ||
+        !transferencia.souDestino) {
+      return null;
+    }
+    return transferencia;
+  }
+
+  Future<void> _aceitarTransferenciaMaster() async {
+    final transferencia = _transferenciaParaAceitar;
+    final administracao = widget.servicoAdministracao;
+    if (transferencia == null ||
+        administracao == null ||
+        _aceitandoTransferencia) {
+      return;
+    }
+
+    final confirmou = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Aceitar controle master?'),
+        content: Text(
+          'Você passará a possuir o controle superior do aplicativo. '
+          '${transferencia.masterAtualEmail} continuará com acesso como '
+          'submaster.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Agora não'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Aceitar controle'),
+          ),
+        ],
+      ),
+    );
+    if (confirmou != true || !mounted) return;
+
+    setState(() => _aceitandoTransferencia = true);
+    try {
+      await administracao.aceitarTransferenciaMaster(transferencia.id);
+      if (!mounted) return;
+      _recarregar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Transferência concluída. Agora você é o master.'),
+        ),
+      );
+    } on FalhaAdministracao catch (erro) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(erro.mensagem)));
+    } finally {
+      if (mounted) setState(() => _aceitandoTransferencia = false);
+    }
   }
 
   Future<void> _abrirAnalise(PerfilUsuario perfil) async {
@@ -161,10 +242,16 @@ class _TelaContaState extends State<TelaConta> {
 class _ConteudoConta extends StatelessWidget {
   const _ConteudoConta({
     required this.perfil,
+    required this.transferenciaMaster,
+    required this.aceitandoTransferencia,
+    required this.onAceitarTransferencia,
     required this.onNovaAnalise,
   });
 
   final PerfilUsuario perfil;
+  final TransferenciaMaster? transferenciaMaster;
+  final bool aceitandoTransferencia;
+  final VoidCallback onAceitarTransferencia;
   final VoidCallback onNovaAnalise;
 
   @override
@@ -185,6 +272,48 @@ class _ConteudoConta extends StatelessWidget {
                 descricao: perfil.email,
               ),
               const SizedBox(height: 18),
+              if (transferenciaMaster != null) ...[
+                CartaoInstitucional(
+                  destaque: true,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.workspace_premium_outlined,
+                        size: 38,
+                        color: CoresInstitucionais.vinho,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Convite para assumir o controle master',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${transferenciaMaster!.masterAtualEmail} indicou '
+                        'você como o próximo responsável pelo aplicativo. '
+                        'A troca só acontecerá quando você aceitar.',
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton.icon(
+                        onPressed: aceitandoTransferencia
+                            ? null
+                            : onAceitarTransferencia,
+                        icon: aceitandoTransferencia
+                            ? const SizedBox.square(
+                                dimension: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.check_circle_outline),
+                        label: const Text('Aceitar controle master'),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
+              ],
               CartaoInstitucional(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

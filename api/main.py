@@ -30,11 +30,12 @@ from .modelos import (
     SolicitacaoEstadoUsuario,
     SolicitacaoPapelUsuario,
     SolicitacaoResolucao,
+    SolicitacaoTransferenciaMaster,
     SolicitacaoTurma,
 )
 
 
-API_VERSION = "1.3.0"
+API_VERSION = "1.4.0"
 
 
 def _origens_permitidas() -> list[str]:
@@ -415,6 +416,108 @@ def alterar_papel_usuario(
         ator_id=usuario.id,
         usuario_id=usuario_id,
         papel=solicitacao.papel,
+    )
+
+
+@app.get(
+    "/api/v1/transferencia-master",
+    response_model=dict[str, Any] | None,
+    tags=["administração"],
+)
+def obter_transferencia_master(
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> dict[str, Any] | None:
+    return provedor.obter_transferencia_master(usuario.id)
+
+
+@app.post(
+    "/api/v1/admin/transferencia-master",
+    response_model=dict[str, Any],
+    tags=["administração"],
+)
+def iniciar_transferencia_master(
+    solicitacao: SolicitacaoTransferenciaMaster,
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> dict[str, Any]:
+    if not usuario.autenticacao_recente():
+        raise ErroAPI(
+            status_code=403,
+            codigo="REAUTENTICACAO_NECESSARIA",
+            mensagem=(
+                "Confirme sua senha novamente antes de transferir "
+                "o controle master."
+            ),
+        )
+    resultado = provedor.iniciar_transferencia_master(
+        ator_id=usuario.id,
+        email_destino=solicitacao.email_destino,
+        dias_validade=solicitacao.dias_validade,
+    )
+    try:
+        provedor.enviar_email_acesso(
+            email=str(resultado["email_destino"]),
+            tipo=str(resultado["envio_tipo"]),
+        )
+        return {**resultado, "envio_email": "enviado"}
+    except (KeyError, ErroAPI):
+        return {**resultado, "envio_email": "falhou"}
+
+
+@app.patch(
+    "/api/v1/admin/transferencia-master/{transferencia_id}/cancelar",
+    response_model=dict[str, Any],
+    tags=["administração"],
+)
+def cancelar_transferencia_master(
+    transferencia_id: UUID,
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> dict[str, Any]:
+    return provedor.cancelar_transferencia_master(
+        ator_id=usuario.id,
+        transferencia_id=transferencia_id,
+    )
+
+
+@app.post(
+    "/api/v1/transferencia-master/{transferencia_id}/aceitar",
+    response_model=dict[str, Any],
+    tags=["administração"],
+)
+def aceitar_transferencia_master(
+    transferencia_id: UUID,
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> dict[str, Any]:
+    return provedor.aceitar_transferencia_master(
+        usuario_id=usuario.id,
+        transferencia_id=transferencia_id,
     )
 
 

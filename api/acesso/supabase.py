@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from datetime import datetime, timedelta, timezone
 from math import isfinite
 from dataclasses import dataclass
 from typing import Any, Protocol
@@ -77,6 +78,18 @@ class ConfiguracaoSupabase:
 class UsuarioAutenticado:
     id: UUID
     email: str | None
+    autenticado_em: datetime | None = None
+
+    def autenticacao_recente(
+        self,
+        intervalo: timedelta = timedelta(minutes=5),
+    ) -> bool:
+        if self.autenticado_em is None:
+            return False
+        momento = self.autenticado_em
+        if momento.tzinfo is None:
+            momento = momento.replace(tzinfo=timezone.utc)
+        return momento >= datetime.now(timezone.utc) - intervalo
 
 
 class ProvedorAcesso(Protocol):
@@ -132,6 +145,33 @@ class ProvedorAcesso(Protocol):
         ator_id: UUID,
         usuario_id: UUID,
         papel: str,
+    ) -> dict[str, Any]: ...
+
+    def obter_transferencia_master(
+        self,
+        usuario_id: UUID,
+    ) -> dict[str, Any] | None: ...
+
+    def iniciar_transferencia_master(
+        self,
+        *,
+        ator_id: UUID,
+        email_destino: str,
+        dias_validade: int,
+    ) -> dict[str, Any]: ...
+
+    def cancelar_transferencia_master(
+        self,
+        *,
+        ator_id: UUID,
+        transferencia_id: UUID,
+    ) -> dict[str, Any]: ...
+
+    def aceitar_transferencia_master(
+        self,
+        *,
+        usuario_id: UUID,
+        transferencia_id: UUID,
     ) -> dict[str, Any]: ...
 
     def listar_turmas(self, ator_id: UUID) -> list[dict[str, Any]]: ...
@@ -227,7 +267,13 @@ class ClienteSupabase:
                 mensagem="O provedor de login retornou uma resposta inválida.",
             ) from erro
 
-        return UsuarioAutenticado(id=usuario_id, email=email)
+        return UsuarioAutenticado(
+            id=usuario_id,
+            email=email,
+            autenticado_em=_interpretar_data_auth(
+                dados.get("last_sign_in_at")
+            ),
+        )
 
     def reservar(
         self,
@@ -344,6 +390,62 @@ class ClienteSupabase:
                 "p_ator_id": str(ator_id),
                 "p_usuario_id": str(usuario_id),
                 "p_papel": papel,
+            },
+        )
+
+    def obter_transferencia_master(
+        self,
+        usuario_id: UUID,
+    ) -> dict[str, Any] | None:
+        dados = self._rpc_json(
+            "obter_transferencia_master",
+            {"p_usuario_id": str(usuario_id)},
+        )
+        if dados is not None and not isinstance(dados, dict):
+            raise _erro_resposta_controle_invalida()
+        return dados
+
+    def iniciar_transferencia_master(
+        self,
+        *,
+        ator_id: UUID,
+        email_destino: str,
+        dias_validade: int,
+    ) -> dict[str, Any]:
+        return self._rpc(
+            "iniciar_transferencia_master",
+            {
+                "p_ator_id": str(ator_id),
+                "p_email_destino": email_destino,
+                "p_dias_validade": dias_validade,
+            },
+        )
+
+    def cancelar_transferencia_master(
+        self,
+        *,
+        ator_id: UUID,
+        transferencia_id: UUID,
+    ) -> dict[str, Any]:
+        return self._rpc(
+            "cancelar_transferencia_master",
+            {
+                "p_ator_id": str(ator_id),
+                "p_transferencia_id": str(transferencia_id),
+            },
+        )
+
+    def aceitar_transferencia_master(
+        self,
+        *,
+        usuario_id: UUID,
+        transferencia_id: UUID,
+    ) -> dict[str, Any]:
+        return self._rpc(
+            "aceitar_transferencia_master",
+            {
+                "p_usuario_id": str(usuario_id),
+                "p_transferencia_id": str(transferencia_id),
             },
         )
 
@@ -520,6 +622,18 @@ def _erro_token_invalido() -> ErroAPI:
     )
 
 
+def _interpretar_data_auth(valor: Any) -> datetime | None:
+    if not isinstance(valor, str) or not valor.strip():
+        return None
+    try:
+        momento = datetime.fromisoformat(valor.strip().replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if momento.tzinfo is None:
+        return momento.replace(tzinfo=timezone.utc)
+    return momento.astimezone(timezone.utc)
+
+
 def _erro_resposta_controle_invalida() -> ErroAPI:
     return ErroAPI(
         status_code=503,
@@ -554,6 +668,42 @@ def _traduzir_erro_rpc(resposta: Any) -> ErroAPI:
         mensagem = ""
 
     normalizada = mensagem.casefold()
+    if "transferência master não encontrada" in normalizada:
+        return ErroAPI(
+            status_code=404,
+            codigo="TRANSFERENCIA_MASTER_NAO_ENCONTRADA",
+            mensagem="A transferência de controle não foi encontrada.",
+        )
+    if "transferência master expirou" in normalizada:
+        return ErroAPI(
+            status_code=410,
+            codigo="TRANSFERENCIA_MASTER_EXPIRADA",
+            mensagem="A transferência de controle expirou.",
+        )
+    if (
+        "já existe uma transferência master pendente" in normalizada
+        or "transferência master não está pendente" in normalizada
+    ):
+        return ErroAPI(
+            status_code=409,
+            codigo="TRANSFERENCIA_MASTER_CONFLITO",
+            mensagem="Já existe uma transferência de controle em andamento.",
+        )
+    if "somente o destinatário" in normalizada:
+        return ErroAPI(
+            status_code=403,
+            codigo="TRANSFERENCIA_MASTER_DESTINATARIO_INVALIDO",
+            mensagem="Somente o destinatário pode aceitar a transferência.",
+        )
+    if (
+        "destinatário precisa confirmar" in normalizada
+        or "master de origem não está mais disponível" in normalizada
+    ):
+        return ErroAPI(
+            status_code=409,
+            codigo="TRANSFERENCIA_MASTER_INDISPONIVEL",
+            mensagem="A transferência de controle não pode ser concluída.",
+        )
     if "permissão administrativa negada" in normalizada:
         return ErroAPI(
             status_code=403,

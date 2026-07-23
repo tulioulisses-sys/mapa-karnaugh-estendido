@@ -28,7 +28,11 @@ class HTTPFake:
         self.posts: list[dict[str, Any]] = []
         self.resposta_get = RespostaFake(
             200,
-            {"id": str(USUARIO_ID), "email": "Teste@Example.com"},
+            {
+                "id": str(USUARIO_ID),
+                "email": "Teste@Example.com",
+                "last_sign_in_at": "2026-07-23T10:30:00Z",
+            },
         )
         self.resposta_post = RespostaFake(
             200,
@@ -74,6 +78,8 @@ def test_autenticacao_valida_token_no_servidor_supabase(
 
     assert usuario.id == USUARIO_ID
     assert usuario.email == "teste@example.com"
+    assert usuario.autenticado_em is not None
+    assert usuario.autenticado_em.isoformat() == "2026-07-23T10:30:00+00:00"
     chamada = http.gets[0]
     assert chamada["url"].endswith("/auth/v1/user")
     assert chamada["headers"]["apikey"] == "sb_publishable_teste"
@@ -184,6 +190,37 @@ def test_convites_em_lote_serializam_perfil_turma_e_cota(
     )
     assert chamada["json"]["p_analises_iniciais"] == 3
     assert chamada["json"]["p_turma_id"] == str(USUARIO_ID)
+
+
+def test_transferencia_master_serializa_destino_e_validade(
+    configuracao: ConfiguracaoSupabase,
+) -> None:
+    http = HTTPFake()
+    http.resposta_post = RespostaFake(
+        200,
+        {
+            "id": str(RESERVA_ID),
+            "email_destino": "novo.master@ufpe.br",
+            "estado": "pendente",
+        },
+    )
+    cliente = ClienteSupabase(configuracao, cliente_http=http)
+
+    cliente.iniciar_transferencia_master(
+        ator_id=USUARIO_ID,
+        email_destino="novo.master@ufpe.br",
+        dias_validade=7,
+    )
+
+    chamada = http.posts[0]
+    assert chamada["url"].endswith(
+        "/rest/v1/rpc/iniciar_transferencia_master"
+    )
+    assert chamada["json"] == {
+        "p_ator_id": str(USUARIO_ID),
+        "p_email_destino": "novo.master@ufpe.br",
+        "p_dias_validade": 7,
+    }
 
 
 def test_email_de_convite_usa_service_role_somente_no_backend(

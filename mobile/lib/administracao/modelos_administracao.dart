@@ -135,3 +135,47 @@ class ResultadoConvitesLote {
   final int emailsEnviados;
   final int emailsComFalha;
 }
+
+class TransferenciaMaster {
+  const TransferenciaMaster({
+    required this.id,
+    required this.masterAtualId,
+    required this.masterAtualEmail,
+    required this.emailDestino,
+    required this.usuarioDestinoId,
+    required this.estado,
+    required this.expiraEm,
+    required this.souOrigem,
+    required this.souDestino,
+    required this.envioEmail,
+  });
+
+  factory TransferenciaMaster.deJson(Map<String, dynamic> json) {
+    return TransferenciaMaster(
+      id: json['id']?.toString() ?? '',
+      masterAtualId: json['master_atual_id']?.toString() ?? '',
+      masterAtualEmail: json['master_atual_email']?.toString() ?? '',
+      emailDestino: json['email_destino']?.toString() ?? '',
+      usuarioDestinoId: json['usuario_destino_id']?.toString(),
+      estado: json['estado']?.toString() ?? '',
+      expiraEm: DateTime.tryParse(json['expira_em']?.toString() ?? ''),
+      souOrigem: json['sou_origem'] == true,
+      souDestino: json['sou_destino'] == true,
+      envioEmail: json['envio_email']?.toString(),
+    );
+  }
+
+  final String id;
+  final String masterAtualId;
+  final String masterAtualEmail;
+  final String emailDestino;
+  final String? usuarioDestinoId;
+  final String estado;
+  final DateTime? expiraEm;
+  final bool souOrigem;
+  final bool souDestino;
+  final String? envioEmail;
+
+  bool get pendente => estado == 'pendente';
+  bool get emailEnviado => envioEmail == 'enviado';
+}

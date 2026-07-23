@@ -26,6 +26,7 @@ class _AdministracaoFake implements ServicoAdministracao {
     ),
   ];
   final operacoes = <String>[];
+  TransferenciaMaster? transferencia;
 
   @override
   Future<List<UsuarioAdministrado>> listarUsuarios() async => usuarios;
@@ -52,6 +53,47 @@ class _AdministracaoFake implements ServicoAdministracao {
   @override
   Future<void> alterarPapel(String usuarioId, PapelUsuario papel) async {
     operacoes.add('papel:$usuarioId:${papel.name}');
+  }
+
+  @override
+  Future<void> reautenticar(String senha) async {
+    operacoes.add('reautenticar:$senha');
+  }
+
+  @override
+  Future<TransferenciaMaster?> obterTransferenciaMaster() async =>
+      transferencia;
+
+  @override
+  Future<TransferenciaMaster> iniciarTransferenciaMaster({
+    required String emailDestino,
+    int diasValidade = 7,
+  }) async {
+    operacoes.add('transferir:$emailDestino:$diasValidade');
+    transferencia = TransferenciaMaster(
+      id: 'transferencia-1',
+      masterAtualId: 'master-1',
+      masterAtualEmail: 'professor@ufpe.br',
+      emailDestino: emailDestino,
+      usuarioDestinoId: null,
+      estado: 'pendente',
+      expiraEm: DateTime.utc(2026, 7, 30),
+      souOrigem: true,
+      souDestino: false,
+      envioEmail: 'enviado',
+    );
+    return transferencia!;
+  }
+
+  @override
+  Future<void> cancelarTransferenciaMaster(String transferenciaId) async {
+    operacoes.add('cancelar-transferencia:$transferenciaId');
+    transferencia = null;
+  }
+
+  @override
+  Future<void> aceitarTransferenciaMaster(String transferenciaId) async {
+    operacoes.add('aceitar-transferencia:$transferenciaId');
   }
 
   @override
@@ -161,6 +203,7 @@ void main() {
     expect(find.text('Tornar submaster'), findsOneWidget);
     expect(find.text('Convidar por e-mail'), findsOneWidget);
     expect(find.text('Criar turma'), findsOneWidget);
+    expect(find.text('Transferir controle master'), findsOneWidget);
   });
 
   testWidgets('master aprova cadastro pendente', (tester) async {
