@@ -264,13 +264,16 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
               spacing: 8,
               runSpacing: 8,
               children: turmasAtivas
-                  .map(
-                    (turma) => Chip(
-                      avatar: const Icon(Icons.groups_outlined, size: 18),
-                      label: Text(
-                        '${turma.codigo} · ${turma.quantidadeAlunos} aluno(s)',
+                  .map<Widget>(
+                    (turma) => Tooltip(
+                      message: turma.nome,
+                      child: Chip(
+                        avatar: const Icon(Icons.groups_outlined, size: 18),
+                        label: Text(
+                          '${turma.codigo} · '
+                          '${turma.quantidadeAlunos} aluno(s)',
+                        ),
                       ),
-                      tooltip: turma.nome,
                     ),
                   )
                   .toList(growable: false),
@@ -302,7 +305,7 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
       padding: const EdgeInsets.only(bottom: 9),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: CoresInstitucionais.fundo,
+          color: CoresInstitucionais.creme,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: CoresInstitucionais.borda),
         ),
