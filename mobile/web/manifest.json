@@ -1,12 +1,16 @@
 {
-    "name": "mapa_karnaugh_app",
-    "short_name": "mapa_karnaugh_app",
+    "name": "Mapa de Karnaugh Estendido",
+    "short_name": "Karnaugh CFM",
+    "id": ".",
     "start_url": ".",
+    "scope": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#F7F5F0",
+    "theme_color": "#7A1024",
+    "description": "Ferramenta acadêmica para o Método do Mapa de Karnaugh Estendido.",
+    "orientation": "any",
+    "lang": "pt-BR",
+    "categories": ["education", "utilities"],
     "prefer_related_applications": false,
     "icons": [
         {

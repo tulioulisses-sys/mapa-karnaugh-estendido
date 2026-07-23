@@ -1,0 +1,4 @@
+storePassword=SUBSTITUA_PELA_SENHA_DO_ARQUIVO
+keyPassword=SUBSTITUA_PELA_SENHA_DA_CHAVE
+keyAlias=mapa-karnaugh
+storeFile=C:/chaves-mapa-karnaugh/mapa-karnaugh-upload.jks

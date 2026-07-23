@@ -76,3 +76,55 @@ O Web Service gratuito pode adormecer quando fica sem tráfego. O Flutter envia
 uma chamada preventiva à rota `/health` ao iniciar e aceita uma espera maior nas
 requisições de análise e administração. O primeiro acesso depois de um período
 ocioso ainda pode demorar; os seguintes tendem a ser imediatos.
+
+## APK Android assinado
+
+O aplicativo usa o identificador permanente
+`br.ufpe.cfm.mapa_karnaugh_app`. Para que as atualizações sejam reconhecidas
+como pertencentes ao mesmo aplicativo, todos os APKs de produção precisam ser
+assinados com a mesma chave.
+
+Crie a chave uma única vez, fora do repositório:
+
+```powershell
+New-Item -ItemType Directory -Force C:\chaves-mapa-karnaugh | Out-Null
+keytool -genkeypair -v `
+  -keystore C:\chaves-mapa-karnaugh\mapa-karnaugh-upload.jks `
+  -keyalg RSA -keysize 2048 -validity 10000 `
+  -alias mapa-karnaugh
+```
+
+Se `keytool` não estiver no `Path`, use o executável instalado com o Android
+Studio:
+
+```powershell
+& "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" `
+  -genkeypair -v `
+  -keystore C:\chaves-mapa-karnaugh\mapa-karnaugh-upload.jks `
+  -keyalg RSA -keysize 2048 -validity 10000 `
+  -alias mapa-karnaugh
+```
+
+Copie `mobile\android\key.properties.example` para
+`mobile\android\key.properties` e preencha as duas senhas. O caminho do arquivo
+de chave pode permanecer como está no exemplo. Esses dois arquivos são
+ignorados pelo Git e nunca devem ser enviados ao repositório.
+
+Guarde cópias seguras do `.jks`, das senhas e do alias. Sem a mesma chave, não é
+possível publicar uma atualização por cima do aplicativo já instalado.
+
+Com `mobile\config\dev.json` apontando para os serviços de produção, gere o APK:
+
+```powershell
+cd C:\projetos\mapa-karnaugh-estendido\mobile
+flutter build apk --release --dart-define-from-file=config\dev.json
+```
+
+O arquivo para distribuição será:
+
+```text
+mobile\build\app\outputs\flutter-apk\app-release.apk
+```
+
+Antes de uma nova versão, aumente o número após `+` no campo `version` de
+`mobile/pubspec.yaml`, por exemplo de `1.0.0+1` para `1.0.1+2`.
