@@ -1,0 +1,5226 @@
+{
+  "casos": [
+    {
+      "analise": {
+        "atuadores": [
+          "A",
+          "B"
+        ],
+        "atuadores_multiposicao": [],
+        "entradas_externas": [],
+        "estado_inicial": {
+          "A": 0,
+          "B": 0
+        },
+        "etapas": [
+          [
+            "A+"
+          ],
+          [
+            "B+"
+          ],
+          [
+            "B-"
+          ],
+          [
+            "A-"
+          ]
+        ],
+        "loops": [],
+        "possui_atuador_multiposicao": false,
+        "possui_loop": false,
+        "quantidade_etapas": 4,
+        "sensores_iniciais": {
+          "A": "a0",
+          "B": "b0"
+        },
+        "sensores_por_atuador": {
+          "A": [
+            "a0",
+            "a1"
+          ],
+          "B": [
+            "b0",
+            "b1"
+          ]
+        },
+        "sequencia_formatada": "A+ → B+ → B- → A-",
+        "sequencia_normalizada": "A+ até a1, B+ até b1, B- até b0, A- até a0",
+        "sinal_partida": "S"
+      },
+      "descricao": "Sequência linear com dois atuadores",
+      "id": "simples",
+      "resolucao": {
+        "atuadores": [
+          "A",
+          "B"
+        ],
+        "atuadores_multiposicao": [],
+        "entradas_externas": [],
+        "equacoes": {
+          "A+": "S.x0",
+          "A-": "b0.x",
+          "B+": "a1.x0",
+          "B-": "x",
+          "X+": "b1",
+          "X-": "a0"
+        },
+        "equacoes_comandos": {
+          "A+": "S.x0",
+          "A-": "b0.x",
+          "B+": "a1.x0",
+          "B-": "x",
+          "X+": "b1",
+          "X-": "a0"
+        },
+        "equacoes_fisicas": {
+          "A+": "S.x0",
+          "A-": "b0.x",
+          "B+": "a1.x0",
+          "B-": "x",
+          "X+": "b1",
+          "X-": "a0"
+        },
+        "equacoes_memorias": {
+          "X": "(b1 + x).¬(a0)"
+        },
+        "estado_inicial": {
+          "A": 0,
+          "B": 0
+        },
+        "etapas": [
+          {
+            "codigo_memorias": {
+              "X": 0
+            },
+            "comando_texto": "A+",
+            "comandos": [
+              "A+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 0,
+              "B": 0
+            },
+            "estado_antes_texto": "a0 · b0",
+            "estado_depois": {
+              "A": 1,
+              "B": 0
+            },
+            "estado_depois_texto": "a1 · b0",
+            "estado_logico_antes": {
+              "A": 0,
+              "B": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "B": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "A",
+                "comando": "A+",
+                "requer_parada": false,
+                "saida": "A+",
+                "sensor_destino": "a1",
+                "sensor_origem": "a0",
+                "sentido": "+"
+              }
+            ],
+            "numero": 1,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "A+"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a0",
+              "B": "b0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {
+              "X": 0
+            },
+            "comando_texto": "B+",
+            "comandos": [
+              "B+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 0
+            },
+            "estado_antes_texto": "a1 · b0",
+            "estado_depois": {
+              "A": 1,
+              "B": 1
+            },
+            "estado_depois_texto": "a1 · b1",
+            "estado_logico_antes": {
+              "A": 1,
+              "B": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "B": 1
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "B",
+                "comando": "B+",
+                "requer_parada": false,
+                "saida": "B+",
+                "sensor_destino": "b1",
+                "sensor_origem": "b0",
+                "sentido": "+"
+              }
+            ],
+            "numero": 2,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "B+"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b1"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {
+              "X": 1
+            },
+            "comando_texto": "B-",
+            "comandos": [
+              "B-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 1
+            },
+            "estado_antes_texto": "a1 · b1",
+            "estado_depois": {
+              "A": 1,
+              "B": 0
+            },
+            "estado_depois_texto": "a1 · b0",
+            "estado_logico_antes": {
+              "A": 1,
+              "B": 1
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "B": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 1,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "B",
+                "comando": "B-",
+                "requer_parada": false,
+                "saida": "B-",
+                "sensor_destino": "b0",
+                "sensor_origem": "b1",
+                "sentido": "-"
+              }
+            ],
+            "numero": 3,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "B-"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b1"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {
+              "X": 1
+            },
+            "comando_texto": "A-",
+            "comandos": [
+              "A-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 0
+            },
+            "estado_antes_texto": "a1 · b0",
+            "estado_depois": {
+              "A": 0,
+              "B": 0
+            },
+            "estado_depois_texto": "a0 · b0",
+            "estado_logico_antes": {
+              "A": 1,
+              "B": 0
+            },
+            "estado_logico_depois": {
+              "A": 0,
+              "B": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 1,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "A",
+                "comando": "A-",
+                "requer_parada": false,
+                "saida": "A-",
+                "sensor_destino": "a0",
+                "sensor_origem": "a1",
+                "sentido": "-"
+              }
+            ],
+            "numero": 4,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "A-"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a0",
+              "B": "b0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          }
+        ],
+        "eventos_mapa": [
+          {
+            "codigo_memorias": {
+              "X": 0
+            },
+            "comandos": [
+              "A+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 0
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 0
+            },
+            "destino_memoria": {
+              "X": 0
+            },
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b0"
+            },
+            "destino_texto": "a1 · b0",
+            "estado_fisico": {
+              "A": 0,
+              "B": 0
+            },
+            "estado_logico": {
+              "A": 0,
+              "B": 0
+            },
+            "estado_texto": "a0 · b0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 0,
+            "indice": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "A+"
+            ],
+            "saidas_fisicas": [
+              "A+"
+            ],
+            "sensores_ativos": {
+              "A": "a0",
+              "B": "b0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {
+              "X": 0
+            },
+            "comandos": [
+              "B+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 1
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 1
+            },
+            "destino_memoria": {
+              "X": 0
+            },
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b1"
+            },
+            "destino_texto": "a1 · b1",
+            "estado_fisico": {
+              "A": 1,
+              "B": 0
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 0
+            },
+            "estado_texto": "a1 · b0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 1,
+            "indice": 1,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "B+"
+            ],
+            "saidas_fisicas": [
+              "B+"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {
+              "X": 0
+            },
+            "comandos": [
+              "X+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 1
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 1
+            },
+            "destino_memoria": {
+              "X": 1
+            },
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b1"
+            },
+            "destino_texto": "a1 · b1",
+            "estado_fisico": {
+              "A": 1,
+              "B": 1
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 1
+            },
+            "estado_texto": "a1 · b1",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": null,
+            "indice": 2,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "X+"
+            ],
+            "saidas_fisicas": [
+              "X+"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b1"
+            },
+            "tipo": "memoria"
+          },
+          {
+            "codigo_memorias": {
+              "X": 1
+            },
+            "comandos": [
+              "B-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 0
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 0
+            },
+            "destino_memoria": {
+              "X": 1
+            },
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b0"
+            },
+            "destino_texto": "a1 · b0",
+            "estado_fisico": {
+              "A": 1,
+              "B": 1
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 1
+            },
+            "estado_texto": "a1 · b1",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 2,
+            "indice": 3,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "B-"
+            ],
+            "saidas_fisicas": [
+              "B-"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b1"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {
+              "X": 1
+            },
+            "comandos": [
+              "A-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 0,
+              "B": 0
+            },
+            "destino_logico": {
+              "A": 0,
+              "B": 0
+            },
+            "destino_memoria": {
+              "X": 1
+            },
+            "destino_sensores_ativos": {
+              "A": "a0",
+              "B": "b0"
+            },
+            "destino_texto": "a0 · b0",
+            "estado_fisico": {
+              "A": 1,
+              "B": 0
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 0
+            },
+            "estado_texto": "a1 · b0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 3,
+            "indice": 4,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "A-"
+            ],
+            "saidas_fisicas": [
+              "A-"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {
+              "X": 1
+            },
+            "comandos": [
+              "X-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 0,
+              "B": 0
+            },
+            "destino_logico": {
+              "A": 0,
+              "B": 0
+            },
+            "destino_memoria": {
+              "X": 0
+            },
+            "destino_sensores_ativos": {
+              "A": "a0",
+              "B": "b0"
+            },
+            "destino_texto": "a0 · b0",
+            "estado_fisico": {
+              "A": 0,
+              "B": 0
+            },
+            "estado_logico": {
+              "A": 0,
+              "B": 0
+            },
+            "estado_texto": "a0 · b0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": null,
+            "indice": 5,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "X-"
+            ],
+            "saidas_fisicas": [
+              "X-"
+            ],
+            "sensores_ativos": {
+              "A": "a0",
+              "B": "b0"
+            },
+            "tipo": "memoria"
+          }
+        ],
+        "loops": [],
+        "mapa_loop_pendente": false,
+        "mapa_multiposicao_pendente": false,
+        "mapa_requer_adaptacao": false,
+        "memorias": [
+          "X"
+        ],
+        "observacoes": [
+          "Quantidade encontrada: 1 memória(s).",
+          "Foram testadas 2 colocações de memória.",
+          "As expressões são mantidas na ordem de qualificação da apostila; não é feita uma minimização algébrica global que altere o método."
+        ],
+        "possui_atuador_multiposicao": false,
+        "possui_fluxo_condicional": false,
+        "possui_loop": false,
+        "quantidade_memorias": 1,
+        "resolucao": [
+          {
+            "Comando": "A+",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "S.x0",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "A-",
+            "Equação final": "A+ = S.x0",
+            "Equação qualificada": "A+ = S.x0",
+            "Passo": 1,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "B+",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "a1",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "B-",
+            "Equação final": "B+ = a1.x0",
+            "Equação qualificada": "B+ = a1.x0",
+            "Passo": 2,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "x0",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "X+",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "b1",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "X-",
+            "Equação final": "X+ = b1",
+            "Equação qualificada": "X+ = b1",
+            "Passo": 3,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "B-",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "x",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "B+",
+            "Equação final": "B- = x",
+            "Equação qualificada": "B- = x",
+            "Passo": 4,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "A-",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "b0",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "A+",
+            "Equação final": "A- = b0.x",
+            "Equação qualificada": "A- = b0.x",
+            "Passo": 5,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "x",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "X-",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "a0",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "X+",
+            "Equação final": "X- = a0",
+            "Equação qualificada": "X- = a0",
+            "Passo": 6,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          }
+        ],
+        "resolucao_compacta": [
+          {
+            "Comando": "A+",
+            "Condição básica": "S.x0",
+            "Equação final": "A+ = S.x0",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          },
+          {
+            "Comando": "B+",
+            "Condição básica": "a1",
+            "Equação final": "B+ = a1.x0",
+            "Pontos perigosos encontrados": "a1 · b1 · x1; a1 · b0 · x1",
+            "Qualificador acrescentado": "x0"
+          },
+          {
+            "Comando": "X+",
+            "Condição básica": "b1",
+            "Equação final": "X+ = b1",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          },
+          {
+            "Comando": "B-",
+            "Condição básica": "x",
+            "Equação final": "B- = x",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          },
+          {
+            "Comando": "A-",
+            "Condição básica": "b0",
+            "Equação final": "A- = b0.x",
+            "Pontos perigosos encontrados": "a0 · b0 · x0; a1 · b0 · x0",
+            "Qualificador acrescentado": "x"
+          },
+          {
+            "Comando": "X-",
+            "Condição básica": "a0",
+            "Equação final": "X- = a0",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          }
+        ],
+        "sensores_iniciais": {
+          "A": "a0",
+          "B": "b0"
+        },
+        "sensores_por_atuador": {
+          "A": [
+            "a0",
+            "a1"
+          ],
+          "B": [
+            "b0",
+            "b1"
+          ]
+        },
+        "validacoes": [
+          "a colocação das memórias segue a sequência de SET/RESET do método",
+          "cada passo usa como base o sinal produzido pelo passo anterior",
+          "atuadores multiposição usam sensores exclusivos e destinos explícitos",
+          "paradas intermediárias são bloqueadas pelo sensor de destino",
+          "ramificações de loop são habilitadas por condições externas exclusivas",
+          "comandos e contracomandos foram qualificados progressivamente",
+          "nenhum ponto perigoso permaneceu nos estados alcançáveis",
+          "nenhum comando e contracomando ficam ativos simultaneamente",
+          "somente uma memória muda em cada evento de memória",
+          "equações de SET, RESET e retenção das memórias são coerentes"
+        ],
+        "variaveis_fisicas": [
+          "A",
+          "B"
+        ],
+        "versao_motor": "engine6-final-regressao-11.0"
+      },
+      "sequencia": "A+, B+, B-, A-"
+    },
+    {
+      "analise": {
+        "atuadores": [
+          "A",
+          "B",
+          "C"
+        ],
+        "atuadores_multiposicao": [],
+        "entradas_externas": [],
+        "estado_inicial": {
+          "A": 0,
+          "B": 0,
+          "C": 0
+        },
+        "etapas": [
+          [
+            "A+"
+          ],
+          [
+            "B+",
+            "C+"
+          ],
+          [
+            "C-"
+          ],
+          [
+            "B-"
+          ],
+          [
+            "A-"
+          ]
+        ],
+        "loops": [],
+        "possui_atuador_multiposicao": false,
+        "possui_loop": false,
+        "quantidade_etapas": 5,
+        "sensores_iniciais": {
+          "A": "a0",
+          "B": "b0",
+          "C": "c0"
+        },
+        "sensores_por_atuador": {
+          "A": [
+            "a0",
+            "a1"
+          ],
+          "B": [
+            "b0",
+            "b1"
+          ],
+          "C": [
+            "c0",
+            "c1"
+          ]
+        },
+        "sequencia_formatada": "A+ → (B+ ∥ C+) → C- → B- → A-",
+        "sequencia_normalizada": "A+ até a1, (B+ até b1, C+ até c1), C- até c0, B- até b0, A- até a0",
+        "sinal_partida": "S"
+      },
+      "descricao": "Etapa com movimentos simultâneos",
+      "id": "simultaneo",
+      "resolucao": {
+        "atuadores": [
+          "A",
+          "B",
+          "C"
+        ],
+        "atuadores_multiposicao": [],
+        "entradas_externas": [],
+        "equacoes": {
+          "A+": "S.x0",
+          "A-": "b0.x",
+          "B+": "a1.x0",
+          "B-": "c0.x",
+          "C+": "a1.x0",
+          "C-": "x",
+          "X+": "b1.c1",
+          "X-": "a0"
+        },
+        "equacoes_comandos": {
+          "A+": "S.x0",
+          "A-": "b0.x",
+          "B+": "a1.x0",
+          "B-": "c0.x",
+          "C+": "a1.x0",
+          "C-": "x",
+          "X+": "b1.c1",
+          "X-": "a0"
+        },
+        "equacoes_fisicas": {
+          "A+": "S.x0",
+          "A-": "b0.x",
+          "B+": "a1.x0",
+          "B-": "c0.x",
+          "C+": "a1.x0",
+          "C-": "x",
+          "X+": "b1.c1",
+          "X-": "a0"
+        },
+        "equacoes_memorias": {
+          "X": "(b1.c1 + x).¬(a0)"
+        },
+        "estado_inicial": {
+          "A": 0,
+          "B": 0,
+          "C": 0
+        },
+        "etapas": [
+          {
+            "codigo_memorias": {
+              "X": 0
+            },
+            "comando_texto": "A+",
+            "comandos": [
+              "A+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "estado_antes_texto": "a0 · b0 · c0",
+            "estado_depois": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estado_depois_texto": "a1 · b0 · c0",
+            "estado_logico_antes": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "A",
+                "comando": "A+",
+                "requer_parada": false,
+                "saida": "A+",
+                "sensor_destino": "a1",
+                "sensor_origem": "a0",
+                "sentido": "+"
+              }
+            ],
+            "numero": 1,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "A+"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a0",
+              "B": "b0",
+              "C": "c0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {
+              "X": 0
+            },
+            "comando_texto": "(B+ ∥ C+)",
+            "comandos": [
+              "B+",
+              "C+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estado_antes_texto": "a1 · b0 · c0",
+            "estado_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "estado_depois_texto": "a1 · b1 · c1",
+            "estado_logico_antes": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "estados_intermediarios": [
+              {
+                "A": 1,
+                "B": 0,
+                "C": 1
+              },
+              {
+                "A": 1,
+                "B": 1,
+                "C": 0
+              }
+            ],
+            "estados_logicos_intermediarios": [
+              {
+                "A": 1,
+                "B": 0,
+                "C": 1
+              },
+              {
+                "A": 1,
+                "B": 1,
+                "C": 0
+              }
+            ],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "B",
+                "comando": "B+",
+                "requer_parada": false,
+                "saida": "B+",
+                "sensor_destino": "b1",
+                "sensor_origem": "b0",
+                "sentido": "+"
+              },
+              {
+                "atuador": "C",
+                "comando": "C+",
+                "requer_parada": false,
+                "saida": "C+",
+                "sensor_destino": "c1",
+                "sensor_origem": "c0",
+                "sentido": "+"
+              }
+            ],
+            "numero": 2,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "B+",
+              "C+"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1"
+            },
+            "sensores_ativos_intermediarios": [
+              {
+                "A": "a1",
+                "B": "b0",
+                "C": "c1"
+              },
+              {
+                "A": "a1",
+                "B": "b1",
+                "C": "c0"
+              }
+            ],
+            "simultaneo": true
+          },
+          {
+            "codigo_memorias": {
+              "X": 1
+            },
+            "comando_texto": "C-",
+            "comandos": [
+              "C-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "estado_antes_texto": "a1 · b1 · c1",
+            "estado_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 0
+            },
+            "estado_depois_texto": "a1 · b1 · c0",
+            "estado_logico_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 1,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "C",
+                "comando": "C-",
+                "requer_parada": false,
+                "saida": "C-",
+                "sensor_destino": "c0",
+                "sensor_origem": "c1",
+                "sentido": "-"
+              }
+            ],
+            "numero": 3,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "C-"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {
+              "X": 1
+            },
+            "comando_texto": "B-",
+            "comandos": [
+              "B-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 0
+            },
+            "estado_antes_texto": "a1 · b1 · c0",
+            "estado_depois": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estado_depois_texto": "a1 · b0 · c0",
+            "estado_logico_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 1,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "B",
+                "comando": "B-",
+                "requer_parada": false,
+                "saida": "B-",
+                "sensor_destino": "b0",
+                "sensor_origem": "b1",
+                "sentido": "-"
+              }
+            ],
+            "numero": 4,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "B-"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {
+              "X": 1
+            },
+            "comando_texto": "A-",
+            "comandos": [
+              "A-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estado_antes_texto": "a1 · b0 · c0",
+            "estado_depois": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "estado_depois_texto": "a0 · b0 · c0",
+            "estado_logico_antes": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estado_logico_depois": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 1,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "A",
+                "comando": "A-",
+                "requer_parada": false,
+                "saida": "A-",
+                "sensor_destino": "a0",
+                "sensor_origem": "a1",
+                "sentido": "-"
+              }
+            ],
+            "numero": 5,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "A-"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a0",
+              "B": "b0",
+              "C": "c0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          }
+        ],
+        "eventos_mapa": [
+          {
+            "codigo_memorias": {
+              "X": 0
+            },
+            "comandos": [
+              "A+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "destino_memoria": {
+              "X": 0
+            },
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0"
+            },
+            "destino_texto": "a1 · b0 · c0",
+            "estado_fisico": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "estado_logico": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "estado_texto": "a0 · b0 · c0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 0,
+            "indice": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "A+"
+            ],
+            "saidas_fisicas": [
+              "A+"
+            ],
+            "sensores_ativos": {
+              "A": "a0",
+              "B": "b0",
+              "C": "c0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {
+              "X": 0
+            },
+            "comandos": [
+              "B+",
+              "C+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "destino_memoria": {
+              "X": 0
+            },
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1"
+            },
+            "destino_texto": "a1 · b1 · c1",
+            "estado_fisico": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estado_texto": "a1 · b0 · c0",
+            "estados_intermediarios": [
+              {
+                "A": 1,
+                "B": 0,
+                "C": 1
+              },
+              {
+                "A": 1,
+                "B": 1,
+                "C": 0
+              }
+            ],
+            "estados_logicos_intermediarios": [
+              {
+                "A": 1,
+                "B": 0,
+                "C": 1
+              },
+              {
+                "A": 1,
+                "B": 1,
+                "C": 0
+              }
+            ],
+            "etapa_indice": 1,
+            "indice": 1,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "B+",
+              "C+"
+            ],
+            "saidas_fisicas": [
+              "B+",
+              "C+"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {
+              "X": 0
+            },
+            "comandos": [
+              "X+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "destino_memoria": {
+              "X": 1
+            },
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1"
+            },
+            "destino_texto": "a1 · b1 · c1",
+            "estado_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "estado_texto": "a1 · b1 · c1",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": null,
+            "indice": 2,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "X+"
+            ],
+            "saidas_fisicas": [
+              "X+"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1"
+            },
+            "tipo": "memoria"
+          },
+          {
+            "codigo_memorias": {
+              "X": 1
+            },
+            "comandos": [
+              "C-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 0
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 0
+            },
+            "destino_memoria": {
+              "X": 1
+            },
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0"
+            },
+            "destino_texto": "a1 · b1 · c0",
+            "estado_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "estado_texto": "a1 · b1 · c1",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 2,
+            "indice": 3,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "C-"
+            ],
+            "saidas_fisicas": [
+              "C-"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {
+              "X": 1
+            },
+            "comandos": [
+              "B-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "destino_memoria": {
+              "X": 1
+            },
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0"
+            },
+            "destino_texto": "a1 · b0 · c0",
+            "estado_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 0
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 0
+            },
+            "estado_texto": "a1 · b1 · c0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 3,
+            "indice": 4,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "B-"
+            ],
+            "saidas_fisicas": [
+              "B-"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {
+              "X": 1
+            },
+            "comandos": [
+              "A-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "destino_logico": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "destino_memoria": {
+              "X": 1
+            },
+            "destino_sensores_ativos": {
+              "A": "a0",
+              "B": "b0",
+              "C": "c0"
+            },
+            "destino_texto": "a0 · b0 · c0",
+            "estado_fisico": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estado_texto": "a1 · b0 · c0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 4,
+            "indice": 5,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "A-"
+            ],
+            "saidas_fisicas": [
+              "A-"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {
+              "X": 1
+            },
+            "comandos": [
+              "X-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "destino_logico": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "destino_memoria": {
+              "X": 0
+            },
+            "destino_sensores_ativos": {
+              "A": "a0",
+              "B": "b0",
+              "C": "c0"
+            },
+            "destino_texto": "a0 · b0 · c0",
+            "estado_fisico": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "estado_logico": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "estado_texto": "a0 · b0 · c0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": null,
+            "indice": 6,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "X-"
+            ],
+            "saidas_fisicas": [
+              "X-"
+            ],
+            "sensores_ativos": {
+              "A": "a0",
+              "B": "b0",
+              "C": "c0"
+            },
+            "tipo": "memoria"
+          }
+        ],
+        "loops": [],
+        "mapa_loop_pendente": false,
+        "mapa_multiposicao_pendente": false,
+        "mapa_requer_adaptacao": false,
+        "memorias": [
+          "X"
+        ],
+        "observacoes": [
+          "Quantidade encontrada: 1 memória(s).",
+          "Foram testadas 4 colocações de memória.",
+          "As expressões são mantidas na ordem de qualificação da apostila; não é feita uma minimização algébrica global que altere o método."
+        ],
+        "possui_atuador_multiposicao": false,
+        "possui_fluxo_condicional": false,
+        "possui_loop": false,
+        "quantidade_memorias": 1,
+        "resolucao": [
+          {
+            "Comando": "A+",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "S.x0",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "A-",
+            "Equação final": "A+ = S.x0",
+            "Equação qualificada": "A+ = S.x0",
+            "Passo": 1,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "B+ ∥ C+",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "a1",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "B- ∥ C-",
+            "Equação final": "B+ = a1.x0 | C+ = a1.x0",
+            "Equação qualificada": "B+ = a1.x0 | C+ = a1.x0",
+            "Passo": 2,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "x0",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "X+",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "b1.c1",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "X-",
+            "Equação final": "X+ = b1.c1",
+            "Equação qualificada": "X+ = b1.c1",
+            "Passo": 3,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "C-",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "x",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "C+",
+            "Equação final": "C- = x",
+            "Equação qualificada": "C- = x",
+            "Passo": 4,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "B-",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "c0",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "B+",
+            "Equação final": "B- = c0.x",
+            "Equação qualificada": "B- = c0.x",
+            "Passo": 5,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "x",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "A-",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "b0",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "A+",
+            "Equação final": "A- = b0.x",
+            "Equação qualificada": "A- = b0.x",
+            "Passo": 6,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "x",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "X-",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "a0",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "X+",
+            "Equação final": "X- = a0",
+            "Equação qualificada": "X- = a0",
+            "Passo": 7,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          }
+        ],
+        "resolucao_compacta": [
+          {
+            "Comando": "A+",
+            "Condição básica": "S.x0",
+            "Equação final": "A+ = S.x0",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          },
+          {
+            "Comando": "B+ e C+",
+            "Condição básica": "a1",
+            "Equação final": "B+ = a1.x0 | C+ = a1.x0",
+            "Pontos perigosos encontrados": "a1 · b1 · c1 · x1; a1 · b1 · c0 · x1; a1 · b0 · c0 · x1",
+            "Qualificador acrescentado": "x0"
+          },
+          {
+            "Comando": "X+",
+            "Condição básica": "b1.c1",
+            "Equação final": "X+ = b1.c1",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          },
+          {
+            "Comando": "C-",
+            "Condição básica": "x",
+            "Equação final": "C- = x",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          },
+          {
+            "Comando": "B-",
+            "Condição básica": "c0",
+            "Equação final": "B- = c0.x",
+            "Pontos perigosos encontrados": "a1 · b0 · c0 · x0; a1 · b1 · c0 · x0",
+            "Qualificador acrescentado": "x"
+          },
+          {
+            "Comando": "A-",
+            "Condição básica": "b0",
+            "Equação final": "A- = b0.x",
+            "Pontos perigosos encontrados": "a0 · b0 · c0 · x0; a1 · b0 · c0 · x0; a1 · b0 · c1 · x0",
+            "Qualificador acrescentado": "x"
+          },
+          {
+            "Comando": "X-",
+            "Condição básica": "a0",
+            "Equação final": "X- = a0",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          }
+        ],
+        "sensores_iniciais": {
+          "A": "a0",
+          "B": "b0",
+          "C": "c0"
+        },
+        "sensores_por_atuador": {
+          "A": [
+            "a0",
+            "a1"
+          ],
+          "B": [
+            "b0",
+            "b1"
+          ],
+          "C": [
+            "c0",
+            "c1"
+          ]
+        },
+        "validacoes": [
+          "a colocação das memórias segue a sequência de SET/RESET do método",
+          "cada passo usa como base o sinal produzido pelo passo anterior",
+          "atuadores multiposição usam sensores exclusivos e destinos explícitos",
+          "paradas intermediárias são bloqueadas pelo sensor de destino",
+          "ramificações de loop são habilitadas por condições externas exclusivas",
+          "comandos e contracomandos foram qualificados progressivamente",
+          "nenhum ponto perigoso permaneceu nos estados alcançáveis",
+          "nenhum comando e contracomando ficam ativos simultaneamente",
+          "somente uma memória muda em cada evento de memória",
+          "equações de SET, RESET e retenção das memórias são coerentes"
+        ],
+        "variaveis_fisicas": [
+          "A",
+          "B",
+          "C"
+        ],
+        "versao_motor": "engine6-final-regressao-11.0"
+      },
+      "sequencia": "A+, (B+, C+), C-, B-, A-"
+    },
+    {
+      "analise": {
+        "atuadores": [
+          "A",
+          "B",
+          "C"
+        ],
+        "atuadores_multiposicao": [
+          "B"
+        ],
+        "entradas_externas": [],
+        "estado_inicial": {
+          "A": 0,
+          "B": 0,
+          "C": 0
+        },
+        "etapas": [
+          [
+            "A+"
+          ],
+          [
+            "B+(1)"
+          ],
+          [
+            "C+"
+          ],
+          [
+            "B+(2)"
+          ],
+          [
+            "C-"
+          ],
+          [
+            "B+(3)"
+          ],
+          [
+            "A-"
+          ],
+          [
+            "B-"
+          ]
+        ],
+        "loops": [],
+        "possui_atuador_multiposicao": true,
+        "possui_loop": false,
+        "quantidade_etapas": 8,
+        "sensores_iniciais": {
+          "A": "a0",
+          "B": "b0",
+          "C": "c0"
+        },
+        "sensores_por_atuador": {
+          "A": [
+            "a0",
+            "a1"
+          ],
+          "B": [
+            "b0",
+            "b1",
+            "b2",
+            "b3"
+          ],
+          "C": [
+            "c0",
+            "c1"
+          ]
+        },
+        "sequencia_formatada": "A+ → B+ até b1 → C+ → B+ até b2 → C- → B+ até b3 → A- → B- até b0",
+        "sequencia_normalizada": "A+ até a1, B+ até b1, C+ até c1, B+ até b2, C- até c0, B+ até b3, A- até a0, B- até b0",
+        "sinal_partida": "S"
+      },
+      "descricao": "Atuador com quatro posições monitoradas",
+      "id": "multiposicao",
+      "resolucao": {
+        "atuadores": [
+          "A",
+          "B",
+          "C"
+        ],
+        "atuadores_multiposicao": [
+          "B"
+        ],
+        "entradas_externas": [],
+        "equacoes": {
+          "A+": "S.b0",
+          "A-": "b3",
+          "B+": "a1.c0.b1' + c1.b2' + c0.b2",
+          "B+(1)": "a1.c0.b1'",
+          "B+(2)": "c1.b2'",
+          "B+(3)": "c0.b2",
+          "B-": "a0",
+          "C+": "b1.a1",
+          "C-": "b2"
+        },
+        "equacoes_comandos": {
+          "A+": "S.b0",
+          "A-": "b3",
+          "B+(1)": "a1.c0.b1'",
+          "B+(2)": "c1.b2'",
+          "B+(3)": "c0.b2",
+          "B-": "a0",
+          "C+": "b1.a1",
+          "C-": "b2"
+        },
+        "equacoes_fisicas": {
+          "A+": "S.b0",
+          "A-": "b3",
+          "B+": "a1.c0.b1' + c1.b2' + c0.b2",
+          "B-": "a0",
+          "C+": "b1.a1",
+          "C-": "b2"
+        },
+        "equacoes_memorias": {},
+        "estado_inicial": {
+          "A": 0,
+          "B": 0,
+          "C": 0
+        },
+        "etapas": [
+          {
+            "codigo_memorias": {},
+            "comando_texto": "A+",
+            "comandos": [
+              "A+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "estado_antes_texto": "a0 · b0 · c0",
+            "estado_depois": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estado_depois_texto": "a1 · b0 · c0",
+            "estado_logico_antes": {
+              "A": 0,
+              "C": 0,
+              "b0": 1,
+              "b1": 0,
+              "b2": 0,
+              "b3": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "C": 0,
+              "b0": 1,
+              "b1": 0,
+              "b2": 0,
+              "b3": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "A",
+                "comando": "A+",
+                "requer_parada": false,
+                "saida": "A+",
+                "sensor_destino": "a1",
+                "sensor_origem": "a0",
+                "sentido": "+"
+              }
+            ],
+            "numero": 1,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "A+"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a0",
+              "B": "b0",
+              "C": "c0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {},
+            "comando_texto": "B+(1)",
+            "comandos": [
+              "B+(1)"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estado_antes_texto": "a1 · b0 · c0",
+            "estado_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 0
+            },
+            "estado_depois_texto": "a1 · b1 · c0",
+            "estado_logico_antes": {
+              "A": 1,
+              "C": 0,
+              "b0": 1,
+              "b1": 0,
+              "b2": 0,
+              "b3": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "C": 0,
+              "b0": 0,
+              "b1": 1,
+              "b2": 0,
+              "b3": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "B",
+                "comando": "B+(1)",
+                "requer_parada": true,
+                "saida": "B+",
+                "sensor_destino": "b1",
+                "sensor_origem": "b0",
+                "sentido": "+"
+              }
+            ],
+            "numero": 2,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "B+"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {},
+            "comando_texto": "C+",
+            "comandos": [
+              "C+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 0
+            },
+            "estado_antes_texto": "a1 · b1 · c0",
+            "estado_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "estado_depois_texto": "a1 · b1 · c1",
+            "estado_logico_antes": {
+              "A": 1,
+              "C": 0,
+              "b0": 0,
+              "b1": 1,
+              "b2": 0,
+              "b3": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "C": 1,
+              "b0": 0,
+              "b1": 1,
+              "b2": 0,
+              "b3": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "C",
+                "comando": "C+",
+                "requer_parada": false,
+                "saida": "C+",
+                "sensor_destino": "c1",
+                "sensor_origem": "c0",
+                "sentido": "+"
+              }
+            ],
+            "numero": 3,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "C+"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {},
+            "comando_texto": "B+(2)",
+            "comandos": [
+              "B+(2)"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "estado_antes_texto": "a1 · b1 · c1",
+            "estado_depois": {
+              "A": 1,
+              "B": 2,
+              "C": 1
+            },
+            "estado_depois_texto": "a1 · b2 · c1",
+            "estado_logico_antes": {
+              "A": 1,
+              "C": 1,
+              "b0": 0,
+              "b1": 1,
+              "b2": 0,
+              "b3": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "C": 1,
+              "b0": 0,
+              "b1": 0,
+              "b2": 1,
+              "b3": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "B",
+                "comando": "B+(2)",
+                "requer_parada": true,
+                "saida": "B+",
+                "sensor_destino": "b2",
+                "sensor_origem": "b1",
+                "sentido": "+"
+              }
+            ],
+            "numero": 4,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "B+"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b2",
+              "C": "c1"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {},
+            "comando_texto": "C-",
+            "comandos": [
+              "C-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 2,
+              "C": 1
+            },
+            "estado_antes_texto": "a1 · b2 · c1",
+            "estado_depois": {
+              "A": 1,
+              "B": 2,
+              "C": 0
+            },
+            "estado_depois_texto": "a1 · b2 · c0",
+            "estado_logico_antes": {
+              "A": 1,
+              "C": 1,
+              "b0": 0,
+              "b1": 0,
+              "b2": 1,
+              "b3": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "C": 0,
+              "b0": 0,
+              "b1": 0,
+              "b2": 1,
+              "b3": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "C",
+                "comando": "C-",
+                "requer_parada": false,
+                "saida": "C-",
+                "sensor_destino": "c0",
+                "sensor_origem": "c1",
+                "sentido": "-"
+              }
+            ],
+            "numero": 5,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "C-"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b2",
+              "C": "c1"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b2",
+              "C": "c0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {},
+            "comando_texto": "B+(3)",
+            "comandos": [
+              "B+(3)"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 2,
+              "C": 0
+            },
+            "estado_antes_texto": "a1 · b2 · c0",
+            "estado_depois": {
+              "A": 1,
+              "B": 3,
+              "C": 0
+            },
+            "estado_depois_texto": "a1 · b3 · c0",
+            "estado_logico_antes": {
+              "A": 1,
+              "C": 0,
+              "b0": 0,
+              "b1": 0,
+              "b2": 1,
+              "b3": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "C": 0,
+              "b0": 0,
+              "b1": 0,
+              "b2": 0,
+              "b3": 1
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "B",
+                "comando": "B+(3)",
+                "requer_parada": true,
+                "saida": "B+",
+                "sensor_destino": "b3",
+                "sensor_origem": "b2",
+                "sentido": "+"
+              }
+            ],
+            "numero": 6,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "B+"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b2",
+              "C": "c0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b3",
+              "C": "c0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {},
+            "comando_texto": "A-",
+            "comandos": [
+              "A-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 3,
+              "C": 0
+            },
+            "estado_antes_texto": "a1 · b3 · c0",
+            "estado_depois": {
+              "A": 0,
+              "B": 3,
+              "C": 0
+            },
+            "estado_depois_texto": "a0 · b3 · c0",
+            "estado_logico_antes": {
+              "A": 1,
+              "C": 0,
+              "b0": 0,
+              "b1": 0,
+              "b2": 0,
+              "b3": 1
+            },
+            "estado_logico_depois": {
+              "A": 0,
+              "C": 0,
+              "b0": 0,
+              "b1": 0,
+              "b2": 0,
+              "b3": 1
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "A",
+                "comando": "A-",
+                "requer_parada": false,
+                "saida": "A-",
+                "sensor_destino": "a0",
+                "sensor_origem": "a1",
+                "sentido": "-"
+              }
+            ],
+            "numero": 7,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "A-"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b3",
+              "C": "c0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a0",
+              "B": "b3",
+              "C": "c0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {},
+            "comando_texto": "B-",
+            "comandos": [
+              "B-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 0,
+              "B": 3,
+              "C": 0
+            },
+            "estado_antes_texto": "a0 · b3 · c0",
+            "estado_depois": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "estado_depois_texto": "a0 · b0 · c0",
+            "estado_logico_antes": {
+              "A": 0,
+              "C": 0,
+              "b0": 0,
+              "b1": 0,
+              "b2": 0,
+              "b3": 1
+            },
+            "estado_logico_depois": {
+              "A": 0,
+              "C": 0,
+              "b0": 1,
+              "b1": 0,
+              "b2": 0,
+              "b3": 0
+            },
+            "estados_intermediarios": [
+              {
+                "A": 0,
+                "B": 2,
+                "C": 0
+              },
+              {
+                "A": 0,
+                "B": 1,
+                "C": 0
+              }
+            ],
+            "estados_logicos_intermediarios": [
+              {
+                "A": 0,
+                "C": 0,
+                "b0": 0,
+                "b1": 0,
+                "b2": 1,
+                "b3": 0
+              },
+              {
+                "A": 0,
+                "C": 0,
+                "b0": 0,
+                "b1": 1,
+                "b2": 0,
+                "b3": 0
+              }
+            ],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "B",
+                "comando": "B-",
+                "requer_parada": false,
+                "saida": "B-",
+                "sensor_destino": "b0",
+                "sensor_origem": "b3",
+                "sentido": "-"
+              }
+            ],
+            "numero": 8,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "B-"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a0",
+              "B": "b3",
+              "C": "c0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a0",
+              "B": "b0",
+              "C": "c0"
+            },
+            "sensores_ativos_intermediarios": [
+              {
+                "A": "a0",
+                "B": "b2",
+                "C": "c0"
+              },
+              {
+                "A": "a0",
+                "B": "b1",
+                "C": "c0"
+              }
+            ],
+            "simultaneo": false
+          }
+        ],
+        "eventos_mapa": [
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "A+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "destino_logico": {
+              "A": 1,
+              "C": 0,
+              "b0": 1,
+              "b1": 0,
+              "b2": 0,
+              "b3": 0
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0"
+            },
+            "destino_texto": "a1 · b0 · c0",
+            "estado_fisico": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "estado_logico": {
+              "A": 0,
+              "C": 0,
+              "b0": 1,
+              "b1": 0,
+              "b2": 0,
+              "b3": 0
+            },
+            "estado_texto": "a0 · b0 · c0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 0,
+            "indice": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "A+"
+            ],
+            "saidas_fisicas": [
+              "A+"
+            ],
+            "sensores_ativos": {
+              "A": "a0",
+              "B": "b0",
+              "C": "c0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "B+(1)"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 0
+            },
+            "destino_logico": {
+              "A": 1,
+              "C": 0,
+              "b0": 0,
+              "b1": 1,
+              "b2": 0,
+              "b3": 0
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0"
+            },
+            "destino_texto": "a1 · b1 · c0",
+            "estado_fisico": {
+              "A": 1,
+              "B": 0,
+              "C": 0
+            },
+            "estado_logico": {
+              "A": 1,
+              "C": 0,
+              "b0": 1,
+              "b1": 0,
+              "b2": 0,
+              "b3": 0
+            },
+            "estado_texto": "a1 · b0 · c0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 1,
+            "indice": 1,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "B+(1)"
+            ],
+            "saidas_fisicas": [
+              "B+"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "C+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "destino_logico": {
+              "A": 1,
+              "C": 1,
+              "b0": 0,
+              "b1": 1,
+              "b2": 0,
+              "b3": 0
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1"
+            },
+            "destino_texto": "a1 · b1 · c1",
+            "estado_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 0
+            },
+            "estado_logico": {
+              "A": 1,
+              "C": 0,
+              "b0": 0,
+              "b1": 1,
+              "b2": 0,
+              "b3": 0
+            },
+            "estado_texto": "a1 · b1 · c0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 2,
+            "indice": 2,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "C+"
+            ],
+            "saidas_fisicas": [
+              "C+"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "B+(2)"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 2,
+              "C": 1
+            },
+            "destino_logico": {
+              "A": 1,
+              "C": 1,
+              "b0": 0,
+              "b1": 0,
+              "b2": 1,
+              "b3": 0
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b2",
+              "C": "c1"
+            },
+            "destino_texto": "a1 · b2 · c1",
+            "estado_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 1
+            },
+            "estado_logico": {
+              "A": 1,
+              "C": 1,
+              "b0": 0,
+              "b1": 1,
+              "b2": 0,
+              "b3": 0
+            },
+            "estado_texto": "a1 · b1 · c1",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 3,
+            "indice": 3,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "B+(2)"
+            ],
+            "saidas_fisicas": [
+              "B+"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "C-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 2,
+              "C": 0
+            },
+            "destino_logico": {
+              "A": 1,
+              "C": 0,
+              "b0": 0,
+              "b1": 0,
+              "b2": 1,
+              "b3": 0
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b2",
+              "C": "c0"
+            },
+            "destino_texto": "a1 · b2 · c0",
+            "estado_fisico": {
+              "A": 1,
+              "B": 2,
+              "C": 1
+            },
+            "estado_logico": {
+              "A": 1,
+              "C": 1,
+              "b0": 0,
+              "b1": 0,
+              "b2": 1,
+              "b3": 0
+            },
+            "estado_texto": "a1 · b2 · c1",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 4,
+            "indice": 4,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "C-"
+            ],
+            "saidas_fisicas": [
+              "C-"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b2",
+              "C": "c1"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "B+(3)"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 3,
+              "C": 0
+            },
+            "destino_logico": {
+              "A": 1,
+              "C": 0,
+              "b0": 0,
+              "b1": 0,
+              "b2": 0,
+              "b3": 1
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b3",
+              "C": "c0"
+            },
+            "destino_texto": "a1 · b3 · c0",
+            "estado_fisico": {
+              "A": 1,
+              "B": 2,
+              "C": 0
+            },
+            "estado_logico": {
+              "A": 1,
+              "C": 0,
+              "b0": 0,
+              "b1": 0,
+              "b2": 1,
+              "b3": 0
+            },
+            "estado_texto": "a1 · b2 · c0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 5,
+            "indice": 5,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "B+(3)"
+            ],
+            "saidas_fisicas": [
+              "B+"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b2",
+              "C": "c0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "A-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 0,
+              "B": 3,
+              "C": 0
+            },
+            "destino_logico": {
+              "A": 0,
+              "C": 0,
+              "b0": 0,
+              "b1": 0,
+              "b2": 0,
+              "b3": 1
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a0",
+              "B": "b3",
+              "C": "c0"
+            },
+            "destino_texto": "a0 · b3 · c0",
+            "estado_fisico": {
+              "A": 1,
+              "B": 3,
+              "C": 0
+            },
+            "estado_logico": {
+              "A": 1,
+              "C": 0,
+              "b0": 0,
+              "b1": 0,
+              "b2": 0,
+              "b3": 1
+            },
+            "estado_texto": "a1 · b3 · c0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 6,
+            "indice": 6,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "A-"
+            ],
+            "saidas_fisicas": [
+              "A-"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b3",
+              "C": "c0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "B-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 0,
+              "B": 0,
+              "C": 0
+            },
+            "destino_logico": {
+              "A": 0,
+              "C": 0,
+              "b0": 1,
+              "b1": 0,
+              "b2": 0,
+              "b3": 0
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a0",
+              "B": "b0",
+              "C": "c0"
+            },
+            "destino_texto": "a0 · b0 · c0",
+            "estado_fisico": {
+              "A": 0,
+              "B": 3,
+              "C": 0
+            },
+            "estado_logico": {
+              "A": 0,
+              "C": 0,
+              "b0": 0,
+              "b1": 0,
+              "b2": 0,
+              "b3": 1
+            },
+            "estado_texto": "a0 · b3 · c0",
+            "estados_intermediarios": [
+              {
+                "A": 0,
+                "B": 2,
+                "C": 0
+              },
+              {
+                "A": 0,
+                "B": 1,
+                "C": 0
+              }
+            ],
+            "estados_logicos_intermediarios": [
+              {
+                "A": 0,
+                "C": 0,
+                "b0": 0,
+                "b1": 0,
+                "b2": 1,
+                "b3": 0
+              },
+              {
+                "A": 0,
+                "C": 0,
+                "b0": 0,
+                "b1": 1,
+                "b2": 0,
+                "b3": 0
+              }
+            ],
+            "etapa_indice": 7,
+            "indice": 7,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "B-"
+            ],
+            "saidas_fisicas": [
+              "B-"
+            ],
+            "sensores_ativos": {
+              "A": "a0",
+              "B": "b3",
+              "C": "c0"
+            },
+            "tipo": "atuador"
+          }
+        ],
+        "loops": [],
+        "mapa_loop_pendente": false,
+        "mapa_multiposicao_pendente": true,
+        "mapa_requer_adaptacao": true,
+        "memorias": [],
+        "observacoes": [
+          "Quantidade encontrada: 0 memória(s).",
+          "Foram testadas 1 colocações de memória.",
+          "As expressões são mantidas na ordem de qualificação da apostila; não é feita uma minimização algébrica global que altere o método.",
+          "Atuadores multiposição processados: B."
+        ],
+        "possui_atuador_multiposicao": true,
+        "possui_fluxo_condicional": false,
+        "possui_loop": false,
+        "quantidade_memorias": 0,
+        "resolucao": [
+          {
+            "Comando": "A+",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "S.b0",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "A-",
+            "Equação final": "A+ = S.b0",
+            "Equação qualificada": "A+ = S.b0",
+            "Passo": 1,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "B+(1)",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "a1",
+            "Contato de parada": "b1'",
+            "Contracomando": "B-",
+            "Equação final": "B+(1) = a1.c0.b1'",
+            "Equação qualificada": "B+(1) = a1.b1'",
+            "Passo": 2,
+            "Pontos perigosos": "a1 · b2 · c1",
+            "Qualificador complementar": "c0",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "C+",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "b1",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "C-",
+            "Equação final": "C+ = b1.a1",
+            "Equação qualificada": "C+ = b1",
+            "Passo": 3,
+            "Pontos perigosos": "a0 · b1 · c0",
+            "Qualificador complementar": "a1",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "B+(2)",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "c1",
+            "Contato de parada": "b2'",
+            "Contracomando": "B-",
+            "Equação final": "B+(2) = c1.b2'",
+            "Equação qualificada": "B+(2) = c1.b2'",
+            "Passo": 4,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "C-",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "b2",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "C+",
+            "Equação final": "C- = b2",
+            "Equação qualificada": "C- = b2",
+            "Passo": 5,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "B+(3)",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "c0",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "B-",
+            "Equação final": "B+(3) = c0.b2",
+            "Equação qualificada": "B+(3) = c0",
+            "Passo": 6,
+            "Pontos perigosos": "a0 · b0 · c0; a1 · b1 · c0; a0 · b3 · c0",
+            "Qualificador complementar": "b2",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "A-",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "b3",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "A+",
+            "Equação final": "A- = b3",
+            "Equação qualificada": "A- = b3",
+            "Passo": 7,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "B-",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "a0",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "B+(1) ∥ B+(2) ∥ B+(3)",
+            "Equação final": "B- = a0",
+            "Equação qualificada": "B- = a0",
+            "Passo": 8,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          }
+        ],
+        "resolucao_compacta": [
+          {
+            "Comando": "A+",
+            "Condição básica": "S.b0",
+            "Equação final": "A+ = S.b0",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          },
+          {
+            "Comando": "B+(1)",
+            "Condição básica": "a1",
+            "Equação final": "B+(1) = a1.c0.b1'",
+            "Pontos perigosos encontrados": "a1 · b1 · c0; a1 · b2 · c1",
+            "Qualificador acrescentado": "c0.b1'"
+          },
+          {
+            "Comando": "C+",
+            "Condição básica": "b1",
+            "Equação final": "C+ = b1.a1",
+            "Pontos perigosos encontrados": "a0 · b1 · c0",
+            "Qualificador acrescentado": "a1"
+          },
+          {
+            "Comando": "B+(2)",
+            "Condição básica": "c1",
+            "Equação final": "B+(2) = c1.b2'",
+            "Pontos perigosos encontrados": "a1 · b2 · c1",
+            "Qualificador acrescentado": "b2'"
+          },
+          {
+            "Comando": "C-",
+            "Condição básica": "b2",
+            "Equação final": "C- = b2",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          },
+          {
+            "Comando": "B+(3)",
+            "Condição básica": "c0",
+            "Equação final": "B+(3) = c0.b2",
+            "Pontos perigosos encontrados": "a0 · b0 · c0; a1 · b1 · c0; a0 · b3 · c0; a0 · b2 · c0; a0 · b1 · c0",
+            "Qualificador acrescentado": "b2"
+          },
+          {
+            "Comando": "A-",
+            "Condição básica": "b3",
+            "Equação final": "A- = b3",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          },
+          {
+            "Comando": "B-",
+            "Condição básica": "a0",
+            "Equação final": "B- = a0",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          }
+        ],
+        "sensores_iniciais": {
+          "A": "a0",
+          "B": "b0",
+          "C": "c0"
+        },
+        "sensores_por_atuador": {
+          "A": [
+            "a0",
+            "a1"
+          ],
+          "B": [
+            "b0",
+            "b1",
+            "b2",
+            "b3"
+          ],
+          "C": [
+            "c0",
+            "c1"
+          ]
+        },
+        "validacoes": [
+          "a colocação das memórias segue a sequência de SET/RESET do método",
+          "cada passo usa como base o sinal produzido pelo passo anterior",
+          "atuadores multiposição usam sensores exclusivos e destinos explícitos",
+          "paradas intermediárias são bloqueadas pelo sensor de destino",
+          "ramificações de loop são habilitadas por condições externas exclusivas",
+          "comandos e contracomandos foram qualificados progressivamente",
+          "nenhum ponto perigoso permaneceu nos estados alcançáveis",
+          "nenhum comando e contracomando ficam ativos simultaneamente",
+          "somente uma memória muda em cada evento de memória",
+          "equações de SET, RESET e retenção das memórias são coerentes"
+        ],
+        "variaveis_fisicas": [
+          "A",
+          "b0",
+          "b1",
+          "b2",
+          "b3",
+          "C"
+        ],
+        "versao_motor": "engine6-final-regressao-11.0"
+      },
+      "sequencia": "A+, B+ até b1, C+, B+ até b2, C-, B+ até b3, A-, B- até b0"
+    },
+    {
+      "analise": {
+        "atuadores": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "atuadores_multiposicao": [],
+        "entradas_externas": [
+          "e"
+        ],
+        "estado_inicial": {
+          "A": 0,
+          "B": 0,
+          "C": 0,
+          "D": 0
+        },
+        "etapas": [
+          [
+            "A+"
+          ],
+          [
+            "B+"
+          ],
+          [
+            "C+"
+          ],
+          [
+            "D+"
+          ],
+          [
+            "C-"
+          ],
+          [
+            "D-"
+          ],
+          [
+            "A-"
+          ],
+          [
+            "B-"
+          ]
+        ],
+        "loops": [
+          {
+            "condicao_repeticao": {
+              "e": 0
+            },
+            "condicao_repeticao_texto": "e = 0",
+            "condicao_saida": {
+              "e": 1
+            },
+            "condicao_saida_texto": "e = 1",
+            "continua_na_etapa": 7,
+            "descricao": "etapas 3 a 6, repetir enquanto e = 0",
+            "etapa_final": 6,
+            "etapa_inicial": 3,
+            "fim": 5,
+            "inicio": 2,
+            "literal_repeticao": "e'",
+            "literal_saida": "e",
+            "quantidade_etapas": 4,
+            "repetir_quando": 0,
+            "retorna_para_etapa": 3,
+            "sair_quando": 1,
+            "sensor": "e"
+          }
+        ],
+        "possui_atuador_multiposicao": false,
+        "possui_loop": true,
+        "quantidade_etapas": 8,
+        "sensores_iniciais": {
+          "A": "a0",
+          "B": "b0",
+          "C": "c0",
+          "D": "d0"
+        },
+        "sensores_por_atuador": {
+          "A": [
+            "a0",
+            "a1"
+          ],
+          "B": [
+            "b0",
+            "b1"
+          ],
+          "C": [
+            "c0",
+            "c1"
+          ],
+          "D": [
+            "d0",
+            "d1"
+          ]
+        },
+        "sequencia_formatada": "A+ → B+ → [C+, D+, C-, D-] enquanto e=0 → A- → B-",
+        "sequencia_normalizada": "A+ até a1, B+ até b1, [C+ até c1, D+ até d1, C- até c0, D- até d0] enquanto e=0, A- até a0, B- até b0",
+        "sinal_partida": "S"
+      },
+      "descricao": "Trecho repetitivo controlado por entrada externa",
+      "id": "loop",
+      "resolucao": {
+        "atuadores": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "atuadores_multiposicao": [],
+        "entradas_externas": [
+          "e"
+        ],
+        "equacoes": {
+          "A+": "S.b0",
+          "A-": "d0.e.b1",
+          "B+": "a1",
+          "B-": "a0",
+          "C+": "b1.e'.d0",
+          "C-": "d1",
+          "D+": "c1",
+          "D-": "c0"
+        },
+        "equacoes_comandos": {
+          "A+": "S.b0",
+          "A-": "d0.e.b1",
+          "B+": "a1",
+          "B-": "a0",
+          "C+": "b1.e'.d0",
+          "C-": "d1",
+          "D+": "c1",
+          "D-": "c0"
+        },
+        "equacoes_fisicas": {
+          "A+": "S.b0",
+          "A-": "d0.e.b1",
+          "B+": "a1",
+          "B-": "a0",
+          "C+": "b1.e'.d0",
+          "C-": "d1",
+          "D+": "c1",
+          "D-": "c0"
+        },
+        "equacoes_memorias": {},
+        "estado_inicial": {
+          "A": 0,
+          "B": 0,
+          "C": 0,
+          "D": 0
+        },
+        "etapas": [
+          {
+            "codigo_memorias": {},
+            "comando_texto": "A+",
+            "comandos": [
+              "A+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 0,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "estado_antes_texto": "a0 · b0 · c0 · d0",
+            "estado_depois": {
+              "A": 1,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "estado_depois_texto": "a1 · b0 · c0 · d0",
+            "estado_logico_antes": {
+              "A": 0,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "A",
+                "comando": "A+",
+                "requer_parada": false,
+                "saida": "A+",
+                "sensor_destino": "a1",
+                "sensor_origem": "a0",
+                "sentido": "+"
+              }
+            ],
+            "numero": 1,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "A+"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a0",
+              "B": "b0",
+              "C": "c0",
+              "D": "d0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0",
+              "D": "d0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {},
+            "comando_texto": "B+",
+            "comandos": [
+              "B+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "estado_antes_texto": "a1 · b0 · c0 · d0",
+            "estado_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_depois_texto": "a1 · b1 · c0 · d0",
+            "estado_logico_antes": {
+              "A": 1,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "B",
+                "comando": "B+",
+                "requer_parada": false,
+                "saida": "B+",
+                "sensor_destino": "b1",
+                "sensor_origem": "b0",
+                "sentido": "+"
+              }
+            ],
+            "numero": 2,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas_fisicas": [
+              "B+"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0",
+              "D": "d0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0",
+              "D": "d0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {},
+            "comando_texto": "C+",
+            "comandos": [
+              "C+"
+            ],
+            "condicao_externa_texto": "e = 0",
+            "condicoes_externas": {
+              "e": 0
+            },
+            "estado_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_antes_texto": "a1 · b1 · c0 · d0",
+            "estado_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 0
+            },
+            "estado_depois_texto": "a1 · b1 · c1 · d0",
+            "estado_logico_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "e'",
+            "loops": [
+              {
+                "condicao_repeticao": {
+                  "e": 0
+                },
+                "condicao_repeticao_texto": "e = 0",
+                "condicao_saida": {
+                  "e": 1
+                },
+                "condicao_saida_texto": "e = 1",
+                "continua_na_etapa": 7,
+                "descricao": "etapas 3 a 6, repetir enquanto e = 0",
+                "etapa_final": 6,
+                "etapa_inicial": 3,
+                "fim": 5,
+                "inicio": 2,
+                "literal_repeticao": "e'",
+                "literal_saida": "e",
+                "quantidade_etapas": 4,
+                "repetir_quando": 0,
+                "retorna_para_etapa": 3,
+                "sair_quando": 1,
+                "sensor": "e"
+              }
+            ],
+            "movimentos": [
+              {
+                "atuador": "C",
+                "comando": "C+",
+                "requer_parada": false,
+                "saida": "C+",
+                "sensor_destino": "c1",
+                "sensor_origem": "c0",
+                "sentido": "+"
+              }
+            ],
+            "numero": 3,
+            "pertence_loop": true,
+            "restricao_ramo_texto": "e = 0",
+            "restricoes_externas": {
+              "e": 0
+            },
+            "saidas_fisicas": [
+              "C+"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0",
+              "D": "d0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1",
+              "D": "d0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {},
+            "comando_texto": "D+",
+            "comandos": [
+              "D+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 0
+            },
+            "estado_antes_texto": "a1 · b1 · c1 · d0",
+            "estado_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 1
+            },
+            "estado_depois_texto": "a1 · b1 · c1 · d1",
+            "estado_logico_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 0
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 1
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [
+              {
+                "condicao_repeticao": {
+                  "e": 0
+                },
+                "condicao_repeticao_texto": "e = 0",
+                "condicao_saida": {
+                  "e": 1
+                },
+                "condicao_saida_texto": "e = 1",
+                "continua_na_etapa": 7,
+                "descricao": "etapas 3 a 6, repetir enquanto e = 0",
+                "etapa_final": 6,
+                "etapa_inicial": 3,
+                "fim": 5,
+                "inicio": 2,
+                "literal_repeticao": "e'",
+                "literal_saida": "e",
+                "quantidade_etapas": 4,
+                "repetir_quando": 0,
+                "retorna_para_etapa": 3,
+                "sair_quando": 1,
+                "sensor": "e"
+              }
+            ],
+            "movimentos": [
+              {
+                "atuador": "D",
+                "comando": "D+",
+                "requer_parada": false,
+                "saida": "D+",
+                "sensor_destino": "d1",
+                "sensor_origem": "d0",
+                "sentido": "+"
+              }
+            ],
+            "numero": 4,
+            "pertence_loop": true,
+            "restricao_ramo_texto": "e = 0",
+            "restricoes_externas": {
+              "e": 0
+            },
+            "saidas_fisicas": [
+              "D+"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1",
+              "D": "d0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1",
+              "D": "d1"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {},
+            "comando_texto": "C-",
+            "comandos": [
+              "C-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 1
+            },
+            "estado_antes_texto": "a1 · b1 · c1 · d1",
+            "estado_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 1
+            },
+            "estado_depois_texto": "a1 · b1 · c0 · d1",
+            "estado_logico_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 1
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 1
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [
+              {
+                "condicao_repeticao": {
+                  "e": 0
+                },
+                "condicao_repeticao_texto": "e = 0",
+                "condicao_saida": {
+                  "e": 1
+                },
+                "condicao_saida_texto": "e = 1",
+                "continua_na_etapa": 7,
+                "descricao": "etapas 3 a 6, repetir enquanto e = 0",
+                "etapa_final": 6,
+                "etapa_inicial": 3,
+                "fim": 5,
+                "inicio": 2,
+                "literal_repeticao": "e'",
+                "literal_saida": "e",
+                "quantidade_etapas": 4,
+                "repetir_quando": 0,
+                "retorna_para_etapa": 3,
+                "sair_quando": 1,
+                "sensor": "e"
+              }
+            ],
+            "movimentos": [
+              {
+                "atuador": "C",
+                "comando": "C-",
+                "requer_parada": false,
+                "saida": "C-",
+                "sensor_destino": "c0",
+                "sensor_origem": "c1",
+                "sentido": "-"
+              }
+            ],
+            "numero": 5,
+            "pertence_loop": true,
+            "restricao_ramo_texto": "e = 0",
+            "restricoes_externas": {
+              "e": 0
+            },
+            "saidas_fisicas": [
+              "C-"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1",
+              "D": "d1"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0",
+              "D": "d1"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {},
+            "comando_texto": "D-",
+            "comandos": [
+              "D-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 1
+            },
+            "estado_antes_texto": "a1 · b1 · c0 · d1",
+            "estado_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_depois_texto": "a1 · b1 · c0 · d0",
+            "estado_logico_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 1
+            },
+            "estado_logico_depois": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [
+              {
+                "condicao_repeticao": {
+                  "e": 0
+                },
+                "condicao_repeticao_texto": "e = 0",
+                "condicao_saida": {
+                  "e": 1
+                },
+                "condicao_saida_texto": "e = 1",
+                "continua_na_etapa": 7,
+                "descricao": "etapas 3 a 6, repetir enquanto e = 0",
+                "etapa_final": 6,
+                "etapa_inicial": 3,
+                "fim": 5,
+                "inicio": 2,
+                "literal_repeticao": "e'",
+                "literal_saida": "e",
+                "quantidade_etapas": 4,
+                "repetir_quando": 0,
+                "retorna_para_etapa": 3,
+                "sair_quando": 1,
+                "sensor": "e"
+              }
+            ],
+            "movimentos": [
+              {
+                "atuador": "D",
+                "comando": "D-",
+                "requer_parada": false,
+                "saida": "D-",
+                "sensor_destino": "d0",
+                "sensor_origem": "d1",
+                "sentido": "-"
+              }
+            ],
+            "numero": 6,
+            "pertence_loop": true,
+            "restricao_ramo_texto": "e = 0",
+            "restricoes_externas": {
+              "e": 0
+            },
+            "saidas_fisicas": [
+              "D-"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0",
+              "D": "d1"
+            },
+            "sensores_ativos_depois": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0",
+              "D": "d0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {},
+            "comando_texto": "A-",
+            "comandos": [
+              "A-"
+            ],
+            "condicao_externa_texto": "e = 1",
+            "condicoes_externas": {
+              "e": 1
+            },
+            "estado_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_antes_texto": "a1 · b1 · c0 · d0",
+            "estado_depois": {
+              "A": 0,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_depois_texto": "a0 · b1 · c0 · d0",
+            "estado_logico_antes": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_logico_depois": {
+              "A": 0,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "e",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "A",
+                "comando": "A-",
+                "requer_parada": false,
+                "saida": "A-",
+                "sensor_destino": "a0",
+                "sensor_origem": "a1",
+                "sentido": "-"
+              }
+            ],
+            "numero": 7,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "e = 1",
+            "restricoes_externas": {
+              "e": 1
+            },
+            "saidas_fisicas": [
+              "A-"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0",
+              "D": "d0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a0",
+              "B": "b1",
+              "C": "c0",
+              "D": "d0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          },
+          {
+            "codigo_memorias": {},
+            "comando_texto": "B-",
+            "comandos": [
+              "B-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "estado_antes": {
+              "A": 0,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_antes_texto": "a0 · b1 · c0 · d0",
+            "estado_depois": {
+              "A": 0,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "estado_depois_texto": "a0 · b0 · c0 · d0",
+            "estado_logico_antes": {
+              "A": 0,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_logico_depois": {
+              "A": 0,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "fase": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "movimentos": [
+              {
+                "atuador": "B",
+                "comando": "B-",
+                "requer_parada": false,
+                "saida": "B-",
+                "sensor_destino": "b0",
+                "sensor_origem": "b1",
+                "sentido": "-"
+              }
+            ],
+            "numero": 8,
+            "pertence_loop": false,
+            "restricao_ramo_texto": "e = 1",
+            "restricoes_externas": {
+              "e": 1
+            },
+            "saidas_fisicas": [
+              "B-"
+            ],
+            "sensores_ativos_antes": {
+              "A": "a0",
+              "B": "b1",
+              "C": "c0",
+              "D": "d0"
+            },
+            "sensores_ativos_depois": {
+              "A": "a0",
+              "B": "b0",
+              "C": "c0",
+              "D": "d0"
+            },
+            "sensores_ativos_intermediarios": [],
+            "simultaneo": false
+          }
+        ],
+        "eventos_mapa": [
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "A+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0",
+              "D": "d0"
+            },
+            "destino_texto": "a1 · b0 · c0 · d0",
+            "estado_fisico": {
+              "A": 0,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "estado_logico": {
+              "A": 0,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "estado_texto": "a0 · b0 · c0 · d0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 0,
+            "indice": 0,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "A+"
+            ],
+            "saidas_fisicas": [
+              "A+"
+            ],
+            "sensores_ativos": {
+              "A": "a0",
+              "B": "b0",
+              "C": "c0",
+              "D": "d0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "B+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0",
+              "D": "d0"
+            },
+            "destino_texto": "a1 · b1 · c0 · d0",
+            "estado_fisico": {
+              "A": 1,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "estado_texto": "a1 · b0 · c0 · d0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 1,
+            "indice": 1,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "Nenhuma",
+            "restricoes_externas": {},
+            "saidas": [
+              "B+"
+            ],
+            "saidas_fisicas": [
+              "B+"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b0",
+              "C": "c0",
+              "D": "d0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "C+"
+            ],
+            "condicao_externa_texto": "e = 0",
+            "condicoes_externas": {
+              "e": 0
+            },
+            "destino_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 0
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 0
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1",
+              "D": "d0"
+            },
+            "destino_texto": "a1 · b1 · c1 · d0",
+            "estado_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_texto": "a1 · b1 · c0 · d0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 2,
+            "indice": 2,
+            "literal_condicao_externa": "e'",
+            "loops": [
+              {
+                "condicao_repeticao": {
+                  "e": 0
+                },
+                "condicao_repeticao_texto": "e = 0",
+                "condicao_saida": {
+                  "e": 1
+                },
+                "condicao_saida_texto": "e = 1",
+                "continua_na_etapa": 7,
+                "descricao": "etapas 3 a 6, repetir enquanto e = 0",
+                "etapa_final": 6,
+                "etapa_inicial": 3,
+                "fim": 5,
+                "inicio": 2,
+                "literal_repeticao": "e'",
+                "literal_saida": "e",
+                "quantidade_etapas": 4,
+                "repetir_quando": 0,
+                "retorna_para_etapa": 3,
+                "sair_quando": 1,
+                "sensor": "e"
+              }
+            ],
+            "pertence_loop": true,
+            "restricao_ramo_texto": "e = 0",
+            "restricoes_externas": {
+              "e": 0
+            },
+            "saidas": [
+              "C+"
+            ],
+            "saidas_fisicas": [
+              "C+"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0",
+              "D": "d0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "D+"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 1
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 1
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1",
+              "D": "d1"
+            },
+            "destino_texto": "a1 · b1 · c1 · d1",
+            "estado_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 0
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 0
+            },
+            "estado_texto": "a1 · b1 · c1 · d0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 3,
+            "indice": 3,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [
+              {
+                "condicao_repeticao": {
+                  "e": 0
+                },
+                "condicao_repeticao_texto": "e = 0",
+                "condicao_saida": {
+                  "e": 1
+                },
+                "condicao_saida_texto": "e = 1",
+                "continua_na_etapa": 7,
+                "descricao": "etapas 3 a 6, repetir enquanto e = 0",
+                "etapa_final": 6,
+                "etapa_inicial": 3,
+                "fim": 5,
+                "inicio": 2,
+                "literal_repeticao": "e'",
+                "literal_saida": "e",
+                "quantidade_etapas": 4,
+                "repetir_quando": 0,
+                "retorna_para_etapa": 3,
+                "sair_quando": 1,
+                "sensor": "e"
+              }
+            ],
+            "pertence_loop": true,
+            "restricao_ramo_texto": "e = 0",
+            "restricoes_externas": {
+              "e": 0
+            },
+            "saidas": [
+              "D+"
+            ],
+            "saidas_fisicas": [
+              "D+"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1",
+              "D": "d0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "C-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 1
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 1
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0",
+              "D": "d1"
+            },
+            "destino_texto": "a1 · b1 · c0 · d1",
+            "estado_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 1
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 1,
+              "D": 1
+            },
+            "estado_texto": "a1 · b1 · c1 · d1",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 4,
+            "indice": 4,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [
+              {
+                "condicao_repeticao": {
+                  "e": 0
+                },
+                "condicao_repeticao_texto": "e = 0",
+                "condicao_saida": {
+                  "e": 1
+                },
+                "condicao_saida_texto": "e = 1",
+                "continua_na_etapa": 7,
+                "descricao": "etapas 3 a 6, repetir enquanto e = 0",
+                "etapa_final": 6,
+                "etapa_inicial": 3,
+                "fim": 5,
+                "inicio": 2,
+                "literal_repeticao": "e'",
+                "literal_saida": "e",
+                "quantidade_etapas": 4,
+                "repetir_quando": 0,
+                "retorna_para_etapa": 3,
+                "sair_quando": 1,
+                "sensor": "e"
+              }
+            ],
+            "pertence_loop": true,
+            "restricao_ramo_texto": "e = 0",
+            "restricoes_externas": {
+              "e": 0
+            },
+            "saidas": [
+              "C-"
+            ],
+            "saidas_fisicas": [
+              "C-"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c1",
+              "D": "d1"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "D-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "destino_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0",
+              "D": "d0"
+            },
+            "destino_texto": "a1 · b1 · c0 · d0",
+            "estado_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 1
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 1
+            },
+            "estado_texto": "a1 · b1 · c0 · d1",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 5,
+            "indice": 5,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [
+              {
+                "condicao_repeticao": {
+                  "e": 0
+                },
+                "condicao_repeticao_texto": "e = 0",
+                "condicao_saida": {
+                  "e": 1
+                },
+                "condicao_saida_texto": "e = 1",
+                "continua_na_etapa": 7,
+                "descricao": "etapas 3 a 6, repetir enquanto e = 0",
+                "etapa_final": 6,
+                "etapa_inicial": 3,
+                "fim": 5,
+                "inicio": 2,
+                "literal_repeticao": "e'",
+                "literal_saida": "e",
+                "quantidade_etapas": 4,
+                "repetir_quando": 0,
+                "retorna_para_etapa": 3,
+                "sair_quando": 1,
+                "sensor": "e"
+              }
+            ],
+            "pertence_loop": true,
+            "restricao_ramo_texto": "e = 0",
+            "restricoes_externas": {
+              "e": 0
+            },
+            "saidas": [
+              "D-"
+            ],
+            "saidas_fisicas": [
+              "D-"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0",
+              "D": "d1"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "A-"
+            ],
+            "condicao_externa_texto": "e = 1",
+            "condicoes_externas": {
+              "e": 1
+            },
+            "destino_fisico": {
+              "A": 0,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "destino_logico": {
+              "A": 0,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a0",
+              "B": "b1",
+              "C": "c0",
+              "D": "d0"
+            },
+            "destino_texto": "a0 · b1 · c0 · d0",
+            "estado_fisico": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_logico": {
+              "A": 1,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_texto": "a1 · b1 · c0 · d0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 6,
+            "indice": 6,
+            "literal_condicao_externa": "e",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "e = 1",
+            "restricoes_externas": {
+              "e": 1
+            },
+            "saidas": [
+              "A-"
+            ],
+            "saidas_fisicas": [
+              "A-"
+            ],
+            "sensores_ativos": {
+              "A": "a1",
+              "B": "b1",
+              "C": "c0",
+              "D": "d0"
+            },
+            "tipo": "atuador"
+          },
+          {
+            "codigo_memorias": {},
+            "comandos": [
+              "B-"
+            ],
+            "condicao_externa_texto": "Nenhuma",
+            "condicoes_externas": {},
+            "destino_fisico": {
+              "A": 0,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "destino_logico": {
+              "A": 0,
+              "B": 0,
+              "C": 0,
+              "D": 0
+            },
+            "destino_memoria": {},
+            "destino_sensores_ativos": {
+              "A": "a0",
+              "B": "b0",
+              "C": "c0",
+              "D": "d0"
+            },
+            "destino_texto": "a0 · b0 · c0 · d0",
+            "estado_fisico": {
+              "A": 0,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_logico": {
+              "A": 0,
+              "B": 1,
+              "C": 0,
+              "D": 0
+            },
+            "estado_texto": "a0 · b1 · c0 · d0",
+            "estados_intermediarios": [],
+            "estados_logicos_intermediarios": [],
+            "etapa_indice": 7,
+            "indice": 7,
+            "literal_condicao_externa": "Nenhuma",
+            "loops": [],
+            "pertence_loop": false,
+            "restricao_ramo_texto": "e = 1",
+            "restricoes_externas": {
+              "e": 1
+            },
+            "saidas": [
+              "B-"
+            ],
+            "saidas_fisicas": [
+              "B-"
+            ],
+            "sensores_ativos": {
+              "A": "a0",
+              "B": "b1",
+              "C": "c0",
+              "D": "d0"
+            },
+            "tipo": "atuador"
+          }
+        ],
+        "loops": [
+          {
+            "condicao_repeticao": {
+              "e": 0
+            },
+            "condicao_repeticao_texto": "e = 0",
+            "condicao_saida": {
+              "e": 1
+            },
+            "condicao_saida_texto": "e = 1",
+            "continua_na_etapa": 7,
+            "descricao": "etapas 3 a 6, repetir enquanto e = 0",
+            "etapa_final": 6,
+            "etapa_inicial": 3,
+            "fim": 5,
+            "inicio": 2,
+            "literal_repeticao": "e'",
+            "literal_saida": "e",
+            "quantidade_etapas": 4,
+            "repetir_quando": 0,
+            "retorna_para_etapa": 3,
+            "sair_quando": 1,
+            "sensor": "e"
+          }
+        ],
+        "mapa_loop_pendente": true,
+        "mapa_multiposicao_pendente": false,
+        "mapa_requer_adaptacao": true,
+        "memorias": [],
+        "observacoes": [
+          "Quantidade encontrada: 0 memória(s).",
+          "Foram testadas 1 colocações de memória.",
+          "As expressões são mantidas na ordem de qualificação da apostila; não é feita uma minimização algébrica global que altere o método.",
+          "Loops condicionais processados: etapas 3–6 por e=0."
+        ],
+        "possui_atuador_multiposicao": false,
+        "possui_fluxo_condicional": true,
+        "possui_loop": true,
+        "quantidade_memorias": 0,
+        "resolucao": [
+          {
+            "Comando": "A+",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "S.b0",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "A-",
+            "Equação final": "A+ = S.b0",
+            "Equação qualificada": "A+ = S.b0",
+            "Passo": 1,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "B+",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "a1",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "B-",
+            "Equação final": "B+ = a1",
+            "Equação qualificada": "B+ = a1",
+            "Passo": 2,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "Nenhuma"
+          },
+          {
+            "Comando": "C+",
+            "Condição externa": "e'",
+            "Condição mínima": "b1.e'",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "C-",
+            "Equação final": "C+ = b1.e'.d0",
+            "Equação qualificada": "C+ = b1.e'.d0",
+            "Passo": 3,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "d0",
+            "Restrição do ramo": "e = 0"
+          },
+          {
+            "Comando": "D+",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "c1",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "D-",
+            "Equação final": "D+ = c1",
+            "Equação qualificada": "D+ = c1",
+            "Passo": 4,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "e = 0"
+          },
+          {
+            "Comando": "C-",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "d1",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "C+",
+            "Equação final": "C- = d1",
+            "Equação qualificada": "C- = d1",
+            "Passo": 5,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "e = 0"
+          },
+          {
+            "Comando": "D-",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "c0",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "D+",
+            "Equação final": "D- = c0",
+            "Equação qualificada": "D- = c0",
+            "Passo": 6,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "e = 0"
+          },
+          {
+            "Comando": "A-",
+            "Condição externa": "e",
+            "Condição mínima": "d0.e",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "A+",
+            "Equação final": "A- = d0.e.b1",
+            "Equação qualificada": "A- = d0.e",
+            "Passo": 7,
+            "Pontos perigosos": "a0 · b0 · c0 · d0 · e=1; a1 · b0 · c0 · d0 · e=1",
+            "Qualificador complementar": "b1",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "e = 1"
+          },
+          {
+            "Comando": "B-",
+            "Condição externa": "Nenhuma",
+            "Condição mínima": "a0",
+            "Contato de parada": "Nenhum",
+            "Contracomando": "B+",
+            "Equação final": "B- = a0",
+            "Equação qualificada": "B- = a0",
+            "Passo": 8,
+            "Pontos perigosos": "Nenhum",
+            "Qualificador complementar": "Nenhum",
+            "Qualificador de diferenciação": "Nenhum",
+            "Restrição do ramo": "e = 1"
+          }
+        ],
+        "resolucao_compacta": [
+          {
+            "Comando": "A+",
+            "Condição básica": "S.b0",
+            "Equação final": "A+ = S.b0",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          },
+          {
+            "Comando": "B+",
+            "Condição básica": "a1",
+            "Equação final": "B+ = a1",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          },
+          {
+            "Comando": "C+",
+            "Condição básica": "b1.e'",
+            "Equação final": "C+ = b1.e'.d0",
+            "Pontos perigosos encontrados": "a1 · b1 · c1 · d1 · e=0; a1 · b1 · c0 · d1 · e=0",
+            "Qualificador acrescentado": "d0"
+          },
+          {
+            "Comando": "D+",
+            "Condição básica": "c1",
+            "Equação final": "D+ = c1",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          },
+          {
+            "Comando": "C-",
+            "Condição básica": "d1",
+            "Equação final": "C- = d1",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          },
+          {
+            "Comando": "D-",
+            "Condição básica": "c0",
+            "Equação final": "D- = c0",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          },
+          {
+            "Comando": "A-",
+            "Condição básica": "e.d0",
+            "Equação final": "A- = d0.e.b1",
+            "Pontos perigosos encontrados": "a0 · b0 · c0 · d0 · e=1; a1 · b0 · c0 · d0 · e=1",
+            "Qualificador acrescentado": "b1"
+          },
+          {
+            "Comando": "B-",
+            "Condição básica": "a0",
+            "Equação final": "B- = a0",
+            "Pontos perigosos encontrados": "Nenhum",
+            "Qualificador acrescentado": "Nenhum"
+          }
+        ],
+        "sensores_iniciais": {
+          "A": "a0",
+          "B": "b0",
+          "C": "c0",
+          "D": "d0"
+        },
+        "sensores_por_atuador": {
+          "A": [
+            "a0",
+            "a1"
+          ],
+          "B": [
+            "b0",
+            "b1"
+          ],
+          "C": [
+            "c0",
+            "c1"
+          ],
+          "D": [
+            "d0",
+            "d1"
+          ]
+        },
+        "validacoes": [
+          "a colocação das memórias segue a sequência de SET/RESET do método",
+          "cada passo usa como base o sinal produzido pelo passo anterior",
+          "atuadores multiposição usam sensores exclusivos e destinos explícitos",
+          "paradas intermediárias são bloqueadas pelo sensor de destino",
+          "ramificações de loop são habilitadas por condições externas exclusivas",
+          "comandos e contracomandos foram qualificados progressivamente",
+          "nenhum ponto perigoso permaneceu nos estados alcançáveis",
+          "nenhum comando e contracomando ficam ativos simultaneamente",
+          "somente uma memória muda em cada evento de memória",
+          "equações de SET, RESET e retenção das memórias são coerentes"
+        ],
+        "variaveis_fisicas": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "versao_motor": "engine6-final-regressao-11.0"
+      },
+      "sequencia": "A+, B+, [C+, D+, C-, D-] enquanto e=0, A-, B-"
+    }
+  ],
+  "motor_python_version": "engine6-final-regressao-11.0",
+  "schema_version": 1
+}

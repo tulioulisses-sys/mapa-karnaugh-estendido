@@ -1,7 +1,7 @@
 # Mapa de Karnaugh Estendido
 
-Ferramenta para resolver sistemas sequenciais pneumáticos, eletropneumáticos e
-fluídicos pelo Método do Mapa de Karnaugh Estendido.
+Ferramenta para resolver circuitos fluido mecânicos pneumáticos,
+eletropneumáticos e hidráulicos pelo Método do Mapa de Karnaugh Estendido.
 
 O projeto interpreta a sequência de movimentos, determina estados físicos,
 calcula as memórias necessárias, qualifica os comandos, verifica condições de
@@ -17,6 +17,9 @@ segurança e gera o mapa em SVG.
 - identificação e qualificação de pontos perigosos;
 - mapa de Karnaugh Estendido em SVG;
 - interface web responsiva em Streamlit;
+- API HTTP v1 para análise e resolução;
+- estrutura Flutter para Android, iOS e Web;
+- parser Dart validado contra referências do motor Python;
 - testes automatizados com GitHub Actions.
 
 ## Executar localmente
@@ -40,12 +43,23 @@ python -m pytest
 
 ```bash
 python -m pip install -r requirements-api.txt
-python -m uvicorn api.main:app --reload
+cp .env.example .env
+python -m uvicorn api.main:app --reload --env-file .env
 ```
 
 A documentação interativa ficará disponível em
 `http://127.0.0.1:8000/docs`. Para permitir um frontend em outro domínio,
 configure `CORS_ORIGINS` com uma lista separada por vírgulas.
+
+Preencha o arquivo `.env` local com a URL, a chave publicável e uma chave
+secreta do projeto Supabase. O arquivo real é ignorado pelo Git. A chave
+`SUPABASE_SECRET_KEY` é exclusiva do servidor e nunca deve ser copiada para o
+Flutter, para o navegador, para commits ou para mensagens.
+
+`POST /api/v1/analises` permanece público porque faz apenas validação de
+entrada e não consome cota. `POST /api/v1/resolucoes` exige um token Bearer do
+Supabase, uma `chave_idempotencia` e, para usuários comuns, o `turma_id`. A API
+reserva a cota, executa o motor e confirma ou estorna a reserva.
 
 ## Entrada básica
 
@@ -75,10 +89,21 @@ tests/                 Testes automatizados
 docs/                  Contratos e documentação técnica
 ```
 
-## Evolução para aplicativo móvel
+## Aplicativo móvel
 
-O motor Python será exposto por uma API HTTP. Um aplicativo Flutter consumirá
-essa API no Android e no iOS. O contrato planejado para essa integração está em
-[`docs/contrato-motor.md`](docs/contrato-motor.md).
+O motor Python é exposto por uma API HTTP. O aplicativo Flutter fará a
+validação inicial no dispositivo e solicitará a resolução completa ao servidor.
+O contrato está em [`docs/contrato-motor.md`](docs/contrato-motor.md).
 
-> A API, a autenticação e o aplicativo móvel ainda não fazem parte desta versão.
+As regras implementadas de master, submaster, turmas, convites, cotas e
+auditoria estão em
+[`docs/controle-acesso.md`](docs/controle-acesso.md).
+
+O esquema PostgreSQL/Supabase e suas operações administrativas estão em
+[`supabase/migrations`](supabase/migrations).
+
+## Publicação
+
+O contêiner da API e o roteiro para publicar API, PWA e APK estão descritos em
+[`docs/publicacao.md`](docs/publicacao.md). O contêiner recebe as configurações
+somente em tempo de execução e não incorpora o arquivo `.env`.

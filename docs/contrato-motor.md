@@ -3,8 +3,8 @@
 ## 1. Objetivo
 
 Este documento define a fronteira entre o motor de Karnaugh e seus clientes.
-Hoje o cliente é a interface Streamlit; futuramente serão a API HTTP e o
-aplicativo Flutter.
+Os clientes são a interface Streamlit e a API HTTP. O aplicativo Flutter
+consumirá a API após a autorização da análise.
 
 O contrato v1 deve preservar o comportamento público de
 `src.solver.resolver_site` e não expor classes internas de `src.engine`.
@@ -167,12 +167,11 @@ O schema correspondente está em
 - O tempo máximo de resolução será limitado.
 - SVG será produzido exclusivamente pelo servidor e tratado como conteúdo não
   executável no cliente.
-- Autenticação e autorização serão adicionadas em contrato separado, depois da
-  definição das regras de acesso por usuário.
+- Autenticação, autorização e cotas seguem as regras de
+  [`controle-acesso.md`](controle-acesso.md).
 
 ## 8. Fora do escopo desta etapa
 
-Este documento não implementa endpoints, banco de dados, login, pagamentos ou
-aplicativo Flutter. Ele estabiliza a fronteira necessária para que essas partes
-sejam criadas sem acoplamento às classes internas do motor.
-
+Este contrato não define o provedor de autenticação nem o banco de dados. Ele
+estabiliza a fronteira do motor para que essas partes sejam criadas sem
+acoplamento às classes internas da resolução.

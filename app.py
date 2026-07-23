@@ -7,7 +7,7 @@ from src.interface import (
 
 
 st.set_page_config(
-    page_title="Comandos Fluídicos Sequenciais",
+    page_title="Circuitos Fluido Mecânicos",
     page_icon="⚙️",
     layout="wide",
     initial_sidebar_state="collapsed",
