@@ -14,7 +14,14 @@ class AutenticacaoFake implements ServicoAutenticacao {
       const UsuarioSessao(id: 'usuario-1', email: 'teste@example.com');
 
   @override
+  MotivoDefinicaoSenha? get definicaoSenhaPendente => null;
+
+  @override
   Stream<UsuarioSessao?> get mudancasSessao => const Stream.empty();
+
+  @override
+  Stream<MotivoDefinicaoSenha> get solicitacoesDefinicaoSenha =>
+      const Stream.empty();
 
   @override
   Future<String> obterTokenAcesso() async => 'token-valido';
@@ -32,6 +39,13 @@ class AutenticacaoFake implements ServicoAutenticacao {
   @override
   Future<void> entrar({required String email, required String senha}) =>
       throw UnimplementedError();
+
+  @override
+  Future<void> solicitarRedefinicaoSenha(String email) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> definirNovaSenha(String senha) => throw UnimplementedError();
 
   @override
   Future<void> sair() => throw UnimplementedError();

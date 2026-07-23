@@ -205,7 +205,10 @@ def test_email_de_convite_usa_service_role_somente_no_backend(
     assert "redirect_to=https%3A%2F%2Fmapa.example.com" in chamada["url"]
     assert chamada["headers"]["apikey"] == "sb_secret_teste"
     assert chamada["headers"]["Authorization"] == "Bearer sb_secret_teste"
-    assert chamada["json"] == {"email": "aluno@ufpe.br"}
+    assert chamada["json"] == {
+        "email": "aluno@ufpe.br",
+        "data": {"convite_mapa_karnaugh": True},
+    }
 
 
 @pytest.mark.parametrize(

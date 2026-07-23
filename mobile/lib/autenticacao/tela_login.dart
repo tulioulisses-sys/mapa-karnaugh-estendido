@@ -75,6 +75,23 @@ class _TelaLoginState extends State<TelaLogin> {
     });
   }
 
+  Future<void> _recuperarSenha() async {
+    final enviado = await showDialog<bool>(
+      context: context,
+      builder: (context) => _DialogRecuperarSenha(
+        servico: widget.servico,
+        emailInicial: _email.text,
+      ),
+    );
+    if (enviado != true || !mounted) return;
+    setState(() {
+      _mensagemErro = false;
+      _mensagem =
+          'Se o e-mail estiver cadastrado, você receberá um link para '
+          'redefinir a senha.';
+    });
+  }
+
   void _abrirSobreMetodo() {
     Navigator.of(
       context,
@@ -187,6 +204,18 @@ class _TelaLoginState extends State<TelaLogin> {
                               return null;
                             },
                           ),
+                          if (!_cadastro) ...[
+                            const SizedBox(height: 4),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: _enviando
+                                    ? null
+                                    : _recuperarSenha,
+                                child: const Text('Esqueci minha senha'),
+                              ),
+                            ),
+                          ],
                           if (aviso != null) ...[
                             const SizedBox(height: 16),
                             _Aviso(mensagem: aviso, erro: true),
@@ -239,6 +268,125 @@ class _TelaLoginState extends State<TelaLogin> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DialogRecuperarSenha extends StatefulWidget {
+  const _DialogRecuperarSenha({
+    required this.servico,
+    required this.emailInicial,
+  });
+
+  final ServicoAutenticacao servico;
+  final String emailInicial;
+
+  @override
+  State<_DialogRecuperarSenha> createState() =>
+      _DialogRecuperarSenhaState();
+}
+
+class _DialogRecuperarSenhaState extends State<_DialogRecuperarSenha> {
+  final _formulario = GlobalKey<FormState>();
+  late final TextEditingController _email;
+  bool _enviando = false;
+  String? _erro;
+
+  @override
+  void initState() {
+    super.initState();
+    _email = TextEditingController(text: widget.emailInicial.trim());
+  }
+
+  @override
+  void dispose() {
+    _email.dispose();
+    super.dispose();
+  }
+
+  Future<void> _enviar() async {
+    if (_enviando || !_formulario.currentState!.validate()) return;
+    setState(() {
+      _enviando = true;
+      _erro = null;
+    });
+    try {
+      await widget.servico.solicitarRedefinicaoSenha(_email.text);
+      if (mounted) Navigator.of(context).pop(true);
+    } on FalhaAutenticacao catch (erro) {
+      if (!mounted) return;
+      setState(() => _erro = erro.mensagem);
+    } finally {
+      if (mounted) setState(() => _enviando = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      icon: const Icon(
+        Icons.lock_reset_outlined,
+        color: CoresInstitucionais.vinho,
+      ),
+      title: const Text('Recuperar senha'),
+      content: SizedBox(
+        width: 420,
+        child: Form(
+          key: _formulario,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Informe o e-mail da conta. Enviaremos um link para você '
+                'definir uma nova senha.',
+              ),
+              const SizedBox(height: 18),
+              TextFormField(
+                controller: _email,
+                autofocus: true,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.done,
+                autofillHints: const [AutofillHints.email],
+                onFieldSubmitted: (_) => _enviar(),
+                decoration: const InputDecoration(
+                  labelText: 'E-mail',
+                  prefixIcon: Icon(Icons.email_outlined),
+                ),
+                validator: (valor) {
+                  final texto = valor?.trim() ?? '';
+                  if (!texto.contains('@') || texto.endsWith('@')) {
+                    return 'Informe um e-mail válido.';
+                  }
+                  return null;
+                },
+              ),
+              if (_erro != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                  _erro!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _enviando ? null : () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          onPressed: _enviando ? null : _enviar,
+          child: _enviando
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Enviar link'),
+        ),
+      ],
     );
   }
 }

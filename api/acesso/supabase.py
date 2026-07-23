@@ -425,7 +425,10 @@ class ClienteSupabase:
         corpo: dict[str, Any]
         if tipo == "convite":
             caminho = "/auth/v1/invite"
-            corpo = {"email": email}
+            corpo = {
+                "email": email,
+                "data": {"convite_mapa_karnaugh": True},
+            }
         elif tipo == "confirmacao":
             caminho = "/auth/v1/resend"
             corpo = {"email": email, "type": "signup"}

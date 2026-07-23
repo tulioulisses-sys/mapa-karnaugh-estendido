@@ -14,7 +14,14 @@ class _AutenticacaoFake implements ServicoAutenticacao {
   UsuarioSessao? get usuarioAtual => null;
 
   @override
+  MotivoDefinicaoSenha? get definicaoSenhaPendente => null;
+
+  @override
   Stream<UsuarioSessao?> get mudancasSessao => const Stream.empty();
+
+  @override
+  Stream<MotivoDefinicaoSenha> get solicitacoesDefinicaoSenha =>
+      const Stream.empty();
 
   @override
   Future<PerfilUsuario> carregarPerfil(String usuarioId) {
@@ -31,6 +38,16 @@ class _AutenticacaoFake implements ServicoAutenticacao {
 
   @override
   Future<void> entrar({required String email, required String senha}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> solicitarRedefinicaoSenha(String email) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> definirNovaSenha(String senha) {
     throw UnimplementedError();
   }
 

@@ -40,6 +40,8 @@ enum TipoAcesso {
       valor == 'ilimitado' ? TipoAcesso.ilimitado : TipoAcesso.limitado;
 }
 
+enum MotivoDefinicaoSenha { convite, recuperacao }
+
 class UsuarioSessao {
   const UsuarioSessao({required this.id, required this.email});
 

@@ -13,8 +13,25 @@ class ServicoAutenticacaoSupabase implements ServicoAutenticacao {
       _converterUsuario(_cliente.auth.currentUser);
 
   @override
+  MotivoDefinicaoSenha? get definicaoSenhaPendente =>
+      _conviteAguardandoSenha(_cliente.auth.currentUser)
+      ? MotivoDefinicaoSenha.convite
+      : null;
+
+  @override
   Stream<UsuarioSessao?> get mudancasSessao => _cliente.auth.onAuthStateChange
       .map((evento) => _converterUsuario(evento.session?.user));
+
+  @override
+  Stream<MotivoDefinicaoSenha> get solicitacoesDefinicaoSenha async* {
+    await for (final evento in _cliente.auth.onAuthStateChange) {
+      if (evento.event == AuthChangeEvent.passwordRecovery) {
+        yield MotivoDefinicaoSenha.recuperacao;
+      } else if (_conviteAguardandoSenha(evento.session?.user)) {
+        yield MotivoDefinicaoSenha.convite;
+      }
+    }
+  }
 
   @override
   Future<void> entrar({required String email, required String senha}) async {
@@ -87,6 +104,34 @@ class ServicoAutenticacaoSupabase implements ServicoAutenticacao {
   }
 
   @override
+  Future<void> solicitarRedefinicaoSenha(String email) async {
+    try {
+      await _cliente.auth.resetPasswordForEmail(email.trim());
+    } on AuthException catch (erro) {
+      throw FalhaAutenticacao(_traduzirErroAuth(erro.message));
+    }
+  }
+
+  @override
+  Future<void> definirNovaSenha(String senha) async {
+    try {
+      final resposta = await _cliente.auth.updateUser(
+        UserAttributes(
+          password: senha,
+          data: const {'convite_mapa_karnaugh': false},
+        ),
+      );
+      if (resposta.user == null) {
+        throw const FalhaAutenticacao(
+          'Não foi possível atualizar a senha da conta.',
+        );
+      }
+    } on AuthException catch (erro) {
+      throw FalhaAutenticacao(_traduzirErroAuth(erro.message));
+    }
+  }
+
+  @override
   Future<void> sair() async {
     try {
       await _cliente.auth.signOut();
@@ -97,6 +142,9 @@ class ServicoAutenticacaoSupabase implements ServicoAutenticacao {
     }
   }
 }
+
+bool _conviteAguardandoSenha(User? usuario) =>
+    usuario?.userMetadata?['convite_mapa_karnaugh'] == true;
 
 UsuarioSessao? _converterUsuario(User? usuario) {
   if (usuario == null) return null;

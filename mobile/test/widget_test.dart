@@ -11,7 +11,10 @@ import 'package:mapa_karnaugh_app/visual/identidade_visual.dart';
 
 class ServicoAutenticacaoFake implements ServicoAutenticacao {
   final _mudancas = StreamController<UsuarioSessao?>.broadcast();
+  final _solicitacoesSenha =
+      StreamController<MotivoDefinicaoSenha>.broadcast();
   UsuarioSessao? usuario;
+  MotivoDefinicaoSenha? senhaPendente;
   PerfilUsuario perfil = const PerfilUsuario(
     id: 'usuario-1',
     email: 'teste@example.com',
@@ -22,12 +25,21 @@ class ServicoAutenticacaoFake implements ServicoAutenticacao {
   );
   bool cadastroRequerConfirmacao = true;
   int tentativasEntrada = 0;
+  String? emailRecuperacao;
+  String? novaSenha;
 
   @override
   UsuarioSessao? get usuarioAtual => usuario;
 
   @override
+  MotivoDefinicaoSenha? get definicaoSenhaPendente => senhaPendente;
+
+  @override
   Stream<UsuarioSessao?> get mudancasSessao => _mudancas.stream;
+
+  @override
+  Stream<MotivoDefinicaoSenha> get solicitacoesDefinicaoSenha =>
+      _solicitacoesSenha.stream;
 
   @override
   Future<void> entrar({required String email, required String senha}) async {
@@ -51,12 +63,26 @@ class ServicoAutenticacaoFake implements ServicoAutenticacao {
   Future<String> obterTokenAcesso() async => 'token-teste';
 
   @override
+  Future<void> solicitarRedefinicaoSenha(String email) async {
+    emailRecuperacao = email;
+  }
+
+  @override
+  Future<void> definirNovaSenha(String senha) async {
+    novaSenha = senha;
+    senhaPendente = null;
+  }
+
+  @override
   Future<void> sair() async {
     usuario = null;
     _mudancas.add(null);
   }
 
-  Future<void> fechar() => _mudancas.close();
+  Future<void> fechar() async {
+    await _mudancas.close();
+    await _solicitacoesSenha.close();
+  }
 }
 
 class ServicoAnaliseFake implements ServicoAnalise {
@@ -147,6 +173,54 @@ void main() {
       find.text('Cadastro criado. Confira seu e-mail para confirmar a conta.'),
       findsOneWidget,
     );
+    await servico.fechar();
+  });
+
+  testWidgets('solicita recuperação sem revelar se a conta existe', (
+    tester,
+  ) async {
+    final servico = ServicoAutenticacaoFake();
+    await tester.pumpWidget(_aplicativo(servico));
+
+    await tester.tap(find.text('Esqueci minha senha'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byType(TextFormField).last,
+      'aluno@example.com',
+    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Enviar link'));
+    await tester.pumpAndSettle();
+
+    expect(servico.emailRecuperacao, 'aluno@example.com');
+    expect(
+      find.text(
+        'Se o e-mail estiver cadastrado, você receberá um link para '
+        'redefinir a senha.',
+      ),
+      findsOneWidget,
+    );
+    await servico.fechar();
+  });
+
+  testWidgets('convite exige a criação da primeira senha', (tester) async {
+    final servico = ServicoAutenticacaoFake()
+      ..usuario = const UsuarioSessao(
+        id: 'usuario-1',
+        email: 'convidado@example.com',
+      )
+      ..senhaPendente = MotivoDefinicaoSenha.convite;
+    await tester.pumpWidget(_aplicativo(servico));
+
+    expect(find.text('Crie sua senha'), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField).first, 'senha-segura');
+    await tester.enterText(find.byType(TextFormField).last, 'senha-segura');
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'Concluir meu acesso'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(servico.novaSenha, 'senha-segura');
+    expect(find.text('Acesso liberado'), findsOneWidget);
     await servico.fechar();
   });
 
