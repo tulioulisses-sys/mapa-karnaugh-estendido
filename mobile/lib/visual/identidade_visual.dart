@@ -349,12 +349,13 @@ class RodapeUfpe extends StatelessWidget {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final compacto = constraints.maxWidth < 620;
-                final marca = Text(
-                  'UFPE',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: CoresInstitucionais.vinho,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.6,
+                const marca = SizedBox(
+                  width: 78,
+                  height: 86,
+                  child: Image(
+                    image: AssetImage('assets/images/logo_ufpe.png'),
+                    fit: BoxFit.contain,
+                    cacheWidth: 220,
                   ),
                 );
                 const descricao = Text(

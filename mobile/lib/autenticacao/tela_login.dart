@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../metodo/tela_sobre_metodo.dart';
 import '../visual/identidade_visual.dart';
 import 'modelos_autenticacao.dart';
 import 'servico_autenticacao.dart';
@@ -72,6 +73,12 @@ class _TelaLoginState extends State<TelaLogin> {
       _mensagem = null;
       _mensagemErro = false;
     });
+  }
+
+  void _abrirSobreMetodo() {
+    Navigator.of(
+      context,
+    ).push<void>(MaterialPageRoute(builder: (_) => const TelaSobreMetodo()));
   }
 
   @override
@@ -210,6 +217,14 @@ class _TelaLoginState extends State<TelaLogin> {
                               _cadastro
                                   ? 'Já tenho uma conta'
                                   : 'Criar uma conta',
+                            ),
+                          ),
+                          const Divider(height: 24),
+                          TextButton.icon(
+                            onPressed: _abrirSobreMetodo,
+                            icon: const Icon(Icons.menu_book_outlined),
+                            label: const Text(
+                              'Conheça o método e acesse os materiais',
                             ),
                           ),
                         ],

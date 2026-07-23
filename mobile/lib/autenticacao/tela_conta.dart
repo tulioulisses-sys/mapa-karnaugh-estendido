@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../analise/servico_analise.dart';
 import '../analise/tela_analise.dart';
+import '../metodo/tela_sobre_metodo.dart';
 import '../visual/identidade_visual.dart';
 import 'modelos_autenticacao.dart';
 import 'servico_autenticacao.dart';
@@ -52,12 +53,23 @@ class _TelaContaState extends State<TelaConta> {
     }
   }
 
+  void _abrirSobreMetodo() {
+    Navigator.of(
+      context,
+    ).push<void>(MaterialPageRoute(builder: (_) => const TelaSobreMetodo()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mapa de Karnaugh Estendido'),
         actions: [
+          IconButton(
+            onPressed: _abrirSobreMetodo,
+            tooltip: 'Sobre o método',
+            icon: const Icon(Icons.menu_book_outlined),
+          ),
           TextButton.icon(
             onPressed: _saindo ? null : _sair,
             icon: const Icon(Icons.logout),

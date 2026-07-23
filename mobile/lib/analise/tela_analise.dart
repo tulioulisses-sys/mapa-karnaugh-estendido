@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../metodo/tela_sobre_metodo.dart';
 import '../visual/identidade_visual.dart';
 import 'modelos_analise.dart';
 import 'servico_analise.dart';
@@ -61,8 +62,14 @@ class _TelaAnaliseState extends State<TelaAnalise> {
     });
   }
 
-  void _usarExemplo() {
-    _sequencia.text = 'A+, B+, B-, A-';
+  void _usarExemplo(String sequencia) {
+    _sequencia.text = sequencia;
+  }
+
+  void _abrirSobreMetodo() {
+    Navigator.of(
+      context,
+    ).push<void>(MaterialPageRoute(builder: (_) => const TelaSobreMetodo()));
   }
 
   Future<void> _resolver() async {
@@ -99,7 +106,17 @@ class _TelaAnaliseState extends State<TelaAnalise> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Resolver')),
+      appBar: AppBar(
+        title: const Text('Resolver'),
+        actions: [
+          IconButton(
+            onPressed: _abrirSobreMetodo,
+            tooltip: 'Sobre o método',
+            icon: const Icon(Icons.menu_book_outlined),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(24),
@@ -173,7 +190,7 @@ class _FormularioAnalise extends StatelessWidget {
   final bool processando;
   final ValueChanged<bool> onAlterarCiclo;
   final ValueChanged<bool> onAlterarMapa;
-  final VoidCallback onUsarExemplo;
+  final ValueChanged<String> onUsarExemplo;
   final VoidCallback onResolver;
 
   @override
@@ -190,6 +207,86 @@ class _FormularioAnalise extends StatelessWidget {
               descricao:
                   'Escreva os movimentos na ordem de execução. Movimentos '
                   'simultâneos podem ser informados entre parênteses.',
+            ),
+            const SizedBox(height: 12),
+            ExpansionTile(
+              initiallyExpanded: true,
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: const EdgeInsets.only(bottom: 10),
+              title: const Text('Como escrever a sequência?'),
+              subtitle: const Text(
+                'O sistema identifica atuadores, sensores, movimentos '
+                'simultâneos, multiposição e loops.',
+              ),
+              children: [
+                const _ExemploEntrada(
+                  titulo: 'Sequência simples',
+                  exemplo: 'A+, B+, B-, A-',
+                ),
+                const _ExemploEntrada(
+                  titulo: 'Movimentos simultâneos',
+                  exemplo: 'A+, B+, (C-, D+), (D-, A-)',
+                ),
+                const _ExemploEntrada(
+                  titulo: 'Atuador com várias posições',
+                  exemplo:
+                      'A+, B+ até b1, C+, B+ até b2, C-, B+ até b3, '
+                      'A-, B- até b0',
+                ),
+                const _ExemploEntrada(
+                  titulo: 'Loop condicional',
+                  exemplo:
+                      'A+, B+, [C+, D+, C-, D-] enquanto e=0, A-, B-',
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    TextButton.icon(
+                      onPressed: processando
+                          ? null
+                          : () => onUsarExemplo('A+, B+, B-, A-'),
+                      icon: const Icon(Icons.auto_fix_high_outlined),
+                      label: const Text('Usar exemplo A+, B+, B-, A-'),
+                    ),
+                    TextButton.icon(
+                      onPressed: processando
+                          ? null
+                          : () => onUsarExemplo(
+                              'A+, B+ até b1, C+, B+ até b2, C-, '
+                              'B+ até b3, A-, B- até b0',
+                            ),
+                      icon: const Icon(Icons.linear_scale),
+                      label: const Text('Usar exemplo multiposição'),
+                    ),
+                    TextButton.icon(
+                      onPressed: processando
+                          ? null
+                          : () => onUsarExemplo(
+                              'A+, B+, [C+, D+, C-, D-] enquanto e=0, '
+                              'A-, B-',
+                            ),
+                      icon: const Icon(Icons.loop),
+                      label: const Text('Usar exemplo com loop'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: CoresInstitucionais.vinhoFundo,
+                    border: Border.all(color: const Color(0xFFEBD0D7)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Text(
+                    'Para entender os símbolos das equações e consultar os '
+                    'materiais completos, use o ícone “Sobre o método” no '
+                    'topo da tela.',
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 22),
             TextFormField(
@@ -209,14 +306,6 @@ class _FormularioAnalise extends StatelessWidget {
                 }
                 return null;
               },
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: processando ? null : onUsarExemplo,
-                icon: const Icon(Icons.auto_fix_high_outlined),
-                label: const Text('Usar exemplo A+, B+, B-, A-'),
-              ),
             ),
             const Divider(height: 28),
             SwitchListTile(
@@ -250,6 +339,42 @@ class _FormularioAnalise extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ExemploEntrada extends StatelessWidget {
+  const _ExemploEntrada({required this.titulo, required this.exemplo});
+
+  final String titulo;
+  final String exemplo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(titulo, style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 5),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            decoration: BoxDecoration(
+              color: CoresInstitucionais.vinhoFundo,
+              border: Border.all(color: const Color(0xFFEBD0D7)),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: SelectableText(
+              exemplo,
+              style: const TextStyle(
+                color: CoresInstitucionais.vinhoEscuro,
+                fontFamily: 'monospace',
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
