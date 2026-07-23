@@ -837,10 +837,9 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
 
   Future<void> _encerrarTurma(TurmaAdministrada turma) async {
     var confirmacao = '';
-    var estado = EstadoConta.suspenso;
     String? erro;
 
-    final estadoEscolhido = await showDialog<EstadoConta>(
+    final confirmou = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, atualizar) => AlertDialog(
@@ -854,39 +853,14 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
                 children: [
                   const Text(
                     'A turma será arquivada, as matrículas serão encerradas '
-                    'e os convites pendentes serão cancelados. O histórico '
-                    'será preservado.',
+                    'e os convites pendentes serão cancelados.',
                   ),
                   const SizedBox(height: 16),
-                  const Text('O que deve acontecer com os alunos?'),
-                  const SizedBox(height: 8),
-                  SegmentedButton<EstadoConta>(
-                    segments: const [
-                      ButtonSegment(
-                        value: EstadoConta.suspenso,
-                        label: Text('Suspender'),
-                        icon: Icon(Icons.pause_circle_outline),
-                      ),
-                      ButtonSegment(
-                        value: EstadoConta.revogado,
-                        label: Text('Remover acessos'),
-                        icon: Icon(Icons.person_remove_outlined),
-                      ),
-                    ],
-                    selected: {estado},
-                    onSelectionChanged: (selecionados) {
-                      atualizar(() => estado = selecionados.first);
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    estado == EstadoConta.revogado
-                        ? 'A remoção bloqueia definitivamente as contas '
-                              'desta turma. Elas só voltarão se um '
-                              'administrador conceder novo acesso.'
-                        : 'A suspensão é reversível e bloqueia as análises '
-                              'até uma aprovação individual posterior.',
-                    style: const TextStyle(
+                  const Text(
+                    'Todas as contas vinculadas à turma terão o acesso '
+                    'removido automaticamente. Elas só voltarão a aparecer '
+                    'se um administrador conceder um novo acesso.',
+                    style: TextStyle(
                       color: CoresInstitucionais.textoSuave,
                     ),
                   ),
@@ -923,7 +897,7 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
                   );
                   return;
                 }
-                Navigator.pop(context, estado);
+                Navigator.pop(context, true);
               },
               icon: const Icon(Icons.archive_outlined),
               label: const Text('Encerrar turma'),
@@ -932,18 +906,16 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
         ),
       ),
     );
-    if (estadoEscolhido == null || !mounted) return;
+    if (confirmou != true || !mounted) return;
 
     await _executar(
       () async {
         await widget.servico.encerrarTurma(
           turmaId: turma.id,
-          estadoUsuarios: estadoEscolhido,
+          estadoUsuarios: EstadoConta.revogado,
         );
       },
-      estadoEscolhido == EstadoConta.revogado
-          ? 'Turma encerrada e acessos dos alunos removidos.'
-          : 'Turma encerrada e alunos suspensos.',
+      'Turma encerrada e acessos das contas removidos.',
     );
   }
 

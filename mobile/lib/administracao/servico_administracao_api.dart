@@ -198,11 +198,7 @@ class ServicoAdministracaoApi implements ServicoAdministracao {
     final dados = await _requisitar(
       'PATCH',
       '/api/v1/admin/turmas/$turmaId/encerrar',
-      {
-        'estado_usuarios': estadoUsuarios == EstadoConta.revogado
-            ? 'revogado'
-            : 'suspenso',
-      },
+      {'estado_usuarios': 'revogado'},
     );
     if (dados is! Map) throw _respostaInvalida();
     return ResultadoEncerramentoTurma.deJson(

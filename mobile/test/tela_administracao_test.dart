@@ -298,7 +298,15 @@ void main() {
     await tester.tap(encerrar);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Remover acessos'));
+    expect(find.text('Suspender'), findsNothing);
+    expect(find.text('Remover acessos'), findsNothing);
+    expect(
+      find.textContaining(
+        'Todas as contas vinculadas à turma terão o acesso removido '
+        'automaticamente.',
+      ),
+      findsOneWidget,
+    );
     await tester.enterText(
       find.byType(TextField),
       '2026.1',

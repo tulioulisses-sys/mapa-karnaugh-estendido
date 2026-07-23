@@ -102,7 +102,7 @@ class SolicitacaoTurma(ModeloEntrada):
 
 
 class SolicitacaoEncerramentoTurma(ModeloEntrada):
-    estado_usuarios: Literal["suspenso", "revogado"]
+    estado_usuarios: Literal["suspenso", "revogado"] = "revogado"
 
 
 class SolicitacaoConvitesLote(ModeloEntrada):

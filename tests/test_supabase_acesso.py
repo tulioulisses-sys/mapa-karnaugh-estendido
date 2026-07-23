@@ -171,7 +171,7 @@ def test_ajuste_em_lote_serializa_ids(
     assert http.posts[0]["json"]["p_turma_id"] == str(RESERVA_ID)
 
 
-def test_encerramento_de_turma_serializa_estado_dos_alunos(
+def test_encerramento_de_turma_sempre_revoga_acesso_dos_alunos(
     configuracao: ConfiguracaoSupabase,
 ) -> None:
     http = HTTPFake()
@@ -181,7 +181,7 @@ def test_encerramento_de_turma_serializa_estado_dos_alunos(
     cliente.encerrar_turma(
         ator_id=USUARIO_ID,
         turma_id=RESERVA_ID,
-        estado_usuarios="revogado",
+        estado_usuarios="suspenso",
     )
 
     chamada = http.posts[0]
