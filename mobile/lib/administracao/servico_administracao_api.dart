@@ -71,14 +71,16 @@ class ServicoAdministracaoApi implements ServicoAdministracao {
     required int quantidade,
     List<String>? usuarioIds,
   }) async {
+    final corpo = <String, dynamic>{
+      'operacao': adicionar ? 'adicionar' : 'definir',
+      'quantidade': quantidade,
+    };
+    if (usuarioIds != null) corpo['usuario_ids'] = usuarioIds;
+
     final dados = await _requisitar(
       'POST',
       '/api/v1/admin/usuarios/cotas-em-lote',
-      {
-        'operacao': adicionar ? 'adicionar' : 'definir',
-        'quantidade': quantidade,
-        if (usuarioIds != null) 'usuario_ids': usuarioIds,
-      },
+      corpo,
     );
     if (dados is! Map) throw _respostaInvalida();
     return ResultadoCotasLote.deJson(Map<String, dynamic>.from(dados));

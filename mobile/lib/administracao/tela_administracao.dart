@@ -641,15 +641,21 @@ class _Indicador extends StatelessWidget {
           children: [
             Icon(icone, color: CoresInstitucionais.vinho),
             const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  valor.toString(),
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                Text(rotulo),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    valor.toString(),
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  Text(
+                    rotulo,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
