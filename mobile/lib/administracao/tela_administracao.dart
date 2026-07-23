@@ -23,7 +23,6 @@ class TelaAdministracao extends StatefulWidget {
 class _TelaAdministracaoState extends State<TelaAdministracao> {
   List<UsuarioAdministrado> _usuarios = const [];
   List<TurmaAdministrada> _turmas = const [];
-  List<ConviteAdministrado> _convites = const [];
   TransferenciaMaster? _transferenciaMaster;
   bool _carregando = true;
   bool _processando = false;
@@ -43,13 +42,11 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
     try {
       final usuarios = await widget.servico.listarUsuarios();
       final turmas = await widget.servico.listarTurmas();
-      final convites = await widget.servico.listarConvites();
       final transferencia = await widget.servico.obterTransferenciaMaster();
       if (!mounted) return;
       setState(() {
         _usuarios = usuarios;
         _turmas = turmas;
-        _convites = convites;
         _transferenciaMaster = transferencia;
         _carregando = false;
       });
@@ -108,15 +105,18 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
   }
 
   Widget _conteudo() {
-    final pendentes = _usuarios.where((usuario) => usuario.aguardando).length;
-    final alunos = _usuarios
+    final usuariosVisiveis = _usuarios
+        .where((usuario) => usuario.estado != EstadoConta.revogado)
+        .toList(growable: false);
+    final pendentes = usuariosVisiveis
+        .where((usuario) => usuario.aguardando)
+        .length;
+    final alunos = usuariosVisiveis
         .where(
-          (usuario) =>
-              usuario.papel == PapelUsuario.usuario &&
-              usuario.estado != EstadoConta.revogado,
+          (usuario) => usuario.papel == PapelUsuario.usuario,
         )
         .length;
-    final submasters = _usuarios
+    final submasters = usuariosVisiveis
         .where((usuario) => usuario.papel == PapelUsuario.submaster)
         .length;
 
@@ -145,7 +145,7 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
               _painelConvitesTurmas(),
               const SizedBox(height: 18),
               _ResumoAdministracao(
-                total: _usuarios.length,
+                total: usuariosVisiveis.length,
                 alunos: alunos,
                 pendentes: pendentes,
                 submasters: submasters,
@@ -158,12 +158,12 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 10),
-              if (_usuarios.isEmpty)
+              if (usuariosVisiveis.isEmpty)
                 const CartaoInstitucional(
                   child: Text('Nenhuma conta cadastrada.'),
                 )
               else
-                ..._usuarios.map(
+                ...usuariosVisiveis.map(
                   (usuario) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: _cartaoUsuario(usuario),
@@ -303,7 +303,6 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
 
   Widget _painelConvitesTurmas() {
     final turmasAtivas = _turmas.where((turma) => turma.ativa).toList();
-    final convitesVisiveis = _convites.take(8).toList();
 
     return CartaoInstitucional(
       destaque: true,
@@ -350,30 +349,6 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
             )
           else
             ...turmasAtivas.map(_linhaTurmaAtiva),
-          if (_turmas.any((turma) => !turma.ativa)) ...[
-            const SizedBox(height: 12),
-            Text(
-              'Encerradas: ${_turmas.where((turma) => !turma.ativa).map(
-                    (turma) => turma.codigo,
-                  ).join(', ')}',
-              style: const TextStyle(
-                color: CoresInstitucionais.textoSuave,
-              ),
-            ),
-          ],
-          const Divider(height: 30),
-          Text(
-            'Convites recentes',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          if (convitesVisiveis.isEmpty)
-            const Text(
-              'Nenhum convite enviado.',
-              style: TextStyle(color: CoresInstitucionais.textoSuave),
-            )
-          else
-            ...convitesVisiveis.map(_linhaConvite),
         ],
       ),
     );
@@ -419,66 +394,6 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
               label: const Text('Encerrar'),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _linhaConvite(ConviteAdministrado convite) {
-    final cota = convite.acessoDestino == TipoAcesso.ilimitado
-        ? 'Ilimitado'
-        : '${convite.analisesIniciais ?? 0} análise(s)';
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 9),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: CoresInstitucionais.creme,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: CoresInstitucionais.borda),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.mail_outline,
-                color: CoresInstitucionais.vinho,
-              ),
-              const SizedBox(width: 11),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      convite.email,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      [
-                        _rotuloEstadoConvite(convite.estado),
-                        convite.turmaCodigo,
-                        convite.papelDestino.rotulo,
-                        cota,
-                      ].whereType<String>().join(' · '),
-                      style: const TextStyle(
-                        color: CoresInstitucionais.textoSuave,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (convite.pendente)
-                IconButton(
-                  onPressed: _processando
-                      ? null
-                      : () => _cancelarConvite(convite),
-                  tooltip: 'Cancelar convite',
-                  icon: const Icon(Icons.close),
-                ),
-            ],
-          ),
         ),
       ),
     );
@@ -1257,19 +1172,6 @@ class _TelaAdministracaoState extends State<TelaAdministracao> {
     }
   }
 
-  Future<void> _cancelarConvite(ConviteAdministrado convite) async {
-    final confirmou = await _confirmar(
-      titulo: 'Cancelar convite?',
-      mensagem: '${convite.email} não poderá mais aceitar este convite.',
-      rotuloConfirmacao: 'Cancelar convite',
-    );
-    if (confirmou != true || !mounted) return;
-    await _executar(
-      () => widget.servico.cancelarConvite(convite.id),
-      'Convite cancelado.',
-    );
-  }
-
   Future<void> _abrirTransferenciaMaster() async {
     final email = TextEditingController();
     final confirmacao = TextEditingController();
@@ -1659,14 +1561,6 @@ String _rotuloEstado(EstadoConta estado) => switch (estado) {
   EstadoConta.ativo => 'Ativo',
   EstadoConta.suspenso => 'Suspenso',
   EstadoConta.revogado => 'Acesso removido',
-};
-
-String _rotuloEstadoConvite(String estado) => switch (estado) {
-  'pendente' => 'Pendente',
-  'aceito' => 'Aceito',
-  'expirado' => 'Expirado',
-  'cancelado' => 'Cancelado',
-  _ => estado,
 };
 
 String _rotuloAcesso(UsuarioAdministrado usuario) {

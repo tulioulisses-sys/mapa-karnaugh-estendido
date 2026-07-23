@@ -24,6 +24,14 @@ class _AdministracaoFake implements ServicoAdministracao {
       acesso: TipoAcesso.limitado,
       analisesRestantes: 0,
     ),
+    const UsuarioAdministrado(
+      id: 'aluno-removido',
+      email: 'removido@ufpe.br',
+      papel: PapelUsuario.usuario,
+      estado: EstadoConta.revogado,
+      acesso: TipoAcesso.limitado,
+      analisesRestantes: 0,
+    ),
   ];
   final operacoes = <String>[];
   TransferenciaMaster? transferencia;
@@ -126,6 +134,13 @@ class _AdministracaoFake implements ServicoAdministracao {
       codigo: '2026.1',
       nome: 'Circuitos Fluido Mecânicos',
       ativa: true,
+      quantidadeAlunos: 0,
+    ),
+    TurmaAdministrada(
+      id: 'turma-antiga',
+      codigo: '2025.2',
+      nome: 'Turma encerrada',
+      ativa: false,
       quantidadeAlunos: 0,
     ),
   ];
@@ -235,6 +250,9 @@ void main() {
     expect(find.text('Criar turma'), findsOneWidget);
     expect(find.text('Transferir controle master'), findsOneWidget);
     expect(find.text('Histórico administrativo'), findsNothing);
+    expect(find.text('Convites recentes'), findsNothing);
+    expect(find.text('removido@ufpe.br'), findsNothing);
+    expect(find.textContaining('2025.2'), findsNothing);
   });
 
   testWidgets('master aprova cadastro pendente', (tester) async {

@@ -383,7 +383,7 @@ class _AbaResolucao extends StatelessWidget {
       titulo: 'Qualificação dos comandos',
       descricao:
           'Demonstração completa da condição mínima até a equação final. '
-          'Deslize a tabela horizontalmente para consultar todas as colunas.',
+          'No celular, cada comando é organizado em um cartão vertical.',
       child: resultado.resolucao.isEmpty
           ? const Text('Nenhuma linha de resolução foi produzida.')
           : _TabelaResultado(
@@ -599,7 +599,101 @@ class _TabelaResultado extends StatelessWidget {
       return const Text('Nenhum dado foi produzido para esta seção.');
     }
 
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 680) {
+          return _cartoesMobile(context);
+        }
+        return _tabelaDesktop();
+      },
+    );
+  }
+
+  Widget _cartoesMobile(BuildContext context) {
+    return Column(
+      key: const Key('resultado-cartoes-mobile'),
+      children: [
+        for (var indice = 0; indice < linhas.length; indice++)
+          Padding(
+            padding: EdgeInsets.only(
+              bottom: indice == linhas.length - 1 ? 0 : 12,
+            ),
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: CoresInstitucionais.borda),
+                borderRadius: BorderRadius.circular(11),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    color: CoresInstitucionais.vinhoFundo,
+                    child: Text(
+                      _tituloLinhaMobile(linhas[indice], indice),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: CoresInstitucionais.vinhoEscuro,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 4, 14, 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final coluna in colunas)
+                          if (!_chavesDoTituloMobile(
+                            linhas[indice],
+                          ).contains(coluna.chave))
+                            _campoMobile(context, coluna, linhas[indice]),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _campoMobile(
+    BuildContext context,
+    _ColunaTabela coluna,
+    Map<String, dynamic> linha,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            coluna.titulo,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: CoresInstitucionais.textoSuave,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 3),
+          SelectableText(
+            _textoTabela(linha[coluna.chave]),
+            style: _estiloCelula(coluna, linha),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _tabelaDesktop() {
     return ClipRRect(
+      key: const Key('resultado-tabela-desktop'),
       borderRadius: BorderRadius.circular(11),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -650,6 +744,23 @@ class _TabelaResultado extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _tituloLinhaMobile(Map<String, dynamic> linha, int indice) {
+    final chaves = _chavesDoTituloMobile(linha);
+    if (chaves.isEmpty) return 'Item ${indice + 1}';
+    return chaves
+        .map((chave) => _textoTabela(linha[chave]))
+        .where((texto) => texto != '—')
+        .join(' · ');
+  }
+
+  Set<String> _chavesDoTituloMobile(Map<String, dynamic> linha) {
+    if (linha.containsKey('Passo')) return const {'Passo', 'Comando'};
+    if (linha.containsKey('Etapa')) return const {'Etapa', 'Comando'};
+    if (linha.containsKey('Loop')) return const {'Loop', 'Trecho'};
+    if (linha.containsKey('Saída')) return const {'Saída', 'Tipo'};
+    return colunas.isEmpty ? const <String>{} : {colunas.first.chave};
   }
 
   TextStyle? _estiloCelula(

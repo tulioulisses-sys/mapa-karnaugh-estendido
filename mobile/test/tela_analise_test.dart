@@ -149,6 +149,28 @@ void main() {
     expect(servico.chavesRecebidas[1], servico.chavesRecebidas[0]);
     expect(find.text('Resultado da resolução'), findsOneWidget);
   });
+
+  testWidgets('resultados usam cartões sem rolagem lateral no celular', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final servico = AnaliseFake();
+    await tester.pumpWidget(MaterialApp(home: TelaAnalise(servico: servico)));
+
+    await _tocarUsarExemplo(tester);
+    await _tocarBotaoAnalise(tester);
+    await tester.pumpAndSettle();
+    await _tocarAba(tester, 'Resolução do método');
+
+    expect(find.byKey(const Key('resultado-cartoes-mobile')), findsOneWidget);
+    expect(find.byKey(const Key('resultado-tabela-desktop')), findsNothing);
+    expect(find.text('Pontos perigosos'), findsOneWidget);
+    expect(find.text('Equação final'), findsOneWidget);
+  });
 }
 
 Future<void> _tocarAba(WidgetTester tester, String nome) async {
