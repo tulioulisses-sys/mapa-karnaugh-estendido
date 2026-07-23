@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'administracao/servico_administracao_api.dart';
 import 'analise/servico_api.dart';
 import 'app.dart';
 import 'autenticacao/servico_supabase.dart';
@@ -26,10 +27,15 @@ Future<void> main() async {
       apiBaseUrl: configuracao.apiBaseUrl,
       autenticacao: autenticacao,
     );
+    final administracao = ServicoAdministracaoApi(
+      apiBaseUrl: configuracao.apiBaseUrl,
+      autenticacao: autenticacao,
+    );
     runApp(
       MapaKarnaughApp(
         servicoAutenticacao: autenticacao,
         servicoAnalise: analise,
+        servicoAdministracao: administracao,
       ),
     );
   } catch (_) {

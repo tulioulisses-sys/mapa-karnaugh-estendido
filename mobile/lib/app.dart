@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'administracao/servico_administracao.dart';
 import 'analise/servico_analise.dart';
 import 'autenticacao/portao_autenticacao.dart';
 import 'autenticacao/servico_autenticacao.dart';
@@ -10,6 +11,7 @@ class MapaKarnaughApp extends StatelessWidget {
     super.key,
     this.servicoAutenticacao,
     this.servicoAnalise,
+    this.servicoAdministracao,
     this.erroInicial,
   }) : assert(
          (servicoAutenticacao != null && servicoAnalise != null) ||
@@ -19,6 +21,7 @@ class MapaKarnaughApp extends StatelessWidget {
 
   final ServicoAutenticacao? servicoAutenticacao;
   final ServicoAnalise? servicoAnalise;
+  final ServicoAdministracao? servicoAdministracao;
   final String? erroInicial;
 
   @override
@@ -32,6 +35,7 @@ class MapaKarnaughApp extends StatelessWidget {
           ? PortaoAutenticacao(
               servicoAutenticacao: servicoAutenticacao!,
               servicoAnalise: servicoAnalise!,
+              servicoAdministracao: servicoAdministracao,
             )
           : TelaConfiguracaoAusente(mensagem: erroInicial!),
     );

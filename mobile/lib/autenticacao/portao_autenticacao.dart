@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../administracao/servico_administracao.dart';
 import '../analise/servico_analise.dart';
 import 'modelos_autenticacao.dart';
 import 'servico_autenticacao.dart';
@@ -13,10 +14,12 @@ class PortaoAutenticacao extends StatefulWidget {
     super.key,
     required this.servicoAutenticacao,
     required this.servicoAnalise,
+    this.servicoAdministracao,
   });
 
   final ServicoAutenticacao servicoAutenticacao;
   final ServicoAnalise servicoAnalise;
+  final ServicoAdministracao? servicoAdministracao;
 
   @override
   State<PortaoAutenticacao> createState() => _PortaoAutenticacaoState();
@@ -67,6 +70,7 @@ class _PortaoAutenticacaoState extends State<PortaoAutenticacao> {
       key: ValueKey(usuario.id),
       servicoAutenticacao: widget.servicoAutenticacao,
       servicoAnalise: widget.servicoAnalise,
+      servicoAdministracao: widget.servicoAdministracao,
       usuario: usuario,
     );
   }

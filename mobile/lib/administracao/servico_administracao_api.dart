@@ -1,0 +1,173 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../autenticacao/modelos_autenticacao.dart';
+import '../autenticacao/servico_autenticacao.dart';
+import 'modelos_administracao.dart';
+import 'servico_administracao.dart';
+
+class ServicoAdministracaoApi implements ServicoAdministracao {
+  ServicoAdministracaoApi({
+    required String apiBaseUrl,
+    required this.autenticacao,
+    http.Client? cliente,
+  }) : _apiBaseUrl = apiBaseUrl.replaceFirst(RegExp(r'/+$'), ''),
+       _cliente = cliente ?? http.Client();
+
+  final String _apiBaseUrl;
+  final ServicoAutenticacao autenticacao;
+  final http.Client _cliente;
+
+  @override
+  Future<List<UsuarioAdministrado>> listarUsuarios() async {
+    final dados = await _requisitar('GET', '/api/v1/admin/usuarios');
+    if (dados is! List) throw _respostaInvalida();
+
+    try {
+      return dados
+          .map(
+            (item) => UsuarioAdministrado.deJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(growable: false);
+    } on Object {
+      throw _respostaInvalida();
+    }
+  }
+
+  @override
+  Future<void> alterarEstado(String usuarioId, EstadoConta estado) async {
+    await _requisitar(
+      'PATCH',
+      '/api/v1/admin/usuarios/$usuarioId/estado',
+      {'estado': _estadoTexto(estado)},
+    );
+  }
+
+  @override
+  Future<void> definirAcesso(
+    String usuarioId,
+    TipoAcesso acesso,
+    int? analisesRestantes,
+  ) async {
+    await _requisitar(
+      'PATCH',
+      '/api/v1/admin/usuarios/$usuarioId/acesso',
+      {
+        'acesso': acesso == TipoAcesso.ilimitado
+            ? 'ilimitado'
+            : 'limitado',
+        'analises_restantes': analisesRestantes,
+      },
+    );
+  }
+
+  @override
+  Future<ResultadoCotasLote> ajustarCotasEmLote({
+    required bool adicionar,
+    required int quantidade,
+    List<String>? usuarioIds,
+  }) async {
+    final dados = await _requisitar(
+      'POST',
+      '/api/v1/admin/usuarios/cotas-em-lote',
+      {
+        'operacao': adicionar ? 'adicionar' : 'definir',
+        'quantidade': quantidade,
+        if (usuarioIds != null) 'usuario_ids': usuarioIds,
+      },
+    );
+    if (dados is! Map) throw _respostaInvalida();
+    return ResultadoCotasLote.deJson(Map<String, dynamic>.from(dados));
+  }
+
+  @override
+  Future<void> alterarPapel(String usuarioId, PapelUsuario papel) async {
+    await _requisitar(
+      'PATCH',
+      '/api/v1/admin/usuarios/$usuarioId/papel',
+      {'papel': papel == PapelUsuario.submaster ? 'submaster' : 'usuario'},
+    );
+  }
+
+  Future<Object?> _requisitar(
+    String metodo,
+    String caminho, [
+    Map<String, dynamic>? corpo,
+  ]) async {
+    try {
+      final token = await autenticacao.obterTokenAcesso();
+      final requisicao = http.Request(
+        metodo,
+        Uri.parse('$_apiBaseUrl$caminho'),
+      )
+        ..headers.addAll({
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+          if (corpo != null) 'Content-Type': 'application/json',
+        });
+      if (corpo != null) requisicao.body = jsonEncode(corpo);
+
+      final fluxo = await _cliente
+          .send(requisicao)
+          .timeout(const Duration(seconds: 20));
+      final resposta = await http.Response.fromStream(fluxo);
+      final dados = resposta.body.isEmpty ? <String, dynamic>{} : jsonDecode(
+        resposta.body,
+      );
+
+      if (resposta.statusCode < 200 || resposta.statusCode >= 300) {
+        throw _falhaDaApi(dados, resposta.statusCode);
+      }
+      return dados;
+    } on FalhaAdministracao {
+      rethrow;
+    } on FalhaAutenticacao catch (erro) {
+      throw FalhaAdministracao(erro.mensagem, codigo: 'SESSAO_INVALIDA');
+    } on TimeoutException {
+      throw const FalhaAdministracao(
+        'A administração demorou mais que o esperado. Tente novamente.',
+        codigo: 'TEMPO_ESGOTADO',
+      );
+    } on http.ClientException {
+      throw const FalhaAdministracao(
+        'Não foi possível conectar à API administrativa.',
+        codigo: 'API_INDISPONIVEL',
+      );
+    } on FormatException {
+      throw _respostaInvalida();
+    }
+  }
+}
+
+String _estadoTexto(EstadoConta estado) => switch (estado) {
+  EstadoConta.ativo => 'ativo',
+  EstadoConta.suspenso => 'suspenso',
+  EstadoConta.revogado => 'revogado',
+  EstadoConta.convidado => 'convidado',
+  EstadoConta.aguardandoAprovacao => 'aguardando_aprovacao',
+};
+
+FalhaAdministracao _falhaDaApi(Object? corpo, int statusCode) {
+  if (corpo is Map && corpo['erro'] is Map) {
+    final erro = corpo['erro'] as Map;
+    return FalhaAdministracao(
+      erro['mensagem']?.toString() ?? 'Não foi possível concluir a operação.',
+      codigo: erro['codigo']?.toString(),
+    );
+  }
+  return FalhaAdministracao(
+    'Não foi possível concluir a operação (HTTP $statusCode).',
+    codigo: 'ERRO_HTTP_$statusCode',
+  );
+}
+
+FalhaAdministracao _respostaInvalida() {
+  return const FalhaAdministracao(
+    'A API administrativa retornou uma resposta inválida.',
+    codigo: 'RESPOSTA_INVALIDA',
+  );
+}

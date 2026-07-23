@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../administracao/servico_administracao.dart';
+import '../administracao/tela_administracao.dart';
 import '../analise/servico_analise.dart';
 import '../analise/tela_analise.dart';
 import '../metodo/tela_sobre_metodo.dart';
@@ -12,11 +14,13 @@ class TelaConta extends StatefulWidget {
     super.key,
     required this.servicoAutenticacao,
     required this.servicoAnalise,
+    this.servicoAdministracao,
     required this.usuario,
   });
 
   final ServicoAutenticacao servicoAutenticacao;
   final ServicoAnalise servicoAnalise;
+  final ServicoAdministracao? servicoAdministracao;
   final UsuarioSessao usuario;
 
   @override
@@ -90,6 +94,9 @@ class _TelaContaState extends State<TelaConta> {
           return _ConteudoConta(
             perfil: snapshot.data!,
             onNovaAnalise: () => _abrirAnalise(snapshot.data!),
+            onAdministrar: widget.servicoAdministracao == null
+                ? null
+                : () => _abrirAdministracao(snapshot.data!),
           );
         },
       ),
@@ -107,13 +114,37 @@ class _TelaContaState extends State<TelaConta> {
       ),
     );
   }
+
+  Future<void> _abrirAdministracao(PerfilUsuario perfil) async {
+    final servico = widget.servicoAdministracao;
+    if (servico == null ||
+        perfil.papel == PapelUsuario.usuario ||
+        perfil.estado != EstadoConta.ativo) {
+      return;
+    }
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => TelaAdministracao(
+          servico: servico,
+          perfilAtual: perfil,
+        ),
+      ),
+    );
+    if (!mounted) return;
+    _recarregar();
+  }
 }
 
 class _ConteudoConta extends StatelessWidget {
-  const _ConteudoConta({required this.perfil, required this.onNovaAnalise});
+  const _ConteudoConta({
+    required this.perfil,
+    required this.onNovaAnalise,
+    required this.onAdministrar,
+  });
 
   final PerfilUsuario perfil;
   final VoidCallback onNovaAnalise;
+  final VoidCallback? onAdministrar;
 
   @override
   Widget build(BuildContext context) {
@@ -209,6 +240,20 @@ class _ConteudoConta extends StatelessWidget {
                         label: const Text('Nova análise'),
                       ),
                     ),
+                    if (onAdministrar != null &&
+                        perfil.papel != PapelUsuario.usuario) ...[
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: onAdministrar,
+                          icon: const Icon(
+                            Icons.admin_panel_settings_outlined,
+                          ),
+                          label: const Text('Gerenciar acessos'),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
