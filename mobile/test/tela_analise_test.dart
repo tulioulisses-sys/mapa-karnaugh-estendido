@@ -68,8 +68,7 @@ void main() {
     final servico = AnaliseFake();
     await tester.pumpWidget(MaterialApp(home: TelaAnalise(servico: servico)));
 
-    await tester.tap(find.text('Usar exemplo A+, B+, B-, A-'));
-    await tester.pump();
+    await _tocarUsarExemplo(tester);
     await _tocarBotaoAnalise(tester);
     await tester.pumpAndSettle();
 
@@ -87,7 +86,7 @@ void main() {
     final servico = AnaliseFake(falharPrimeira: true);
     await tester.pumpWidget(MaterialApp(home: TelaAnalise(servico: servico)));
 
-    await tester.tap(find.text('Usar exemplo A+, B+, B-, A-'));
+    await _tocarUsarExemplo(tester);
     await _tocarBotaoAnalise(tester);
     await tester.pumpAndSettle();
     expect(find.text('Falha temporária.'), findsOneWidget);
@@ -99,6 +98,17 @@ void main() {
     expect(servico.chavesRecebidas[1], servico.chavesRecebidas[0]);
     expect(find.text('Resultado da análise'), findsOneWidget);
   });
+}
+
+Future<void> _tocarUsarExemplo(WidgetTester tester) async {
+  final exemplo = find.widgetWithText(
+    TextButton,
+    'Usar exemplo A+, B+, B-, A-',
+  );
+  await tester.ensureVisible(exemplo);
+  await tester.pumpAndSettle();
+  await tester.tap(exemplo);
+  await tester.pump();
 }
 
 Future<void> _tocarBotaoAnalise(WidgetTester tester) async {

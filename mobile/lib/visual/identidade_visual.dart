@@ -189,18 +189,13 @@ class CartaoInstitucional extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: CoresInstitucionais.branco,
-        border: Border.all(color: CoresInstitucionais.borda),
+    return Material(
+      color: CoresInstitucionais.branco,
+      elevation: 1,
+      shadowColor: const Color(0x2448262E),
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0E48262E),
-            blurRadius: 25,
-            offset: Offset(0, 8),
-          ),
-        ],
+        side: const BorderSide(color: CoresInstitucionais.borda),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
