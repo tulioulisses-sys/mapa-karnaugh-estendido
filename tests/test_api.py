@@ -22,6 +22,7 @@ class ProvedorAcessoFake:
         self.reservas: list[dict[str, Any]] = []
         self.consumos: list[UUID] = []
         self.estornos: list[tuple[UUID, str]] = []
+        self.operacoes_admin: list[tuple[str, dict[str, Any]]] = []
         self.erro_reserva: ErroAPI | None = None
 
     def autenticar(self, token: str) -> UsuarioAutenticado:
@@ -80,6 +81,88 @@ class ProvedorAcessoFake:
             "idempotente": False,
         }
 
+    def listar_usuarios(self, ator_id: UUID) -> list[dict[str, Any]]:
+        self.operacoes_admin.append(("listar", {"ator_id": ator_id}))
+        return [
+            {
+                "id": str(USUARIO_ID),
+                "email": "aluno@example.com",
+                "papel": "usuario",
+                "estado": "aguardando_aprovacao",
+                "acesso": "limitado",
+                "analises_restantes": 0,
+            }
+        ]
+
+    def alterar_estado_usuario(
+        self,
+        *,
+        ator_id: UUID,
+        usuario_id: UUID,
+        estado: str,
+    ) -> dict[str, Any]:
+        dados = {
+            "ator_id": ator_id,
+            "usuario_id": usuario_id,
+            "estado": estado,
+        }
+        self.operacoes_admin.append(("estado", dados))
+        return {"id": str(usuario_id), "estado": estado}
+
+    def definir_acesso_usuario(
+        self,
+        *,
+        ator_id: UUID,
+        usuario_id: UUID,
+        acesso: str,
+        analises_restantes: int | None,
+    ) -> dict[str, Any]:
+        dados = {
+            "ator_id": ator_id,
+            "usuario_id": usuario_id,
+            "acesso": acesso,
+            "analises_restantes": analises_restantes,
+        }
+        self.operacoes_admin.append(("acesso", dados))
+        return {"id": str(usuario_id), **dados}
+
+    def ajustar_cotas_lote(
+        self,
+        *,
+        ator_id: UUID,
+        operacao: str,
+        quantidade: int,
+        usuario_ids: list[UUID] | None,
+    ) -> dict[str, Any]:
+        dados = {
+            "ator_id": ator_id,
+            "operacao": operacao,
+            "quantidade": quantidade,
+            "usuario_ids": usuario_ids,
+        }
+        self.operacoes_admin.append(("lote", dados))
+        return {
+            "operacao": operacao,
+            "quantidade": quantidade,
+            "usuarios_alterados": 2,
+            "usuarios_ignorados": 0,
+        }
+
+    def alterar_papel_usuario(
+        self,
+        *,
+        ator_id: UUID,
+        usuario_id: UUID,
+        papel: str,
+    ) -> dict[str, Any]:
+        dados = {
+            "ator_id": ator_id,
+            "usuario_id": usuario_id,
+            "papel": papel,
+        }
+        self.operacoes_admin.append(("papel", dados))
+        return {"id": str(usuario_id), "papel": papel}
+
 
 client = TestClient(app)
 
@@ -106,7 +189,7 @@ def test_health() -> None:
 
     assert resposta.status_code == 200
     assert resposta.json()["status"] == "ok"
-    assert resposta.json()["api_version"] == "1.1.0"
+    assert resposta.json()["api_version"] == "1.2.0"
     assert resposta.headers["x-content-type-options"] == "nosniff"
 
 
@@ -264,3 +347,93 @@ def test_openapi_publica_endpoints_v1() -> None:
     assert "/health" in caminhos
     assert "/api/v1/analises" in caminhos
     assert "/api/v1/resolucoes" in caminhos
+    assert "/api/v1/admin/usuarios" in caminhos
+    assert "/api/v1/admin/usuarios/{usuario_id}/estado" in caminhos
+    assert "/api/v1/admin/usuarios/{usuario_id}/acesso" in caminhos
+    assert "/api/v1/admin/usuarios/cotas-em-lote" in caminhos
+    assert "/api/v1/admin/usuarios/{usuario_id}/papel" in caminhos
+
+
+def test_lista_usuarios_para_painel_admin(
+    provedor: ProvedorAcessoFake,
+) -> None:
+    resposta = client.get(
+        "/api/v1/admin/usuarios",
+        headers=CABECALHO_LOGIN,
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()[0]["email"] == "aluno@example.com"
+    assert provedor.operacoes_admin == [
+        ("listar", {"ator_id": USUARIO_ID})
+    ]
+
+
+def test_aprova_usuario_pela_api(provedor: ProvedorAcessoFake) -> None:
+    aluno_id = UUID("251323e1-26d0-4fe0-8478-3ca9870eb59a")
+    resposta = client.patch(
+        f"/api/v1/admin/usuarios/{aluno_id}/estado",
+        headers=CABECALHO_LOGIN,
+        json={"estado": "ativo"},
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["estado"] == "ativo"
+    assert provedor.operacoes_admin[-1] == (
+        "estado",
+        {
+            "ator_id": USUARIO_ID,
+            "usuario_id": aluno_id,
+            "estado": "ativo",
+        },
+    )
+
+
+def test_define_acesso_limitado(provedor: ProvedorAcessoFake) -> None:
+    aluno_id = UUID("251323e1-26d0-4fe0-8478-3ca9870eb59a")
+    resposta = client.patch(
+        f"/api/v1/admin/usuarios/{aluno_id}/acesso",
+        headers=CABECALHO_LOGIN,
+        json={"acesso": "limitado", "analises_restantes": 3},
+    )
+
+    assert resposta.status_code == 200
+    assert provedor.operacoes_admin[-1][1]["analises_restantes"] == 3
+
+
+def test_rejeita_acesso_limitado_sem_saldo(
+    provedor: ProvedorAcessoFake,
+) -> None:
+    aluno_id = UUID("251323e1-26d0-4fe0-8478-3ca9870eb59a")
+    resposta = client.patch(
+        f"/api/v1/admin/usuarios/{aluno_id}/acesso",
+        headers=CABECALHO_LOGIN,
+        json={"acesso": "limitado"},
+    )
+
+    assert resposta.status_code == 422
+    assert provedor.operacoes_admin == []
+
+
+def test_adiciona_cota_em_lote(provedor: ProvedorAcessoFake) -> None:
+    resposta = client.post(
+        "/api/v1/admin/usuarios/cotas-em-lote",
+        headers=CABECALHO_LOGIN,
+        json={"operacao": "adicionar", "quantidade": 1},
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["usuarios_alterados"] == 2
+    assert provedor.operacoes_admin[-1][1]["usuario_ids"] is None
+
+
+def test_promove_submaster(provedor: ProvedorAcessoFake) -> None:
+    aluno_id = UUID("251323e1-26d0-4fe0-8478-3ca9870eb59a")
+    resposta = client.patch(
+        f"/api/v1/admin/usuarios/{aluno_id}/papel",
+        headers=CABECALHO_LOGIN,
+        json={"papel": "submaster"},
+    )
+
+    assert resposta.status_code == 200
+    assert resposta.json()["papel"] == "submaster"

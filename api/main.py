@@ -23,12 +23,16 @@ from .modelos import (
     LIMITE_SEQUENCIA,
     RespostaErro,
     RespostaSaude,
+    SolicitacaoAcessoUsuario,
     SolicitacaoAnalise,
+    SolicitacaoCotasLote,
+    SolicitacaoEstadoUsuario,
+    SolicitacaoPapelUsuario,
     SolicitacaoResolucao,
 )
 
 
-API_VERSION = "1.1.0"
+API_VERSION = "1.2.0"
 
 
 def _origens_permitidas() -> list[str]:
@@ -56,7 +60,7 @@ if origens:
         CORSMiddleware,
         allow_origins=origens,
         allow_credentials=False,
-        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
         allow_headers=["Content-Type", "Authorization"],
     )
 
@@ -277,6 +281,126 @@ def resolver(
         ),
     }
     return resultado
+
+
+@app.get(
+    "/api/v1/admin/usuarios",
+    response_model=list[dict[str, Any]],
+    responses={
+        401: {"model": RespostaErro},
+        403: {"model": RespostaErro},
+        503: {"model": RespostaErro},
+    },
+    tags=["administração"],
+)
+def listar_usuarios_administracao(
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> list[dict[str, Any]]:
+    return provedor.listar_usuarios(usuario.id)
+
+
+@app.patch(
+    "/api/v1/admin/usuarios/{usuario_id}/estado",
+    response_model=dict[str, Any],
+    tags=["administração"],
+)
+def alterar_estado_usuario(
+    usuario_id: UUID,
+    solicitacao: SolicitacaoEstadoUsuario,
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> dict[str, Any]:
+    return provedor.alterar_estado_usuario(
+        ator_id=usuario.id,
+        usuario_id=usuario_id,
+        estado=solicitacao.estado,
+    )
+
+
+@app.patch(
+    "/api/v1/admin/usuarios/{usuario_id}/acesso",
+    response_model=dict[str, Any],
+    tags=["administração"],
+)
+def definir_acesso_usuario(
+    usuario_id: UUID,
+    solicitacao: SolicitacaoAcessoUsuario,
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> dict[str, Any]:
+    return provedor.definir_acesso_usuario(
+        ator_id=usuario.id,
+        usuario_id=usuario_id,
+        acesso=solicitacao.acesso,
+        analises_restantes=solicitacao.analises_restantes,
+    )
+
+
+@app.post(
+    "/api/v1/admin/usuarios/cotas-em-lote",
+    response_model=dict[str, Any],
+    tags=["administração"],
+)
+def ajustar_cotas_em_lote(
+    solicitacao: SolicitacaoCotasLote,
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> dict[str, Any]:
+    return provedor.ajustar_cotas_lote(
+        ator_id=usuario.id,
+        operacao=solicitacao.operacao,
+        quantidade=solicitacao.quantidade,
+        usuario_ids=solicitacao.usuario_ids,
+    )
+
+
+@app.patch(
+    "/api/v1/admin/usuarios/{usuario_id}/papel",
+    response_model=dict[str, Any],
+    tags=["administração"],
+)
+def alterar_papel_usuario(
+    usuario_id: UUID,
+    solicitacao: SolicitacaoPapelUsuario,
+    usuario: Annotated[
+        UsuarioAutenticado,
+        Depends(obter_usuario_atual),
+    ],
+    provedor: Annotated[
+        ProvedorAcesso,
+        Depends(obter_provedor_acesso),
+    ],
+) -> dict[str, Any]:
+    return provedor.alterar_papel_usuario(
+        ator_id=usuario.id,
+        usuario_id=usuario_id,
+        papel=solicitacao.papel,
+    )
 
 
 def _id_reserva(reserva: dict[str, Any]) -> UUID:

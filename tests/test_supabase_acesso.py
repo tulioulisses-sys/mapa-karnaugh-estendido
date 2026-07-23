@@ -114,12 +114,62 @@ def test_rpc_usa_somente_chave_secreta_no_backend(
     assert chamada["json"]["p_usuario_id"] == str(USUARIO_ID)
 
 
+def test_lista_administrativa_aceita_resposta_em_lista(
+    configuracao: ConfiguracaoSupabase,
+) -> None:
+    http = HTTPFake()
+    http.resposta_post = RespostaFake(
+        200,
+        [
+            {
+                "id": str(USUARIO_ID),
+                "email": "aluno@example.com",
+                "papel": "usuario",
+            }
+        ],
+    )
+    cliente = ClienteSupabase(configuracao, cliente_http=http)
+
+    usuarios = cliente.listar_usuarios(USUARIO_ID)
+
+    assert usuarios[0]["email"] == "aluno@example.com"
+    chamada = http.posts[0]
+    assert chamada["url"].endswith(
+        "/rest/v1/rpc/listar_usuarios_administracao"
+    )
+    assert chamada["json"] == {"p_ator_id": str(USUARIO_ID)}
+
+
+def test_ajuste_em_lote_serializa_ids(
+    configuracao: ConfiguracaoSupabase,
+) -> None:
+    http = HTTPFake()
+    http.resposta_post = RespostaFake(
+        200,
+        {"usuarios_alterados": 1, "usuarios_ignorados": 0},
+    )
+    cliente = ClienteSupabase(configuracao, cliente_http=http)
+
+    cliente.ajustar_cotas_lote(
+        ator_id=USUARIO_ID,
+        operacao="adicionar",
+        quantidade=1,
+        usuario_ids=[USUARIO_ID],
+    )
+
+    assert http.posts[0]["json"]["p_usuario_ids"] == [str(USUARIO_ID)]
+
+
 @pytest.mark.parametrize(
     ("mensagem", "codigo"),
     (
         ("O usuário não possui análises disponíveis.", "COTA_ESGOTADA"),
         ("A conta não está ativa.", "CONTA_INATIVA"),
         ("O usuário precisa de uma turma ativa.", "TURMA_INDISPONIVEL"),
+        (
+            "Permissão administrativa negada.",
+            "PERMISSAO_ADMINISTRATIVA_NEGADA",
+        ),
     ),
 )
 def test_traduz_erros_seguros_do_banco(

@@ -85,6 +85,42 @@ class ProvedorAcesso(Protocol):
         motivo: str,
     ) -> dict[str, Any]: ...
 
+    def listar_usuarios(self, ator_id: UUID) -> list[dict[str, Any]]: ...
+
+    def alterar_estado_usuario(
+        self,
+        *,
+        ator_id: UUID,
+        usuario_id: UUID,
+        estado: str,
+    ) -> dict[str, Any]: ...
+
+    def definir_acesso_usuario(
+        self,
+        *,
+        ator_id: UUID,
+        usuario_id: UUID,
+        acesso: str,
+        analises_restantes: int | None,
+    ) -> dict[str, Any]: ...
+
+    def ajustar_cotas_lote(
+        self,
+        *,
+        ator_id: UUID,
+        operacao: str,
+        quantidade: int,
+        usuario_ids: list[UUID] | None,
+    ) -> dict[str, Any]: ...
+
+    def alterar_papel_usuario(
+        self,
+        *,
+        ator_id: UUID,
+        usuario_id: UUID,
+        papel: str,
+    ) -> dict[str, Any]: ...
+
 
 class ClienteSupabase:
     def __init__(
@@ -177,11 +213,104 @@ class ClienteSupabase:
             },
         )
 
+    def listar_usuarios(self, ator_id: UUID) -> list[dict[str, Any]]:
+        dados = self._rpc_json(
+            "listar_usuarios_administracao",
+            {"p_ator_id": str(ator_id)},
+        )
+        if not isinstance(dados, list) or not all(
+            isinstance(item, dict) for item in dados
+        ):
+            raise _erro_resposta_controle_invalida()
+        return dados
+
+    def alterar_estado_usuario(
+        self,
+        *,
+        ator_id: UUID,
+        usuario_id: UUID,
+        estado: str,
+    ) -> dict[str, Any]:
+        return self._rpc(
+            "alterar_estado_usuario",
+            {
+                "p_ator_id": str(ator_id),
+                "p_usuario_id": str(usuario_id),
+                "p_estado": estado,
+            },
+        )
+
+    def definir_acesso_usuario(
+        self,
+        *,
+        ator_id: UUID,
+        usuario_id: UUID,
+        acesso: str,
+        analises_restantes: int | None,
+    ) -> dict[str, Any]:
+        return self._rpc(
+            "definir_acesso_usuario",
+            {
+                "p_ator_id": str(ator_id),
+                "p_usuario_id": str(usuario_id),
+                "p_acesso": acesso,
+                "p_analises_restantes": analises_restantes,
+            },
+        )
+
+    def ajustar_cotas_lote(
+        self,
+        *,
+        ator_id: UUID,
+        operacao: str,
+        quantidade: int,
+        usuario_ids: list[UUID] | None,
+    ) -> dict[str, Any]:
+        return self._rpc(
+            "ajustar_cotas_em_lote",
+            {
+                "p_ator_id": str(ator_id),
+                "p_operacao": operacao,
+                "p_quantidade": quantidade,
+                "p_usuario_ids": (
+                    [str(usuario_id) for usuario_id in usuario_ids]
+                    if usuario_ids is not None
+                    else None
+                ),
+            },
+        )
+
+    def alterar_papel_usuario(
+        self,
+        *,
+        ator_id: UUID,
+        usuario_id: UUID,
+        papel: str,
+    ) -> dict[str, Any]:
+        return self._rpc(
+            "alterar_papel_usuario",
+            {
+                "p_ator_id": str(ator_id),
+                "p_usuario_id": str(usuario_id),
+                "p_papel": papel,
+            },
+        )
+
     def _rpc(
         self,
         funcao: str,
         parametros: dict[str, Any],
     ) -> dict[str, Any]:
+        dados = self._rpc_json(funcao, parametros)
+        if not isinstance(dados, dict):
+            raise _erro_resposta_controle_invalida()
+        return dados
+
+    def _rpc_json(
+        self,
+        funcao: str,
+        parametros: dict[str, Any],
+    ) -> Any:
         try:
             resposta = self._http.post(
                 f"{self._configuracao.url}/rest/v1/rpc/{funcao}",
@@ -207,18 +336,7 @@ class ClienteSupabase:
         try:
             dados = resposta.json()
         except (TypeError, ValueError) as erro:
-            raise ErroAPI(
-                status_code=503,
-                codigo="RESPOSTA_CONTROLE_ACESSO_INVALIDA",
-                mensagem="O controle de acesso retornou uma resposta inválida.",
-            ) from erro
-
-        if not isinstance(dados, dict):
-            raise ErroAPI(
-                status_code=503,
-                codigo="RESPOSTA_CONTROLE_ACESSO_INVALIDA",
-                mensagem="O controle de acesso retornou uma resposta inválida.",
-            )
+            raise _erro_resposta_controle_invalida() from erro
 
         return dados
 
@@ -231,6 +349,14 @@ def _erro_token_invalido() -> ErroAPI:
     )
 
 
+def _erro_resposta_controle_invalida() -> ErroAPI:
+    return ErroAPI(
+        status_code=503,
+        codigo="RESPOSTA_CONTROLE_ACESSO_INVALIDA",
+        mensagem="O controle de acesso retornou uma resposta inválida.",
+    )
+
+
 def _traduzir_erro_rpc(resposta: Any) -> ErroAPI:
     try:
         corpo = resposta.json()
@@ -239,6 +365,46 @@ def _traduzir_erro_rpc(resposta: Any) -> ErroAPI:
         mensagem = ""
 
     normalizada = mensagem.casefold()
+    if "permissão administrativa negada" in normalizada:
+        return ErroAPI(
+            status_code=403,
+            codigo="PERMISSAO_ADMINISTRATIVA_NEGADA",
+            mensagem="Sua conta não pode realizar essa operação.",
+        )
+    if "somente o master" in normalizada:
+        return ErroAPI(
+            status_code=403,
+            codigo="OPERACAO_EXCLUSIVA_MASTER",
+            mensagem="Somente o master pode realizar essa operação.",
+        )
+    if "usuário não encontrado" in normalizada:
+        return ErroAPI(
+            status_code=404,
+            codigo="USUARIO_NAO_ENCONTRADO",
+            mensagem="O usuário selecionado não foi encontrado.",
+        )
+    if (
+        "não pode administrar esse usuário" in normalizada
+        or "master não pode ser alterado" in normalizada
+        or "não pode alterar a própria conta" in normalizada
+    ):
+        return ErroAPI(
+            status_code=409,
+            codigo="USUARIO_NAO_GERENCIAVEL",
+            mensagem="Essa conta não pode ser alterada por você.",
+        )
+    if (
+        "quantidade" in normalizada
+        or "saldo" in normalizada
+        or "tipo de acesso" in normalizada
+        or "papel de destino" in normalizada
+        or "operação de cota" in normalizada
+    ):
+        return ErroAPI(
+            status_code=422,
+            codigo="AJUSTE_ADMINISTRATIVO_INVALIDO",
+            mensagem="Revise os dados do ajuste administrativo.",
+        )
     if "não possui análises disponíveis" in normalizada:
         return ErroAPI(
             status_code=403,
