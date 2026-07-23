@@ -36,7 +36,7 @@ from .modelos import (
 )
 
 
-API_VERSION = "1.5.0"
+API_VERSION = "1.5.1"
 
 
 def _origens_permitidas() -> list[str]:
@@ -584,7 +584,7 @@ def encerrar_turma(
     return provedor.encerrar_turma(
         ator_id=usuario.id,
         turma_id=turma_id,
-        estado_usuarios=solicitacao.estado_usuarios,
+        estado_usuarios="revogado",
     )
 
 

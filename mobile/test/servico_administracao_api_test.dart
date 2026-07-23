@@ -265,7 +265,7 @@ void main() {
 
     final resultado = await servico.encerrarTurma(
       turmaId: 'turma-1',
-      estadoUsuarios: EstadoConta.revogado,
+      estadoUsuarios: EstadoConta.suspenso,
     );
 
     expect(resultado.usuariosAlterados, 2);

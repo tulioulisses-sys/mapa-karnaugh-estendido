@@ -387,7 +387,7 @@ def test_health() -> None:
 
     assert resposta.status_code == 200
     assert resposta.json()["status"] == "ok"
-    assert resposta.json()["api_version"] == "1.5.0"
+    assert resposta.json()["api_version"] == "1.5.1"
     assert resposta.headers["x-content-type-options"] == "nosniff"
 
 
@@ -764,6 +764,27 @@ def test_encerra_turma_e_revoga_alunos(
     assert resposta.status_code == 200
     assert resposta.json()["ativa"] is False
     assert resposta.json()["usuarios_alterados"] == 2
+    assert provedor.operacoes_admin[-1] == (
+        "encerrar_turma",
+        {
+            "ator_id": USUARIO_ID,
+            "turma_id": UUID(turma_id),
+            "estado_usuarios": "revogado",
+        },
+    )
+
+
+def test_cliente_antigo_nao_consegue_suspender_ao_encerrar_turma(
+    provedor: ProvedorAcessoFake,
+) -> None:
+    turma_id = "c19c03e5-bbf3-4f2a-88d6-b121043f5eb8"
+    resposta = client.patch(
+        f"/api/v1/admin/turmas/{turma_id}/encerrar",
+        headers=CABECALHO_LOGIN,
+        json={"estado_usuarios": "suspenso"},
+    )
+
+    assert resposta.status_code == 200
     assert provedor.operacoes_admin[-1] == (
         "encerrar_turma",
         {

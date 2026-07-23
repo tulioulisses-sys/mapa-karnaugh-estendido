@@ -502,7 +502,7 @@ class ClienteSupabase:
             {
                 "p_ator_id": str(ator_id),
                 "p_turma_id": str(turma_id),
-                "p_estado_usuarios": estado_usuarios,
+                "p_estado_usuarios": "revogado",
             },
         )
 

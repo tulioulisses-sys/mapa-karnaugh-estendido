@@ -23,7 +23,15 @@ do provedor de autenticação.
 4. `202607230001_admin_usuarios_cotas.sql`: administração segura de contas,
    papéis e cotas;
 5. `202607230002_turmas_convites.sql`: turmas, convites em lote, perfil e cota
-   inicial aplicados após a confirmação do endereço.
+   inicial aplicados após a confirmação do endereço;
+6. `202607230003_transferencia_master.sql`: transferência segura da conta
+   master;
+7. `202607230004_auditoria_encerramento_turmas.sql`: auditoria e encerramento
+   transacional das turmas;
+8. `202607230005_turma_automatica_auditoria_compacta.sql`: reconciliação das
+   matrículas e compactação da auditoria;
+9. `202607230006_encerramento_revoga_acessos.sql`: revogação automática de
+   todas as contas vinculadas quando uma turma é encerrada.
 
 Cadastros sem convite entram como `aguardando_aprovacao`. Um convite válido
 só é aceito quando o mesmo endereço aparece confirmado no Supabase Auth.
