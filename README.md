@@ -101,3 +101,9 @@ auditoria estão em
 
 O esquema PostgreSQL/Supabase e suas operações administrativas estão em
 [`supabase/migrations`](supabase/migrations).
+
+## Publicação
+
+O contêiner da API e o roteiro para publicar API, PWA e APK estão descritos em
+[`docs/publicacao.md`](docs/publicacao.md). O contêiner recebe as configurações
+somente em tempo de execução e não incorpora o arquivo `.env`.
