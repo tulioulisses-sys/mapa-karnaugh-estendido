@@ -76,6 +76,19 @@ def _corpo_erro(erro: ErroAPI) -> dict[str, Any]:
     }
 
 
+def _tornar_json_seguro(valor: Any) -> Any:
+    if valor is None or isinstance(valor, (bool, int, float, str)):
+        return valor
+    if isinstance(valor, dict):
+        return {
+            str(chave): _tornar_json_seguro(conteudo)
+            for chave, conteudo in valor.items()
+        }
+    if isinstance(valor, (list, tuple, set)):
+        return [_tornar_json_seguro(item) for item in valor]
+    return str(valor)
+
+
 @app.middleware("http")
 async def cabecalhos_de_seguranca(request: Request, call_next):
     resposta = await call_next(request)
@@ -138,7 +151,7 @@ async def tratar_erro_validacao(
             codigo="DADOS_INVALIDOS",
             mensagem="Revise os dados enviados e tente novamente.",
             campo=campo,
-            detalhes={"erros": erros},
+            detalhes={"erros": _tornar_json_seguro(erros)},
         )
 
     return JSONResponse(
