@@ -1,0 +1,5 @@
+{
+  "SUPABASE_URL": "https://seu-projeto.supabase.co",
+  "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_substitua_aqui",
+  "API_BASE_URL": "http://127.0.0.1:8000"
+}

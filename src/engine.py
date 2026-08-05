@@ -470,30 +470,52 @@ def _criar_contexto(projeto: ProjetoSequencial) -> ContextoFisico:
 
 def _registro_comandos(
     projeto: ProjetoSequencial,
-) -> dict[tuple[str, str, str], ComandoLogico]:
+) -> dict[tuple[int, int], ComandoLogico]:
     destinos_por_saida: dict[str, list[str]] = {}
+    ocorrencias_por_movimento: dict[tuple[str, str], int] = {}
+
     for etapa in projeto.etapas:
         for movimento in etapa.movimentos:
             saida = f"{movimento.atuador}{movimento.sentido}"
             destinos = destinos_por_saida.setdefault(saida, [])
             if movimento.sensor_destino not in destinos:
                 destinos.append(movimento.sensor_destino)
+            assinatura = (saida, movimento.sensor_destino)
+            ocorrencias_por_movimento[assinatura] = (
+                ocorrencias_por_movimento.get(assinatura, 0) + 1
+            )
 
-    registro: dict[tuple[str, str, str], ComandoLogico] = {}
-    for saida, destinos in destinos_por_saida.items():
-        atuador, sentido = saida[:-1], saida[-1]
-        multiplo = len(destinos) > 1
-        for numero, sensor in enumerate(destinos, start=1):
-            chave = saida if not multiplo else f"{saida}@{sensor}"
-            rotulo = saida if not multiplo else f"{saida}({numero})"
-            registro[(atuador, sentido, sensor)] = ComandoLogico(
+    numeros: dict[tuple[str, str], int] = {}
+    registro: dict[tuple[int, int], ComandoLogico] = {}
+
+    for indice_etapa, etapa in enumerate(projeto.etapas):
+        for indice_movimento, movimento in enumerate(etapa.movimentos):
+            saida = f"{movimento.atuador}{movimento.sentido}"
+            destinos = destinos_por_saida[saida]
+            multiposicao = len(destinos) > 1
+            numero_destino = destinos.index(movimento.sensor_destino) + 1
+            rotulo = saida if not multiposicao else f"{saida}({numero_destino})"
+
+            assinatura = (saida, movimento.sensor_destino)
+            numeros[assinatura] = numeros.get(assinatura, 0) + 1
+            numero_ocorrencia = numeros[assinatura]
+            repetido = ocorrencias_por_movimento[assinatura] > 1
+            chave_base = saida if not multiposicao else f"{saida}@{movimento.sensor_destino}"
+            chave = (
+                chave_base
+                if not repetido
+                else f"{chave_base}#{numero_ocorrencia}"
+            )
+
+            registro[(indice_etapa, indice_movimento)] = ComandoLogico(
                 chave=chave,
                 fisica=saida,
-                dispositivo=atuador,
-                sentido=sentido,
+                dispositivo=movimento.atuador,
+                sentido=movimento.sentido,
                 rotulo=rotulo,
-                sensor_destino=sensor,
+                sensor_destino=movimento.sensor_destino,
             )
+
     return registro
 
 
@@ -524,7 +546,7 @@ def _acao_completa(
     movimento: Movimento,
     sensor_origem: str,
     contexto: ContextoFisico,
-    registro: dict[tuple[str, str, str], ComandoLogico],
+    comando: ComandoLogico,
     requer_parada: bool,
 ) -> Acao:
     config = contexto.configuracoes[movimento.atuador]
@@ -565,11 +587,7 @@ def _acao_completa(
         alteracoes=alteracoes,
         conclusao=conclusao,
         sensores_percorridos=sensores_percorridos,
-        comando=registro[(
-            movimento.atuador,
-            movimento.sentido,
-            movimento.sensor_destino,
-        )],
+        comando=comando,
         requer_parada=requer_parada and len(variaveis) > 1,
     )
 
@@ -716,13 +734,13 @@ def _construir_etapas_contexto(
         antes = estado
         acoes: list[Acao] = []
 
-        for movimento in etapa_modelo.movimentos:
+        for indice_movimento, movimento in enumerate(etapa_modelo.movimentos):
             sensor_origem = contexto.sensor_ativo(antes, movimento.atuador)
             acao = _acao_completa(
                 movimento,
                 sensor_origem,
                 contexto,
-                registro,
+                registro[(indice_etapa, indice_movimento)],
                 _ha_mesmo_sentido_antes_do_oposto(
                     projeto.etapas,
                     indice_etapa,
@@ -954,10 +972,7 @@ def _arestas_conflito(
     rotulos: dict[str, list[str]],
 ) -> set[tuple[int, int]]:
     """Passos com mesmo conjunto máximo e decisões incompatíveis."""
-    ativos = [
-        set((etapa.antes,) + etapa.intermediarios_conflito)
-        for etapa in etapas
-    ]
+    ativos = [{etapa.antes} for etapa in etapas]
     arestas: set[tuple[int, int]] = set()
 
     for i, j in combinations(range(len(etapas)), 2):
@@ -1456,6 +1471,7 @@ def _construir_eventos(
     memorias: tuple[str, ...],
     caminhos: dict[int, tuple[tuple[int, ...], ...]],
     simbolos: dict[str, Symbol],
+    contexto: ContextoFisico,
 ) -> list[Evento]:
     eventos: list[Evento] = []
 
@@ -1521,9 +1537,30 @@ def _construir_eventos(
     if not eventos:
         return eventos
 
-    def fatores_produzidos(evento: Evento) -> list[object]:
+    def fatores_produzidos(
+        evento: Evento,
+        seguinte: Evento,
+    ) -> list[object]:
         if evento.tipo == "atuador":
-            return _fatores_conclusao_acoes(evento.acoes, simbolos)
+            fatores = _fatores_conclusao_acoes(evento.acoes, simbolos)
+            if len(evento.acoes) > 1 and seguinte.tipo == "atuador":
+                dispositivos_seguintes = {
+                    comando.dispositivo for comando in seguinte.comandos
+                }
+                preferidos: list[object] = []
+                for acao in evento.acoes:
+                    for nome, valor in acao.conclusao:
+                        atuador = contexto.variavel_para_atuador.get(nome)
+                        if atuador not in dispositivos_seguintes:
+                            preferidos.append(_literal(simbolos[nome], valor))
+                candidatos = preferidos or fatores
+                if candidatos:
+                    # A condição mínima do passo seguinte usa um único sinal
+                    # produzido pela etapa simultânea anterior. Priorizamos um
+                    # fim de curso de outro atuador, evitando que o próprio
+                    # movimento derrube imediatamente seu comando.
+                    return [candidatos[-1]]
+            return fatores
 
         comando = evento.comandos[0]
         return [
@@ -1535,9 +1572,14 @@ def _construir_eventos(
 
     for i, evento in enumerate(eventos):
         anterior = eventos[i - 1]
-        fatores = fatores_produzidos(anterior)
+        fatores = fatores_produzidos(anterior, evento)
         if i == 0:
             fatores = [simbolos["S"], *fatores]
+            if anterior.tipo == "atuador":
+                fatores.extend(
+                    _literal(simbolos[memoria], valor)
+                    for memoria, valor in zip(memorias, evento.codigo)
+                )
 
         fatores_externos = [
             _literal(simbolos[nome], valor)
@@ -1599,7 +1641,11 @@ def _pontos_alcancaveis(
     pontos: list[Ponto] = []
 
     for evento in eventos:
-        estados = (evento.fisico,) + evento.intermediarios
+        estados = (
+            (evento.fisico,)
+            if len(evento.acoes) > 1
+            else (evento.fisico,) + evento.intermediarios
+        )
         fixadas = dict(evento.restricoes_externas)
         livres = [
             nome
@@ -1838,9 +1884,15 @@ def _qualificar_progressivamente(
                             prioridade = 0
                         elif nome in origens_preferidas:
                             prioridade = 0
-                        elif indice < quantidade_variaveis_fisicas and not proprio:
-                            prioridade = 1
+                        # O método usa preferencialmente as regiões das
+                        # memórias para qualificar comando e contracomando.
+                        # Sensores de outro atuador continuam disponíveis,
+                        # mas só entram quando nenhuma memória separa os
+                        # dois pontos. Isso evita contatos físicos
+                        # redundantes, como e0 em Y- = c0.x0.
                         elif inicio_memorias <= indice < fim_memorias:
+                            prioridade = 1
+                        elif indice < quantidade_variaveis_fisicas and not proprio:
                             prioridade = 2
                         elif base_oposta and base_oposta[0] == nome:
                             prioridade = 4
@@ -2425,8 +2477,9 @@ def _equacoes_textuais_comandos(
     contexto: ContextoFisico,
     memorias: tuple[str, ...],
 ) -> dict[str, str]:
-    termos: dict[str, list[str]] = {}
-    ordem_rotulos: list[str] = []
+    termos_por_chave: dict[str, list[str]] = {}
+    comando_por_chave: dict[str, ComandoLogico] = {}
+    ordem_chaves: list[str] = []
 
     for evento in eventos:
         for comando in evento.comandos:
@@ -2436,17 +2489,32 @@ def _equacoes_textuais_comandos(
                 memorias,
                 comando.chave,
             )
-            rotulo = comando.rotulo
-            if rotulo not in termos:
-                termos[rotulo] = []
-                ordem_rotulos.append(rotulo)
-            if texto not in termos[rotulo]:
-                termos[rotulo].append(texto)
+            if comando.chave not in termos_por_chave:
+                termos_por_chave[comando.chave] = []
+                comando_por_chave[comando.chave] = comando
+                ordem_chaves.append(comando.chave)
+            if texto not in termos_por_chave[comando.chave]:
+                termos_por_chave[comando.chave].append(texto)
 
-    return {
-        rotulo: " + ".join(termos[rotulo])
-        for rotulo in ordem_rotulos
-    }
+    chaves_por_rotulo: dict[str, list[str]] = {}
+    for chave in ordem_chaves:
+        rotulo = comando_por_chave[chave].rotulo
+        chaves_por_rotulo.setdefault(rotulo, []).append(chave)
+
+    resultado: dict[str, str] = {}
+    numeros: dict[str, int] = {}
+    for chave in ordem_chaves:
+        comando = comando_por_chave[chave]
+        rotulo = comando.rotulo
+        irmas = chaves_por_rotulo[rotulo]
+        if len(irmas) > 1:
+            numeros[rotulo] = numeros.get(rotulo, 0) + 1
+            rotulo_saida = f"{rotulo}({numeros[rotulo]})"
+        else:
+            rotulo_saida = rotulo
+        resultado[rotulo_saida] = " + ".join(termos_por_chave[chave])
+
+    return resultado
 
 
 def _simplificar_soma_textual(
@@ -2722,6 +2790,7 @@ def resolver(
                     memorias,
                     caminhos,
                     simbolos,
+                    contexto,
                 )
                 rotulos = _rotulos_eventos(eventos, ciclo_logico)
                 pontos = _pontos_alcancaveis(
@@ -2895,7 +2964,7 @@ def validar_exemplos_referencia() -> tuple[str, ...]:
                 "C+": "b0.x.y",
                 "X-": "c1",
                 "C-": "x0",
-                "Y-": "c0.b0.x0",
+                "Y-": "c0.x0",
             },
         ),
         (

@@ -1,0 +1,73 @@
+import '../autenticacao/modelos_autenticacao.dart';
+import 'modelos_administracao.dart';
+
+abstract interface class ServicoAdministracao {
+  Future<List<UsuarioAdministrado>> listarUsuarios();
+
+  Future<void> alterarEstado(String usuarioId, EstadoConta estado);
+
+  Future<void> definirAcesso(
+    String usuarioId,
+    TipoAcesso acesso,
+    int? analisesRestantes,
+  );
+
+  Future<ResultadoCotasLote> ajustarCotasEmLote({
+    required bool adicionar,
+    required int quantidade,
+    required String turmaId,
+    List<String>? usuarioIds,
+  });
+
+  Future<void> alterarPapel(String usuarioId, PapelUsuario papel);
+
+  Future<void> reautenticar(String senha);
+
+  Future<TransferenciaMaster?> obterTransferenciaMaster();
+
+  Future<TransferenciaMaster> iniciarTransferenciaMaster({
+    required String emailDestino,
+    int diasValidade = 7,
+  });
+
+  Future<void> cancelarTransferenciaMaster(String transferenciaId);
+
+  Future<void> aceitarTransferenciaMaster(String transferenciaId);
+
+  Future<List<TurmaAdministrada>> listarTurmas();
+
+  Future<TurmaAdministrada> criarTurma({
+    required String codigo,
+    required String nome,
+  });
+
+  Future<ResultadoEncerramentoTurma> encerrarTurma({
+    required String turmaId,
+    required EstadoConta estadoUsuarios,
+  });
+
+  Future<List<RegistroAuditoria>> listarAuditoria({int limite = 80});
+
+  Future<List<ConviteAdministrado>> listarConvites();
+
+  Future<ResultadoConvitesLote> convidarEmLote({
+    required List<String> emails,
+    required PapelUsuario papelDestino,
+    required TipoAcesso acessoDestino,
+    required int? analisesIniciais,
+    String? turmaId,
+    int diasValidade = 7,
+  });
+
+  Future<void> cancelarConvite(String conviteId);
+}
+
+class FalhaAdministracao implements Exception {
+  const FalhaAdministracao(this.mensagem, {this.codigo});
+
+  final String mensagem;
+  final String? codigo;
+
+  @override
+  String toString() => mensagem;
+}

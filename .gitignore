@@ -5,3 +5,7 @@ __pycache__/
 .streamlit/secrets.toml
 
 *.bak
+.env
+mobile/config/dev.json
+mobile/android/key.properties
+mobile/android/local.properties

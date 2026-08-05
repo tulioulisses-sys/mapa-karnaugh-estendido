@@ -32,10 +32,8 @@ def test_posicao_memorias_com_repeticao_de_e():
         ("X+",),
         ("E-",),
         ("C-",),
-        ("Y+",),
         ("E+",),
         ("X-",),
         ("E-",),
         ("A-", "C+"),
-        ("Y-",),
     )
