@@ -1,4 +1,4 @@
-﻿.venv/
+.venv/
 venv/
 __pycache__/
 *.pyc
@@ -8,3 +8,7 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+mobile/config/dev.json
+mobile/android/key.properties
+mobile/android/local.properties

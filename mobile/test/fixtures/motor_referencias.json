@@ -679,7 +679,7 @@
         ],
         "observacoes": [
           "Quantidade encontrada: 1 memória(s).",
-          "Foram testadas 2 colocações de memória.",
+          "Foram testadas 1 colocações de memória.",
           "As expressões são mantidas na ordem de qualificação da apostila; não é feita uma minimização algébrica global que altere o método."
         ],
         "possui_atuador_multiposicao": false,
@@ -1806,7 +1806,7 @@
         ],
         "observacoes": [
           "Quantidade encontrada: 1 memória(s).",
-          "Foram testadas 4 colocações de memória.",
+          "Foram testadas 1 colocações de memória.",
           "As expressões são mantidas na ordem de qualificação da apostila; não é feita uma minimização algébrica global que altere o método."
         ],
         "possui_atuador_multiposicao": false,
@@ -1946,14 +1946,14 @@
             "Comando": "B-",
             "Condição básica": "c0",
             "Equação final": "B- = c0.x",
-            "Pontos perigosos encontrados": "a1 · b0 · c0 · x0; a1 · b1 · c0 · x0",
+            "Pontos perigosos encontrados": "a1 · b0 · c0 · x0",
             "Qualificador acrescentado": "x"
           },
           {
             "Comando": "A-",
             "Condição básica": "b0",
             "Equação final": "A- = b0.x",
-            "Pontos perigosos encontrados": "a0 · b0 · c0 · x0; a1 · b0 · c0 · x0; a1 · b0 · c1 · x0",
+            "Pontos perigosos encontrados": "a0 · b0 · c0 · x0; a1 · b0 · c0 · x0",
             "Qualificador acrescentado": "x"
           },
           {
