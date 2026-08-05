@@ -1298,7 +1298,14 @@ def _chave_metodo_candidato(
     candidato: CaminhoCandidato,
     arestas: set[tuple[int, int]],
 ) -> tuple:
+    """Ordena as colocações conforme o traçado do mapa estendido.
 
+    Quando os conjuntos conflitantes cabem em uma volta completa do código
+    Gray, priorizamos a ordem didática do artigo (X+, Y+, X-, Y-, ...), com
+    as mudanças imediatamente após os conjuntos que precisam ser
+    diferenciados. Em sequências mais densas, nas quais os códigos precisam
+    ser reutilizados, preservamos a otimização anterior.
+    """
     nos = _nos_de_conflito(arestas)
     codigos = tuple(candidato.codigos[indice] for indice in nos)
 
@@ -1310,7 +1317,7 @@ def _chave_metodo_candidato(
     peso_total = sum(codigo.bit_count() for codigo in codigos)
     peso_maximo = max((codigo.bit_count() for codigo in codigos), default=0)
 
-    return (
+    chave_otimizada = (
         quantidade_regioes,
         mudancas_regiao,
         peso_total,
@@ -1318,6 +1325,65 @@ def _chave_metodo_candidato(
         codigos,
         candidato.chave,
     )
+
+    quantidade_memorias = max(candidato.bits_mudanca, default=-1) + 1
+    capacidade = 1 << quantidade_memorias if quantidade_memorias else 1
+
+    if quantidade_memorias and len(nos) <= capacidade:
+        trajetoria = [candidato.codigos[0]]
+
+        for codigo in candidato.codigos[1:]:
+            if codigo != trajetoria[-1]:
+                trajetoria.append(codigo)
+
+        for codigo in candidato.fechamento[1:]:
+            if codigo != trajetoria[-1]:
+                trajetoria.append(codigo)
+
+        ciclo_gray = [
+            indice ^ (indice >> 1)
+            for indice in range(capacidade)
+        ]
+        ciclo_gray.append(0)
+
+        desvio_gray = abs(len(trajetoria) - len(ciclo_gray)) + sum(
+            obtido != esperado
+            for obtido, esperado in zip(trajetoria, ciclo_gray)
+        )
+
+        quantidade_etapas = len(candidato.codigos)
+        posicoes_esperadas = tuple(
+            [indice + 1 for indice in nos[: capacidade - 1]]
+            + [quantidade_etapas]
+        )
+        posicoes_obtidas = candidato.posicoes_mudanca
+
+        desvio_posicoes = (
+            abs(len(posicoes_obtidas) - len(posicoes_esperadas))
+            + sum(
+                abs(obtida - esperada)
+                for obtida, esperada in zip(
+                    posicoes_obtidas,
+                    posicoes_esperadas,
+                )
+            )
+        )
+
+        return (
+            0,
+            desvio_gray,
+            desvio_posicoes,
+            tuple(
+                abs(obtida - esperada)
+                for obtida, esperada in zip(
+                    posicoes_obtidas,
+                    posicoes_esperadas,
+                )
+            ),
+            chave_otimizada,
+        )
+
+    return (1, chave_otimizada)
 
 
 def _atribuir_candidato(
@@ -2817,19 +2883,19 @@ def validar_exemplos_referencia() -> tuple[str, ...]:
             "A+, A-, B+, B-, C+, C-",
             (
                 "A+", "X+", "A-", "B+", "Y+",
-                "B-", "X-", "C+", "Y-", "C-",
+                "B-", "C+", "X-", "C-", "Y-",
             ),
             {
-                "A+": "S.c0.x0.y0",
+                "A+": "S.y0.x0",
                 "X+": "a1",
                 "A-": "x",
                 "B+": "a0.x.y0",
                 "Y+": "b1",
                 "B-": "y",
-                "X-": "b0.a0.y",
-                "C+": "x0.y",
-                "Y-": "c1",
-                "C-": "y0",
+                "C+": "b0.x.y",
+                "X-": "c1",
+                "C-": "x0",
+                "Y-": "c0.b0.x0",
             },
         ),
         (
