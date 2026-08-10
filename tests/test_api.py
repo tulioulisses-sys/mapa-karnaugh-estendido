@@ -434,6 +434,37 @@ def test_resolve_com_mapa_e_consumo(provedor: ProvedorAcessoFake) -> None:
     assert resposta.headers["cache-control"] == "no-store"
 
 
+
+def test_api_preserva_barreira_de_simultaneidade(
+    provedor: ProvedorAcessoFake,
+) -> None:
+    resposta = client.post(
+        "/api/v1/resolucoes",
+        headers=CABECALHO_LOGIN,
+        json=_solicitacao_resolucao(
+            sequencia="(E+, A+, C+), (A-, C-), E-",
+            incluir_mapa=False,
+            chave_idempotencia="regressao-simultaneidade-001",
+        ),
+    )
+
+    assert resposta.status_code == 200
+    dados = resposta.json()
+
+    assert dados["memorias"] == []
+    assert dados["equacoes_comandos"]["E+"] == "S.e0"
+    assert dados["equacoes_comandos"]["A+"] == "S.e0"
+    assert dados["equacoes_comandos"]["C+"] == "S.e0"
+    assert dados["equacoes_comandos"]["A-"] == "e1.a1.c1"
+    assert dados["equacoes_comandos"]["C-"] == "e1.a1.c1"
+    assert dados["equacoes_comandos"]["E-"] == "a0.c0"
+    assert dados["equacoes"]["A-"] == "e1.a1.c1"
+    assert dados["equacoes"]["C-"] == "e1.a1.c1"
+    assert dados["equacoes"]["E-"] == "a0.c0"
+    assert provedor.consumos == [RESERVA_ID]
+
+
+
 def test_pode_omitir_mapa(provedor: ProvedorAcessoFake) -> None:
     resposta = client.post(
         "/api/v1/resolucoes",
