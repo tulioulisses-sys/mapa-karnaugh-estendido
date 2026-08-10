@@ -1540,10 +1540,16 @@ def _construir_eventos(
     def fatores_produzidos(
         evento: Evento,
         seguinte: Evento,
+        *,
+        fechamento_ciclo: bool = False,
     ) -> list[object]:
         if evento.tipo == "atuador":
             fatores = _fatores_conclusao_acoes(evento.acoes, simbolos)
-            if len(evento.acoes) > 1 and seguinte.tipo == "atuador":
+            if (
+                fechamento_ciclo
+                and len(evento.acoes) > 1
+                and seguinte.tipo == "atuador"
+            ):
                 dispositivos_seguintes = {
                     comando.dispositivo for comando in seguinte.comandos
                 }
@@ -1555,10 +1561,6 @@ def _construir_eventos(
                             preferidos.append(_literal(simbolos[nome], valor))
                 candidatos = preferidos or fatores
                 if candidatos:
-                    # A condição mínima do passo seguinte usa um único sinal
-                    # produzido pela etapa simultânea anterior. Priorizamos um
-                    # fim de curso de outro atuador, evitando que o próprio
-                    # movimento derrube imediatamente seu comando.
                     return [candidatos[-1]]
             return fatores
 
@@ -1572,7 +1574,11 @@ def _construir_eventos(
 
     for i, evento in enumerate(eventos):
         anterior = eventos[i - 1]
-        fatores = fatores_produzidos(anterior, evento)
+        fatores = fatores_produzidos(
+            anterior,
+            evento,
+            fechamento_ciclo=(i == 0),
+        )
         if i == 0:
             fatores = [simbolos["S"], *fatores]
             if anterior.tipo == "atuador":
@@ -2458,12 +2464,50 @@ def _formatar_termo_evento(
     contexto: ContextoFisico,
     memorias: tuple[str, ...],
     chave: str | None = None,
+    anterior: Evento | None = None,
 ) -> str:
-    fatores = (
+    fatores = list(
         evento.fatores_por_comando.get(chave, evento.fatores_ordenados)
         if chave is not None
         else evento.fatores_ordenados
     )
+
+    if (
+        chave is not None
+        and anterior is not None
+        and anterior.tipo == "atuador"
+        and len(anterior.acoes) > 1
+    ):
+        comando = next(
+            (item for item in evento.comandos if item.chave == chave),
+            None,
+        )
+        if comando is not None:
+            if evento.base is true:
+                fatores_base: set[object] = set()
+            elif evento.base.func is And:
+                fatores_base = set(evento.base.args)
+            else:
+                fatores_base = {evento.base}
+
+            filtrados: list[object] = []
+            for fator in fatores:
+                simbolo = None
+                if isinstance(fator, Symbol):
+                    simbolo = fator
+                elif fator.func is Not and isinstance(fator.args[0], Symbol):
+                    simbolo = fator.args[0]
+
+                mesmo_atuador = (
+                    simbolo is not None
+                    and contexto.variavel_para_atuador.get(str(simbolo))
+                    == comando.dispositivo
+                )
+                if fator not in fatores_base and mesmo_atuador:
+                    continue
+                filtrados.append(fator)
+            fatores = filtrados
+
     if not fatores:
         return "1"
     return ".".join(
@@ -2481,13 +2525,15 @@ def _equacoes_textuais_comandos(
     comando_por_chave: dict[str, ComandoLogico] = {}
     ordem_chaves: list[str] = []
 
-    for evento in eventos:
+    for indice_evento, evento in enumerate(eventos):
+        anterior = eventos[indice_evento - 1] if indice_evento > 0 else None
         for comando in evento.comandos:
             texto = _formatar_termo_evento(
                 evento,
                 contexto,
                 memorias,
                 comando.chave,
+                anterior,
             )
             if comando.chave not in termos_por_chave:
                 termos_por_chave[comando.chave] = []
@@ -2621,13 +2667,15 @@ def _equacoes_textuais_fisicas(
     termos: dict[str, list[str]] = {}
     ordem: list[str] = []
 
-    for evento in eventos:
+    for indice_evento, evento in enumerate(eventos):
+        anterior = eventos[indice_evento - 1] if indice_evento > 0 else None
         for comando in evento.comandos:
             texto = _formatar_termo_evento(
                 evento,
                 contexto,
                 memorias,
                 comando.chave,
+                anterior,
             )
             saida = comando.fisica
             if saida not in termos:
